@@ -11,7 +11,7 @@ class User(db.Entity):
     is_confirmed = Required(bool, default=False, sql_default='0')
     avatar = Optional(str)
     
-class Partida(db.Entity):
+class Match(db.Entity):
     id = PrimaryKey(int, auto=True)
     name = Required(str)
     max_players = Required(int)
