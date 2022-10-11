@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from databaseFunctions import *
 
+
 app = FastAPI()
 
 # TODO: implementation
