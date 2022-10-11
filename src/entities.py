@@ -5,6 +5,7 @@ db = Database()
 # class definitions
 
 class User(db.Entity):
+    id = PrimaryKey(int, auto=True)
     username = Required(str, unique=True)
     password = Required(str)
     email = Required(str, unique=True)
