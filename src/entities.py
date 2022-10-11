@@ -18,7 +18,7 @@ class Match(db.Entity):
     min_players = Required(int)
     number_of_games = Required(int)
     password = Optional(str)
-    is_finished = Required(bool)
+    is_finished = Required(bool, default=False, sql_default='0')
     
 db.bind(provider='sqlite', filename='database.sqlite', create_db=True)
 db.generate_mapping(create_tables=True)
