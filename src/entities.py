@@ -13,11 +13,11 @@ class User(db.Entity):
     
 class Partida(db.Entity):
     id = PrimaryKey(int, auto=True)
-    Nombre = Required(str)
-    jugadores_max = Required(int)
-    jugadores_min = Required(int)
-    cant_juegos = Optional(int)
-    clave = Optional(str)
+    name = Required(str)
+    max_players = Required(int)
+    min_players = Required(int)
+    number_of_games = Required(int)
+    password = Optional(str)
     
 db.bind(provider='sqlite', filename='database.sqlite', create_db=True)
 db.generate_mapping(create_tables=True)
