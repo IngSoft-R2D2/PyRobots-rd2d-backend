@@ -17,6 +17,7 @@ class Partida(db.Entity):
     jugadores_max = Required(int)
     jugadores_min = Required(int)
     cant_juegos = Optional(int)
+    clave = Optional(str)
     
 db.bind(provider='sqlite', filename='database.sqlite', create_db=True)
 db.generate_mapping(create_tables=True)
