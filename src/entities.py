@@ -11,6 +11,16 @@ class User(db.Entity):
     email = Required(str, unique=True)
     is_confirmed = Required(bool, default=False, sql_default='0')
     avatar = Optional(str)
+    
+class Match(db.Entity):
+    id = PrimaryKey(int, auto=True)
+    name = Required(str)
+    max_players = Required(int)
+    min_players = Required(int)
+    number_of_games = Required(int)
+    password = Optional(str)
+    is_finished = Required(bool, default=False, sql_default='0')
+    
 
 class Robot(db.Entity):
     id = PrimaryKey(int,auto=True) # Clave primaria, no se si hace falta, capaz q si por la relacion
