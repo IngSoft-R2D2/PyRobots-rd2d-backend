@@ -16,7 +16,7 @@ class Robot(db.Entity):
     user = Required(User) 
     name = Required(str)
     avatar = Optional(str)
-    behaviour_file = Required(str)
+    behavior_file = Required(str)
     matches_played = Required (int,default=0) 
     matches_won = Required(int, default=0)
     matches_lost = Required(int, default=0)
