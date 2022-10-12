@@ -11,7 +11,7 @@ class User(db.Entity):
     email = Required(str, unique=True)
     is_confirmed = Required(bool, default=False, sql_default='0')
     avatar = Optional(str)
-    
+
 class Match(db.Entity):
     id = PrimaryKey(int, auto=True)
     name = Required(str)
