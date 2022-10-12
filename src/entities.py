@@ -12,7 +12,8 @@ class User(db.Entity):
     is_confirmed = Required(bool, default=False, sql_default='0')
     avatar = Optional(str)
     robots = Set('Robot') 
-    matches = Set('Match')
+    matches = Set('Match', reverse='users')
+    created_matches = Set('Match', reverse='creator')
     
 class Match(db.Entity):
     id = PrimaryKey(int, auto=True)
@@ -22,7 +23,8 @@ class Match(db.Entity):
     number_of_games = Required(int)
     password = Optional(str)
     is_finished = Required(bool, default=False, sql_default='0')
-    users = Set(User)
+    users = Set(User, reverse='matches')
+    creator = Required(User, reverse='created_matches')
     
 
 class Robot(db.Entity):
