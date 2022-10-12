@@ -1,7 +1,7 @@
-from fastapi import FastAPI, HTTPException, status
+from fastapi import *
+from databaseFunctions import *
 from typing import Optional
 from pydantic import BaseModel, EmailStr
-from databaseFunctions import get_all_usernames, get_all_emails, upload_user
 
 
 app = FastAPI()
@@ -10,7 +10,7 @@ class UserIn(BaseModel):
     username: str
     password: str
     email: EmailStr
-    avatar: Optional[str] = None
+    avatar: Optional[str]
 
 class UserOut(BaseModel):
     id: int
@@ -40,8 +40,8 @@ async def create_user(new_user: UserIn) -> int:
             status_code=status.HTTP_409_CONFLICT, 
             detail="A user with this email already exists"
         )
+    upload_user(new_user.username, new_user.password,
+                new_user.email, new_user.avatar)
     return UserOut(
-        id = upload_user(new_user.username, new_user.password,
-                new_user.email, new_user.avatar),
+        id = get_id_by_username(new_user.username),
         operation_result="Succesfully created!")
-
