@@ -1,6 +1,6 @@
-from fastapi import FastAPI, HTTPException, status
-from databaseFunctions import robot_add
-from entities import User, Match, Robot
+from fastapi import *
+from databaseFunctions import *
+from entities import *
 from pydantic import BaseModel, EmailStr
 
 app = FastAPI()
@@ -9,17 +9,23 @@ class RobotIn(BaseModel):
     user_id: int
     name: str
     avatar: str
-    behavior_file: str
+    behaviour_file: str
 
 class RobotOut(BaseModel):
-	id: int
-	name: str
+	robot_id: int
 	operation_result: str
 
 # TODO: implementation
 @app.get("/")
 async def root():
 	pass
+
+
+user = Required(User) 
+    name = Required(str)
+    avatar = Optional(str)
+    behaviour_file = Required(str)
+    
 
 """
 	Registrar robot:
@@ -30,12 +36,14 @@ async def root():
 	status_code=status.HTTP_201_CREATED
 )
 async def register_robot(new_robot: RobotIn) -> int:
-	robot_id = robot_add(new_robot.user_id,
-						new_robot.name,
-						new_robot.avatar,
-						new_robot.behavior_file)
+	owner_user = get_user_by_id(RobotIn.user_id)
+	robot_id = add_robot(
+					owner_user,
+					RobotIn.name,
+					RobotIn.avatar,
+					RobotIn.behaviour_file
+	)
 	return RobotOut(
-		new_robot_id = robot_id,
-		new_robot_name = ,
-		operation_result = 
+		robot_id=robot_id,
+		operation_result="Robot succesfully created."
 	)
