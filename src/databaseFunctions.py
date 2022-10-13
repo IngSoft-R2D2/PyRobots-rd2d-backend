@@ -6,10 +6,10 @@ from entities import *
 """
 
 def user_in_database(user_id: str):
-    return set[]==User.select()
+    return set[]!=User.select()[:]
 
 
-get_user_by_id(user_id: int)
+def get_user_by_id(user_id: int):
 
 
 # Creates a new Robot and returns it's id.
