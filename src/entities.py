@@ -12,7 +12,6 @@ class User(db.Entity):
     is_confirmed = Required(bool, default=False, sql_default='0')
     avatar = Optional(str)
     robots = Set('Robot') 
-    matches = Set('Match', reverse='users')
     created_matches = Set('Match', reverse='creator')
     
 class Match(db.Entity):
@@ -23,7 +22,7 @@ class Match(db.Entity):
     number_of_games = Required(int)
     password = Optional(str)
     is_finished = Required(bool, default=False, sql_default='0')
-    users = Set(User, reverse='matches')
+    robots = Set(Robot, reverse='matches')
     creator = Required(User, reverse='created_matches')
     
 
@@ -37,6 +36,7 @@ class Robot(db.Entity):
     matches_won = Required(int, default=0)
     matches_lost = Required(int, default=0)
     matches_drawed = Required(int, default=0)
+    matches = Set(Match, reverse='robots')
 
 db.bind(provider='sqlite', filename='database.sqlite', create_db=True)
 db.generate_mapping(create_tables=True)
