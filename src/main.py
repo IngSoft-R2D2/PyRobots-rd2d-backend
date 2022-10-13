@@ -9,5 +9,12 @@ app = FastAPI()
 async def root():
 	pass
 
+def get_all_matches ():
+	
+	return
 # TODO: add endpoints
 
+#listar partidas 
+@app.get("/match/")
+async def show_all_matches():
+	return get_all_matches()
