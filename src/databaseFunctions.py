@@ -1,5 +1,40 @@
 from pony.orm import *
 from entities import *
+from typing import Optional
+from passlib.context import CryptContext
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+@db_session
+def authenticate_user(username: str, password: str):
+    user = User.get(username=username)
+    if not user:
+        return False
+    if not pwd_context.verify(password, user.password):
+        return False
+    return user
+
+@db_session
+def get_id_by_username(username: str):
+    return User.get(username=username).id
+
+@db_session
+def get_all_usernames():
+    print(select(u.username for u in User)[:])
+    return select(u.username for u in User)[:]
+
+@db_session
+def get_all_emails():
+    print(select(u.email for u in User)[:])
+    return select(u.email for u in User)[:]
+
+@db_session
+def upload_user(username: str, password: str,
+                email: str, avatar: Optional[str]):
+    User(username=username, password=pwd_context.hash(password),
+         email=email, avatar=avatar)
+
+
 
 # function definitions
 
