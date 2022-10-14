@@ -20,19 +20,21 @@ def get_id_by_username(username: str):
 
 @db_session
 def get_all_usernames():
-    print(select(u.username for u in User)[:])
     return select(u.username for u in User)[:]
 
 @db_session
 def get_all_emails():
-    print(select(u.email for u in User)[:])
     return select(u.email for u in User)[:]
 
 @db_session
 def upload_user(username: str, password: str,
                 email: str, avatar: Optional[str]):
-    User(username=username, password=pwd_context.hash(password),
-         email=email, avatar=avatar)
+    if avatar == None:
+        User(username=username, password=pwd_context.hash(password),
+             email=email)
+    else:
+        User(username=username, password=pwd_context.hash(password),
+        email=email, avatar=avatar)
 
 
 

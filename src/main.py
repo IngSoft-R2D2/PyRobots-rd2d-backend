@@ -56,7 +56,7 @@ class UserIn(BaseModel):
     username: str
     password: str
     email: EmailStr
-    avatar: Optional[str]
+    avatar: Optional[str] = None
 
 class UserOut(BaseModel):
     id: int
