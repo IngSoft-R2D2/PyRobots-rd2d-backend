@@ -1,5 +1,6 @@
 from pony.orm import *
 from entities import *
+
 from typing import Optional
 
 
@@ -32,5 +33,3 @@ def create_robot(
         Robot(user=User[user_id_in],
                         name=name_in,
                         behaviour_file=behaviour_file_in)
-
-    
