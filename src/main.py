@@ -1,19 +1,19 @@
-from fastapi import FastAPI, HTTPException, status
-from databaseFunctions import robot_add
-from entities import User, Match, Robot
+from fastapi import *
+from databaseFunctions import *
+from entities import *
+from typing import Optional
 from pydantic import BaseModel, EmailStr
 
 app = FastAPI()
 
-class RobotIn(BaseModel):
+class RobotRegIn(BaseModel):
     user_id: int
     name: str
-    avatar: str
+    avatar: Optional[str] = None
     behavior_file: str
 
-class RobotOut(BaseModel):
+class RobotRegOut(BaseModel):
 	id: int
-	name: str
 	operation_result: str
 
 # TODO: implementation
@@ -22,20 +22,27 @@ async def root():
 	pass
 
 """
-	Registrar robot:
+	Registrar robot.
 """
 @app.post(
-	"/robots/",
-	response_model=RobotOut,
-	status_code=status.HTTP_201_CREATED
-)
-async def register_robot(new_robot: RobotIn) -> int:
-	robot_id = robot_add(new_robot.user_id,
-						new_robot.name,
-						new_robot.avatar,
-						new_robot.behavior_file)
-	return RobotOut(
-		new_robot_id = robot_id,
-		new_robot_name = ,
-		operation_result = 
+		"/robots/",
+		response_model=RobotRegOut,
+		status_code=status.HTTP_201_CREATED
 	)
+async def register_robot(robot_to_cr: RobotRegIn) -> int:
+	if not user_id_is_valid(robot_to_cr.user_id):
+		raise HTTPException(status_code=404, detail="Not valid user Id")
+	create_robot(
+			robot_to_cr.user_id,
+			robot_to_cr.name,
+			robot_to_cr.avatar,
+			robot_to_cr.behavior_file
+		)
+	new_robot_id = get_robot_by_user_and_name(
+						robot_to_cr.user_id,
+						robot_to_cr.name
+					)
+	return RobotRegOut(
+				id=new_robot_id,
+				operation_result="Successfully created." 
+			)
