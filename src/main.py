@@ -6,22 +6,23 @@ from pydantic import BaseModel, EmailStr
 
 app = FastAPI()
 
+
 class UserIn(BaseModel):
     username: str
     password: str
     email: EmailStr
-    avatar: Optional[str]
+    avatar: Optional[str] = None
 
 class UserOut(BaseModel):
     id: int
     operation_result: str
+
 
 # TODO: implementation
 @app.get("/")
 async def root():
 	pass
 
-# TODO: add endpoints
 
 # create a user: registro de usuario
 @app.post(
