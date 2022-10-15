@@ -18,9 +18,22 @@ def get_all_emails():
     return select(u.email for u in User)[:]
 
 @db_session
+def get_user_by_username(username: str):
+    return User.get(username=username)
+
+@db_session
+def authenticate_user(username: str, password: str):
+    user = get_user_by_username(username)
+    if not user:
+        return False
+    if not pwd_context.verify(password, user.password):
+        return False
+    return user
+
+@db_session
 def upload_user(username: str, password: str,
                 email: str, avatar: Optional[str]):
-    if avatar == None:
+    if avatar is None:
         User(username=username, password=pwd_context.hash(password),
              email=email)
     else:
