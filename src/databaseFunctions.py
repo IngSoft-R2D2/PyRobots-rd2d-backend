@@ -49,7 +49,6 @@ def upload_user(username: str, password: str,
         User(username=username, password=pwd_context.hash(password),
              email=email, avatar=avatar)
 
-@db_session
 def get_all_matches ():
     with db_session:
         matches = []
