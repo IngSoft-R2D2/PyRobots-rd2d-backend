@@ -136,3 +136,9 @@ async def create_user(new_user: UserIn) -> int:
 # async def function_name(current_user: User = Depends(get_current_confirmed_user)):
 #     """  code  """
 #     return 'something'
+
+
+#listar partidas 
+@app.get("/match/")
+async def show_all_matches(current_user: User = Depends(get_current_user)):
+	return get_all_matches()
