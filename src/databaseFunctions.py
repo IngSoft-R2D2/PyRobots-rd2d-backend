@@ -21,7 +21,7 @@ def authenticate_user(username: str, password: str):
 @db_session
 def upload_user(username: str, password: str,
                 email: str, avatar: Optional[str]):
-    if avatar == None:
+    if avatar is None:
         User(username=username, password=pwd_context.hash(password),
              email=email)
     else:
