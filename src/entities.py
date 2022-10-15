@@ -37,6 +37,7 @@ class Robot(db.Entity):
     matches_won = Required(int, default=0)
     matches_lost = Required(int, default=0)
     matches_drawed = Required(int, default=0)
+    composite_key(user, name)
 
 db.bind(provider='sqlite', filename='database.sqlite', create_db=True)
 db.generate_mapping(create_tables=True)
