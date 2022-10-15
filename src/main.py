@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from typing import Optional
 
-from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi import *
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 from pydantic import BaseModel, EmailStr
@@ -15,6 +15,18 @@ ACCESS_TOKEN_EXPIRE_DAYS = 30
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 app = FastAPI()
+
+
+class UserIn(BaseModel):
+    username: str
+    password: str
+    email: EmailStr
+    avatar: Optional[str] = None
+
+class UserOut(BaseModel):
+    id: int
+    operation_result: str
+
 
 # TODO: implementation
 @app.get("/")
@@ -88,6 +100,30 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
 #     if not current_user.is_confirmed:
 #         raise HTTPException(status_code=400, detail="The user is not confirmed")
 #     return current_user
+
+
+# create a user: registro de usuario
+@app.post(
+    "/users/",
+    response_model=UserOut,
+    status_code=status.HTTP_201_CREATED
+)
+async def create_user(new_user: UserIn) -> int:
+    if new_user.username in get_all_usernames():
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, 
+            detail="A user with this username already exists"
+        )
+    if new_user.email in get_all_emails():
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, 
+            detail="A user with this email already exists"
+        )
+    upload_user(new_user.username, new_user.password,
+                new_user.email, new_user.avatar)
+    return UserOut(
+        id = get_id_by_username(new_user.username),
+        operation_result="Succesfully created!")
 
 # ejemplo de uso: funcionalidad que requiere estar logeado
 # @app.get("/path/")

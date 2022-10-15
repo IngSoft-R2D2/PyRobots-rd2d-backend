@@ -4,7 +4,18 @@ from typing import Optional
 from passlib.context import CryptContext
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-# function definitions
+
+@db_session
+def get_id_by_username(username: str):
+    return User.get(username=username).id
+
+@db_session
+def get_all_usernames():
+    return select(u.username for u in User)[:]
+
+@db_session
+def get_all_emails():
+    return select(u.email for u in User)[:]
 
 @db_session
 def get_user_by_username(username: str):
@@ -27,9 +38,4 @@ def upload_user(username: str, password: str,
              email=email)
     else:
         User(username=username, password=pwd_context.hash(password),
-        email=email, avatar=avatar)
-
-# Example: 
-#   def show_users():
-#       with db_session:
-#           User.select().show()
+             email=email, avatar=avatar)
