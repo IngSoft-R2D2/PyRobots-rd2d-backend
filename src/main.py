@@ -2,8 +2,8 @@ from datetime import datetime, timedelta
 from typing import Union, Optional
 
 from fastapi import Depends, FastAPI, HTTPException, status
-from fastapi.security import OAuth2PasswordRequestForm
-from jose import jwt
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from jose import JWTError, jwt
 from pydantic import BaseModel, EmailStr
 
 from databaseFunctions import *
@@ -12,12 +12,23 @@ SECRET_KEY = "afaebb3eea9e698378e76dcd26d7d46d83e45890f662d896e538edf8d5243758"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_DAYS = 30
 
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+
 app = FastAPI()
 
 # TODO: implementation
 @app.get("/")
 async def root():
 	pass
+
+class User(BaseModel):
+    username: str
+    email: EmailStr
+    avatar: Optional[str] = None
+    # is_confirmed: Optional[bool] = None         # dejar para caso de uso: confirmar usuario
+
+class UserIn(User):
+    password: str
 
 class Token(BaseModel):
     access_token: str
@@ -47,3 +58,45 @@ def create_access_token(data: dict, expires_delta: Union[timedelta, None] = None
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
+
+
+
+class TokenData(BaseModel):
+    username: Optional[str] = None
+
+async def get_current_user(token: str = Depends(oauth2_scheme)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+        token_data = TokenData(username=username)
+    except JWTError:
+        raise credentials_exception
+    user = get_user_by_username(token_data.username)
+    if user is None:
+        raise credentials_exception
+    return user
+
+# chequear si el usuario está confirmado: dejar para caso de uso confirmar usuario (próximos sprints)
+# async def get_current_confirmed_user(current_user: User = Depends(get_current_user)):
+#     if not current_user.is_confirmed:
+#         raise HTTPException(status_code=400, detail="The user is not confirmed")
+#     return current_user
+
+# ejemplo de uso: funcionalidad que requiere estar logeado
+# @app.get("/path/")
+# async def function_name(current_user: User = Depends(get_current_user)):
+#     """  code  """
+#     return 'something'
+
+# ejemplo de uso: funcionalidad que requiere estar logeado y confirmado (próximos sprints)
+# @app.get("/path/")
+# async def function_name(current_user: User = Depends(get_current_confirmed_user)):
+#     """  code  """
+#     return 'something'

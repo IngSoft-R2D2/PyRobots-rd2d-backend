@@ -6,8 +6,12 @@ from passlib.context import CryptContext
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 @db_session
+def get_user_by_username(username: str):
+    return User.get(username=username)
+
+@db_session
 def authenticate_user(username: str, password: str):
-    user = User.get(username=username)
+    user = get_user_by_username(username)
     if not user:
         return False
     if not pwd_context.verify(password, user.password):
