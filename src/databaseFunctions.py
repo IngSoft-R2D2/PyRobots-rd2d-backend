@@ -1,7 +1,6 @@
 from pony.orm import *
 from entities import *
-from pydantic import BaseModel
-from functions import * 
+from pydantic import BaseModel 
 #from functions import * (eliminar)
 # function definitions
 
