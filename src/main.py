@@ -1,4 +1,3 @@
-
 from datetime import datetime, timedelta
 from typing import Optional
 
@@ -30,7 +29,7 @@ class UserOut(BaseModel):
 class RobotRegIn(BaseModel):
     name: str
     avatar: Optional[str] = None
-    behavior_file: str
+    behaviour_file: str
 
 class RobotRegOut(BaseModel):
 	id: int
@@ -100,7 +99,7 @@ async def root():
     response_model=UserOut,
     status_code=status.HTTP_201_CREATED
 )
-async def create_user(new_user: UserIn) -> int:
+async def create_user(new_user: UserIn):
     if new_user.username in get_all_usernames():
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, 
@@ -146,8 +145,7 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 )
 async def register_robot(
     robot_to_cr: RobotRegIn,
-    current_user: User = Depends(get_current_user)
-) -> int:
+    current_user: User = Depends(get_current_user)):
     user_id = get_id_by_username(current_user.username)
     if not valid_robot_for_user(user_id, robot_to_cr.name):
         raise HTTPException(
@@ -158,7 +156,7 @@ async def register_robot(
         user_id,
         robot_to_cr.name,
         robot_to_cr.avatar,
-        robot_to_cr.behavior_file
+        robot_to_cr.behaviour_file
     )
     new_robot_id = get_robot_by_user_and_name(
         user_id,
