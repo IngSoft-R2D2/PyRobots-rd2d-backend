@@ -10,9 +10,6 @@ from pydantic import BaseModel, EmailStr
 from databaseFunctions import *
 
 
-from typing import Optional
-from pydantic import BaseModel, EmailStr
-
 app = FastAPI()
 
 SECRET_KEY = "afaebb3eea9e698378e76dcd26d7d46d83e45890f662d896e538edf8d5243758"
@@ -96,7 +93,7 @@ async def root():
 #         raise HTTPException(status_code=400, detail="The user is not confirmed")
 #     return current_user
 """
-	Crear Usuario.
+	Create user.
 """
 @app.post(
     "/users/",
@@ -140,7 +137,7 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 
 
 """
-	Registrar robot.
+	Register robot.
 """
 @app.post(
 	"/robots/",
@@ -172,6 +169,13 @@ async def register_robot(
         operation_result="Successfully created." 
     )
 
+"""
+    List matches. 
+"""
+@app.get("/match/")
+async def show_all_matches(current_user: User = Depends(get_current_user)):
+	return get_all_matches()
+
 
 # ejemplo de uso: funcionalidad que requiere estar logeado
 # @app.get("/path/")
@@ -184,3 +188,4 @@ async def register_robot(
 # async def function_name(current_user: User = Depends(get_current_confirmed_user)):
 #     """  code  """
 #     return 'something'
+
