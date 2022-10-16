@@ -14,7 +14,7 @@ class User(db.Entity):
     robots = Set('Robot') 
     matches = Set('Match', reverse='users')
     created_matches = Set('Match', reverse='creator')
-    
+
 class Match(db.Entity):
     id = PrimaryKey(int, auto=True)
     name = Required(str)
