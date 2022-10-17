@@ -110,11 +110,32 @@ async def create_user(new_user: UserIn):
             status_code=status.HTTP_409_CONFLICT, 
             detail="A user with this email already exists"
         )
+    if not valid_password(new_user.password):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, 
+            detail="Invalid password format"
+        )
     upload_user(new_user.username, new_user.password,
                 new_user.email, new_user.avatar)
     return UserOut(
         id = get_id_by_username(new_user.username),
         operation_result="Succesfully created!")
+
+def valid_password(password: str) -> bool:
+    l, u, d = 0, 0, 0
+    validation = False
+    if (len(password) >= 8):
+        for i in password:
+            if (i.islower()):
+                l+=1
+            if (i.isupper()):
+                u+=1
+            if (i.isdigit()):
+                d+=1
+    if (l>=1 and u>=1 and d>=1 and l+u+d==len(password)):
+        validation = True
+    return validation
+
 
 """
     Login.
