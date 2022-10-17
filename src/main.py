@@ -10,8 +10,10 @@ class MatchIn(BaseModel):
     max_players: int
     min_players: int
     number_of_games: int
+    number_of_rounds: int
     password: str
     creator_id: int
+
 
 class MatchOut(BaseModel):
 	match_id: int
@@ -33,7 +35,7 @@ async def root():
 	status_code=status.HTTP_201_CREATED
 )
 async def create_match(new_match: MatchIn) -> int:
-	creator= get_user_by_id(MatchIn.creator_id)
+	creator= get_user_by_id(MatchIn.creator_id) #TODO: definir esto
 	match_id = match_add(MatchIn.name,
                         MatchIn.max_players,
                         MatchIn.min_players,
