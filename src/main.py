@@ -32,8 +32,8 @@ class RobotRegIn(BaseModel):
     behaviour_file: str
 
 class RobotRegOut(BaseModel):
-	id: int
-	operation_result: str
+    id: int
+    operation_result: str
 
 class User(BaseModel):
     username: str
@@ -92,7 +92,7 @@ async def root():
 #         raise HTTPException(status_code=400, detail="The user is not confirmed")
 #     return current_user
 """
-	Create user.
+    Create user.
 """
 @app.post(
     "/users/",
@@ -117,7 +117,7 @@ async def create_user(new_user: UserIn):
         operation_result="Succesfully created!")
 
 """
-	Login.
+    Login.
 """
 @app.post("/login/", response_model=Token)
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
@@ -136,12 +136,12 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 
 
 """
-	Register robot.
+    Register robot.
 """
 @app.post(
-	"/robots/",
-	response_model=RobotRegOut,
-	status_code=status.HTTP_201_CREATED
+    "/robots/",
+    response_model=RobotRegOut,
+    status_code=status.HTTP_201_CREATED
 )
 async def register_robot(
     robot_to_cr: RobotRegIn,
@@ -172,7 +172,7 @@ async def register_robot(
 """
 @app.get("/match/")
 async def show_all_matches(current_user: User = Depends(get_current_user)):
-	return get_all_matches()
+    return get_all_matches()
 
 
 # ejemplo de uso: funcionalidad que requiere estar logeado
