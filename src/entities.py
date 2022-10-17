@@ -21,6 +21,7 @@ class Match(db.Entity):
     max_players = Required(int)
     min_players = Required(int)
     number_of_games = Required(int)
+    number_of_rounds = Required(int)
     password = Optional(str)
     is_finished = Required(bool, default=False, sql_default='0')
     users = Set(User, reverse='matches')
