@@ -116,7 +116,7 @@ def match_add(
         number_of_rounds_in: int,
         password_in: Optional[str]
     ):
-    if password_in!=None:
+    if password_in is None:
         Match(creator=User[creator_id_in],
                         name=name_in,
                         max_players=max_players_in,
