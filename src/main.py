@@ -236,27 +236,24 @@ def valid_match_config(match: NewMatchIn):
     if (match.max_players>4 or match.max_players<2):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid maximum number of players"
+            detail="Invalid maximum number of players."
         )
     if (match.min_players<2 or match.min_players>4):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid minimum number of players"
+            detail="Invalid minimum number of players."
         )
     if (match.number_of_games>200 or match.number_of_games<1 ):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid number of games"
+            detail="Invalid number of games."
         )
     if (match.number_of_rounds>10000 or match.number_of_rounds<1):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid number of rounds"
+            detail="Invalid number of rounds."
         )   
-
     
-    
-
 
 """
     List matches. 
