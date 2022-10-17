@@ -1,8 +1,11 @@
 from pony.orm import *
-from entities import *
-
+from entities import User, Match, Robot, db
 from typing import Optional
 from passlib.context import CryptContext
+
+"""
+        Function definitions:
+"""
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -58,6 +61,12 @@ def get_robot_by_user_and_name(user_id: int,robot_name: str):
                 if r.user.id==user_id and r.name==robot_name)[:1][0]
     return robot_id
 
+@db_session
+def get_match_by_creator_and_name(creator_id: int, match_name: str):
+    match_id = select(m.id for m in Match 
+                if m.creator.id==creator_id and m.name==match_name)[:1][0]
+    return match_id
+
 # Creates a new Robot and returns it's id
 # user_id_in must be a valid Id in Users.
 @db_session
@@ -95,3 +104,30 @@ def get_all_matches ():
         jsons[key]=p
     return (jsons)
 
+# Creates a new Match and returns it's id.
+# creator_id_in must be a valid Id in Users.
+@db_session
+def match_add(
+        creator_id_in: int,
+        name_in: str,
+        max_players_in: int,
+        min_players_in: int,
+        number_of_games_in: int,
+        number_of_rounds_in: int,
+        password_in: Optional[str]
+    ):
+    if password_in!=None:
+        Match(creator=User[creator_id_in],
+                        name=name_in,
+                        max_players=max_players_in,
+                        min_players=min_players_in,
+                        number_of_games=number_of_games_in,
+                        number_of_rounds=number_of_rounds_in)
+    else:
+        Match(creator=User[creator_id_in],
+                        name=name_in,
+                        max_players=max_players_in,
+                        min_players=min_players_in,
+                        number_of_games=number_of_games_in,
+                        number_of_rounds=number_of_rounds_in,
+                        password=password_in)

@@ -35,6 +35,19 @@ class RobotRegOut(BaseModel):
     id: int
     operation_result: str
 
+class NewMatchIn(BaseModel):
+    name: str
+    max_players: int
+    min_players: int
+    number_of_games: int
+    number_of_rounds: int
+    password: str
+
+class NewMatchOut(BaseModel):
+    match_id: int
+    operation_result: str
+
+
 class User(BaseModel):
     username: str
     email: EmailStr
@@ -188,6 +201,61 @@ async def register_robot(
         operation_result="Successfully created." 
     )
 
+
+"""
+    Create Match.
+"""
+@app.post(
+    "/matches/",
+    response_model=NewMatchOut,
+    status_code=status.HTTP_201_CREATED
+)
+async def create_match(
+    match_to_cr: NewMatchIn,
+    current_user: User = Depends(get_current_user)):
+    user_id = get_id_by_username(current_user.username)
+    valid_match_config(match_to_cr)
+    match_add(
+        user_id,
+        match_to_cr.name,
+        match_to_cr.max_players,
+        match_to_cr.min_players,
+        match_to_cr.number_of_games,
+        match_to_cr.number_of_rounds,
+        match_to_cr.password
+    )
+    new_match_id = get_match_by_creator_and_name(
+        user_id,
+        match_to_cr.name
+    )
+    return NewMatchOut(
+        match_id=new_match_id,
+        operation_result="Successfully created." 
+    )
+
+def valid_match_config(match: NewMatchIn):
+    if (match.max_players>4 or match.max_players<2):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid maximum number of players."
+        )
+    if (match.min_players<2 or match.min_players>4):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid minimum number of players."
+        )
+    if (match.number_of_games>200 or match.number_of_games<1 ):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid number of games."
+        )
+    if (match.number_of_rounds>10000 or match.number_of_rounds<1):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid number of rounds."
+        )   
+    
+
 """
     List matches. 
 """
@@ -207,4 +275,3 @@ async def show_all_matches(current_user: User = Depends(get_current_user)):
 # async def function_name(current_user: User = Depends(get_current_confirmed_user)):
 #     """  code  """
 #     return 'something'
-
