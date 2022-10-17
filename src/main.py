@@ -213,6 +213,7 @@ async def create_match(
     match_to_cr: NewMatchIn,
     current_user: User = Depends(get_current_user)):
     user_id = get_id_by_username(current_user.username)
+    valid_match_config(match_to_cr)
     match_add(
         user_id,
         match_to_cr.name,
@@ -227,9 +228,34 @@ async def create_match(
         match_to_cr.name
     )
     return NewMatchOut(
-        id=new_match_id,
+        match_id=new_match_id,
         operation_result="Successfully created." 
     )
+
+def valid_match_config(match: NewMatchIn):
+    if (match.max_players>4 or match.max_players<2):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid maximum number of players"
+        )
+    if (match.min_players<2 or match.min_players>4):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid minimum number of players"
+        )
+    if (match.number_of_games>200 or match.number_of_games<1 ):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid number of games"
+        )
+    if (match.number_of_rounds>10000 or match.number_of_rounds<1):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid number of rounds"
+        )   
+
+    
+    
 
 
 """
