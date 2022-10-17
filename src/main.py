@@ -17,7 +17,6 @@ ACCESS_TOKEN_EXPIRE_DAYS = 30
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
-app = FastAPI()
 
 origins = {
     "http://localhost",
@@ -52,7 +51,7 @@ class NewMatchIn(BaseModel):
     min_players: int
     number_of_games: int
     number_of_rounds: int
-    password: str
+    password: Optional[str] = None
 
 class NewMatchOut(BaseModel):
     match_id: int
