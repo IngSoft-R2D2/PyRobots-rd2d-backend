@@ -47,6 +47,7 @@ class NewMatchOut(BaseModel):
     match_id: int
     operation_result: str
 
+
 class User(BaseModel):
     username: str
     email: EmailStr
