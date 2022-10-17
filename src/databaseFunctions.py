@@ -61,6 +61,12 @@ def get_robot_by_user_and_name(user_id: int,robot_name: str):
                 if r.user.id==user_id and r.name==robot_name)[:1][0]
     return robot_id
 
+@db_session
+def get_match_by_creator_and_name(creator_id: int, match_name: str):
+    match_id = select(m.id for m in Match 
+                if m.creator.id==creator_id and m.name==match_name)[:1][0]
+    return match_id
+
 # Creates a new Robot and returns it's id
 # user_id_in must be a valid Id in Users.
 @db_session
@@ -99,21 +105,29 @@ def get_all_matches ():
     return (jsons)
 
 # Creates a new Match and returns it's id.
+# creator_id_in must be a valid Id in Users.
+@db_session
 def match_add(
+        creator_id_in: int,
         name_in: str,
         max_players_in: int,
         min_players_in: int,
         number_of_games_in: int,
-        password_in: str,
-        creator_id_in: int
+        number_of_rounds_in: int,
+        password_in: Optional[str]
     ):
-    with db_session:
-        #TODO En la siguiente línea solía decir user_id en lugar de user_id_in
-        creator_user = get(u for u in User if u.id==creator_id_in)
-        new_match = Match(name=name_in,
+    if password_in!=None:
+        Match(creator=User[creator_id_in],
+                        name=name_in,
                         max_players=max_players_in,
                         min_players=min_players_in,
                         number_of_games=number_of_games_in,
-                        password=password_in,
-                        creator=creator_id_in)
-        return new_match.id
+                        number_of_rounds=number_of_rounds_in)
+    else:
+        Match(creator=User[creator_id_in],
+                        name=name_in,
+                        max_players=max_players_in,
+                        min_players=min_players_in,
+                        number_of_games=number_of_games_in,
+                        number_of_rounds=number_of_rounds_in,
+                        password=password_in)

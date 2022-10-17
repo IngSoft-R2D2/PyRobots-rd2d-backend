@@ -7,11 +7,9 @@ from jose import JWTError, jwt
 from pydantic import BaseModel, EmailStr
 
 from databaseFunctions import *
-from entities import User, Match, Robot
-from pydantic import BaseModel, EmailStr
+
 
 app = FastAPI()
-
 
 SECRET_KEY = "afaebb3eea9e698378e76dcd26d7d46d83e45890f662d896e538edf8d5243758"
 ALGORITHM = "HS256"
@@ -21,19 +19,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 app = FastAPI()
 
-class MatchIn(BaseModel): 
-    name: str
-    max_players: int
-    min_players: int
-    number_of_games: int
-    number_of_rounds: int
-    password: str
-    creator_id: int
 
-
-class MatchOut(BaseModel):
-	match_id: int
-	operation_result: str
 
 class UserOut(BaseModel):
     id: int
@@ -46,8 +32,20 @@ class RobotRegIn(BaseModel):
     behaviour_file: str
 
 class RobotRegOut(BaseModel):
-	id: int
-	operation_result: str
+    id: int
+    operation_result: str
+
+class NewMatchIn(BaseModel):
+    name: str
+    max_players: int
+    min_players: int
+    number_of_games: int
+    number_of_rounds: int
+    password: str
+
+class NewMatchOut(BaseModel):
+    match_id: int
+    operation_result: str
 
 class User(BaseModel):
     username: str
@@ -106,7 +104,7 @@ async def root():
 #         raise HTTPException(status_code=400, detail="The user is not confirmed")
 #     return current_user
 """
-	Create user.
+    Create user.
 """
 @app.post(
     "/users/",
@@ -124,14 +122,35 @@ async def create_user(new_user: UserIn):
             status_code=status.HTTP_409_CONFLICT, 
             detail="A user with this email already exists"
         )
+    if not valid_password(new_user.password):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, 
+            detail="Invalid password format"
+        )
     upload_user(new_user.username, new_user.password,
                 new_user.email, new_user.avatar)
     return UserOut(
         id = get_id_by_username(new_user.username),
         operation_result="Succesfully created!")
 
+def valid_password(password: str) -> bool:
+    l, u, d = 0, 0, 0
+    validation = False
+    if (len(password) >= 8):
+        for i in password:
+            if (i.islower()):
+                l+=1
+            if (i.isupper()):
+                u+=1
+            if (i.isdigit()):
+                d+=1
+    if (l>=1 and u>=1 and d>=1 and l+u+d==len(password)):
+        validation = True
+    return validation
+
+
 """
-	Login.
+    Login.
 """
 @app.post("/login/", response_model=Token)
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
@@ -150,12 +169,12 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 
 
 """
-	Register robot.
+    Register robot.
 """
 @app.post(
-	"/robots/",
-	response_model=RobotRegOut,
-	status_code=status.HTTP_201_CREATED
+    "/robots/",
+    response_model=RobotRegOut,
+    status_code=status.HTTP_201_CREATED
 )
 async def register_robot(
     robot_to_cr: RobotRegIn,
@@ -181,12 +200,44 @@ async def register_robot(
         operation_result="Successfully created." 
     )
 
+
+"""
+    Create Match.
+"""
+@app.post(
+    "/matches/",
+    response_model=NewMatchOut,
+    status_code=status.HTTP_201_CREATED
+)
+async def create_match(
+    match_to_cr: NewMatchIn,
+    current_user: User = Depends(get_current_user)):
+    user_id = get_id_by_username(current_user.username)
+    match_add(
+        user_id,
+        match_to_cr.name,
+        match_to_cr.max_players,
+        match_to_cr.min_players,
+        match_to_cr.number_of_games,
+        match_to_cr.number_of_rounds,
+        match_to_cr.password
+    )
+    new_match_id = get_match_by_creator_and_name(
+        user_id,
+        match_to_cr.name
+    )
+    return NewMatchOut(
+        id=new_match_id,
+        operation_result="Successfully created." 
+    )
+
+
 """
     List matches. 
 """
 @app.get("/match/")
 async def show_all_matches(current_user: User = Depends(get_current_user)):
-	return get_all_matches()
+    return get_all_matches()
 
 
 # ejemplo de uso: funcionalidad que requiere estar logeado
@@ -200,24 +251,3 @@ async def show_all_matches(current_user: User = Depends(get_current_user)):
 # async def function_name(current_user: User = Depends(get_current_confirmed_user)):
 #     """  code  """
 #     return 'something'
-
-"""
-	Registrar robot:
-"""
-@app.post(
-	"/matches/",
-	response_model=MatchOut,
-	status_code=status.HTTP_201_CREATED
-)
-async def create_match(new_match: MatchIn) -> int:
-	creator= get_user_by_id(MatchIn.creator_id) #TODO: definir esto
-	match_id = match_add(MatchIn.name,
-                        MatchIn.max_players,
-                        MatchIn.min_players,
-                        MatchIn.number_of_games,
-                        MatchIn.password,
-                        creator)
-	return MatchOut(
-		new_match_id = match_id,
-		operation_result = "Match succesfully created"
-	)
