@@ -57,6 +57,20 @@ def test_create_user_existing_email():
     assert response1.json() == {"detail": "A user with this email already exists"}
 
 
+def test_create_user_no_email_format():
+    response1 = client.post("/users/",
+    json={
+        "username": "lucas",
+        "email": "lucasexample.com",
+        "avatar": "salu",
+        "password": "26Hi0284"
+        })
+    assert response1.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    data = response1.json()
+    for i in data['detail']:
+        assert i['msg'] == 'value is not a valid email address'
+
+
 def test_create_user_invalid_password_less_than_8():
     response1 = client.post("/users/",
     json={
