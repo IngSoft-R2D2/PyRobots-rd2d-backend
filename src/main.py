@@ -269,7 +269,7 @@ def valid_match_config(match: NewMatchIn):
 """
     List matches. 
 """
-@app.get("/match/")
+@app.get("/matches/")
 async def show_all_matches(current_user: User = Depends(get_current_user)):
     return get_all_matches()
 
