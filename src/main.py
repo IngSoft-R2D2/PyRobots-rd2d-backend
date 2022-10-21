@@ -47,8 +47,8 @@ class RobotRegOut(BaseModel):
 
 class NewMatchIn(BaseModel):
     name: str
-    max_players: int
-    min_players: int
+    max_players: Optional[int] = None
+    min_players: Optional[int] = None
     number_of_games: int
     number_of_rounds: int
     password: Optional[str] = None
@@ -240,21 +240,30 @@ async def create_match(
     )
     return NewMatchOut(
         match_id=new_match_id,
-        operation_result="Successfully created." 
+        operation_result="Successfully created."
     )
 
 def valid_match_config(match: NewMatchIn):
-    if (match.max_players>4 or match.max_players<2):
+    if (match.max_players is None):
+        match.max_players = 4
+    if (match.min_players is None):
+        match.min_players = 2
+    if (match.max_players<2 or match.max_players>15):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid maximum number of players."
         )
-    if (match.min_players<2 or match.min_players>4):
+    if (match.min_players<2):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid minimum number of players."
         )
-    if (match.number_of_games>200 or match.number_of_games<1 ):
+    if (match.min_players > match.max_players):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Minimum number of players must not be greater than the maximun number of players."
+        )
+    if (match.number_of_games>200 or match.number_of_games<1):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid number of games."
@@ -263,11 +272,11 @@ def valid_match_config(match: NewMatchIn):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid number of rounds."
-        )   
-    
+        )
+
 
 """
-    List matches. 
+    List matches.
 """
 @app.get("/matches/")
 async def show_all_matches(current_user: User = Depends(get_current_user)):

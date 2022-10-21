@@ -45,7 +45,7 @@ fk_new_match_no_password = {
 }
 fk_new_match_many_max_players = {
     "name": "partidallena",
-    "max_players": 5,
+    "max_players": 16,
     "min_players": 2,
     "number_of_games": 100,
     "number_of_rounds": 10000,
@@ -60,14 +60,6 @@ fk_new_match_few_max_players = {
     "password": "cualquiercosa123"
 }
 
-fk_new_match_many_min_players = {
-    "name": "otrapartida",
-    "max_players": 3,
-    "min_players": 5,
-    "number_of_games": 100,
-    "number_of_rounds": 10000,
-    "password": "cualquiercosa123"
-}
 fk_new_match_few_min_players = {
     "name": "otrapartida",
     "max_players": 3,
@@ -108,6 +100,15 @@ fk_new_match_few_rounds = {
     "number_of_rounds": 0,
     "password": "cualquiercosa123"
 }
+fk_new_match_wrong_maxmin_relac = {
+    "name": "otrapartida",
+    "max_players": 8,
+    "min_players": 10,
+    "number_of_games": 50,
+    "number_of_rounds": 0,
+    "password": "cualquiercosa123"
+}
+
 def test_create_match_unauthorized_wrong_token():
     response = client.post(
         "/matches/",
@@ -165,14 +166,6 @@ def test_create_match_with_few_max_players():
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json()["detail"] == "Invalid maximum number of players."
 
-def test_create_match_with_many_min_players():
-    response = client.post(
-        "/matches/",
-        json = fk_new_match_many_min_players,
-        headers={"Authorization": token_type + " " + access_token}
-    )
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response.json()["detail"] == "Invalid minimum number of players."
 
 def test_create_match_with_few_min_players():
     response = client.post(
@@ -182,6 +175,7 @@ def test_create_match_with_few_min_players():
     )
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json()["detail"] == "Invalid minimum number of players."
+
 
 def test_create_match_with_many_rounds():
     response = client.post(
@@ -200,7 +194,8 @@ def test_create_match_with_few_rounds():
     )
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json()["detail"] == "Invalid number of rounds."
-    
+
+
 def test_create_match_with_many_games():
     response = client.post(
         "/matches/",
@@ -220,3 +215,12 @@ def test_create_match_with_few_games():
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json()["detail"] == "Invalid number of games."
 
+
+def test_create_match_with_wrong_maxmin_relac():
+    response = client.post(
+        "/matches/",
+        json = fk_new_match_wrong_maxmin_relac,
+        headers={"Authorization": token_type + " " + access_token}
+    )
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json()["detail"] == "Minimum number of players must not be greater than the maximun number of players."
