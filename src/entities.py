@@ -18,15 +18,14 @@ class User(db.Entity):
 class Match(db.Entity):
     id = PrimaryKey(int, auto=True)
     name = Required(str)
-    max_players = Required(int)
     min_players = Required(int)
+    max_players = Required(int)
     number_of_games = Required(int)
     number_of_rounds = Required(int)
     password = Optional(str)
     is_finished = Required(bool, default=False, sql_default='0')
     users = Set(User, reverse='matches')
     creator = Required(User, reverse='created_matches')
-    
 
 class Robot(db.Entity):
     id = PrimaryKey(int,auto=True) # Clave primaria, no se si hace falta, capaz q si por la relacion
