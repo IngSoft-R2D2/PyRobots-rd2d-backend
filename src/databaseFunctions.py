@@ -139,7 +139,7 @@ def match_add(
 @db_session
 def get_all_user_robots(db, username):
     user = get_user_by_username(db, username)
-    robots_list = select(r for r in db.Robot if r.user == user)[:]
+    robots_list = select(r for r in user.robots)[:]
     jsons = {}
     for r in robots_list:
         key = str(r.id)
