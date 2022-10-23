@@ -1,10 +1,5 @@
 from pony.orm import *
 
-# db = Database()
-
-# Settings for production database: provider='sqlite', filename='database.sqlite', create_db=True
-# Settings for production database: provider='sqlite', filename='::', create_db=True
-
 # class definitions
 def define_entities(db):
     class User(db.Entity):
@@ -31,7 +26,7 @@ def define_entities(db):
         creator = Required(User, reverse='created_matches')
 
     class Robot(db.Entity):
-        id = PrimaryKey(int,auto=True) # Clave primaria, no se si hace falta, capaz q si por la relacion
+        id = PrimaryKey(int,auto=True)
         user = Optional(User)
         name = Required(str)
         avatar = Optional(str)
@@ -51,7 +46,3 @@ def define_database():
 
 db_prod = {'provider':'sqlite', 'filename':'database.sqlite', 'create_db':True}
 db_test = {'provider':'sqlite', 'filename':':sharedmemory:'}
-
-
-#db.bind(provider='sqlite', filename='database.sqlite', create_db=True)
-#db.generate_mapping(create_tables=True)
