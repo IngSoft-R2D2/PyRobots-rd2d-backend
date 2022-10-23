@@ -2,19 +2,21 @@ import sys
 
 sys.path.append('../src/')
 from entities import db_test, define_entities
-from databaseFunctions import upload_user
 from main import app, get_db
 
 from fastapi.testclient import TestClient
 from fastapi import *
 from pony.orm import *
+from passlib.context import CryptContext
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def define_database_test():
     db = Database(**db_test)
     define_entities(db)
     db.generate_mapping(create_tables=True)
     with db_session:
-        db.User(username="angelescch",email="angelescch@gmail.com",password="ssssSSS1",avatar="avatar.img")
+        db.User(username="angelescch",email="angelescch@gmail.com",password=pwd_context.hash("ssssSSS1"),avatar="avatar.img")
     return db
 
 app.dependency_overrides[get_db] = define_database_test

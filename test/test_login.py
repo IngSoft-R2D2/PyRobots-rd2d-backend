@@ -1,11 +1,25 @@
 import sys
 
 sys.path.append('../src/')
+from entities import db_test, define_entities
+from main import app, get_db
 
 from fastapi.testclient import TestClient
-from fastapi import status
+from fastapi import *
+from pony.orm import *
+from passlib.context import CryptContext
 
-from main import app
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+def define_database_test():
+    db = Database(**db_test)
+    define_entities(db)
+    db.generate_mapping(create_tables=True)
+    with db_session:
+        db.User(username="angelescch",email="angelescch@gmail.com",password=pwd_context.hash("ssssSSS1"),avatar="avatar.img")
+    return db
+
+app.dependency_overrides[get_db] = define_database_test
 
 client = TestClient(app)
 
@@ -13,8 +27,8 @@ client = TestClient(app)
 def test_login_user():
     response = client.post("/login/",
     data={
-        "username": "lucas",
-        "password": "26Hi0284"
+        "username": "angelescch",
+        "password": "ssssSSS1"
         })
     assert response.status_code == status.HTTP_200_OK
     assert response.json()['token_type'] == "bearer"
@@ -23,8 +37,8 @@ def test_login_user():
 def test_login_user_unauthorized_wrong_username():
     response = client.post("/login/",
     data={
-        "username": "lucass",
-        "password": "26Hi0284"
+        "username": "angelescchh",
+        "password": "ssssSSS1"
         })
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
     assert response.json()['detail'] == "Incorrect username or password"
@@ -33,8 +47,8 @@ def test_login_user_unauthorized_wrong_username():
 def test_login_user_unauthorized_wrong_password():
     response = client.post("/login/",
     data={
-        "username": "lucas",
-        "password": "26Hi02844"
+        "username": "angelescch",
+        "password": "ssssSSS11"
         })
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
     assert response.json()['detail'] == "Incorrect username or password"
