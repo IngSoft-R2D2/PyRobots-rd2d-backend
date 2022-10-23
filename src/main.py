@@ -9,7 +9,12 @@ from pydantic import BaseModel, EmailStr
 from databaseFunctions import *
 from fastapi.middleware.cors import CORSMiddleware
 
+from entities import define_database
+
 app = FastAPI()
+
+def get_db():
+    return define_database()
 
 SECRET_KEY = "afaebb3eea9e698378e76dcd26d7d46d83e45890f662d896e538edf8d5243758"
 ALGORITHM = "HS256"
@@ -85,7 +90,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     return encoded_jwt
 
 
-async def get_current_user(token: str = Depends(oauth2_scheme)):
+async def get_current_user(token: str = Depends(oauth2_scheme), db: Database = Depends(get_db)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -99,7 +104,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         token_data = TokenData(username=username)
     except JWTError:
         raise credentials_exception
-    user = get_user_by_username(token_data.username)
+    user = get_user_by_username(db, token_data.username)
     if user is None:
         raise credentials_exception
     return user
@@ -122,13 +127,13 @@ async def root():
     response_model=UserOut,
     status_code=status.HTTP_201_CREATED
 )
-async def create_user(new_user: UserIn):
-    if new_user.username in get_all_usernames():
+async def create_user(new_user: UserIn, db: Database = Depends(get_db)):
+    if new_user.username in get_all_usernames(db):
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, 
             detail="A user with this username already exists"
         )
-    if new_user.email in get_all_emails():
+    if new_user.email in get_all_emails(db):
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, 
             detail="A user with this email already exists"
@@ -138,10 +143,10 @@ async def create_user(new_user: UserIn):
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, 
             detail="Invalid password format"
         )
-    upload_user(new_user.username, new_user.password,
+    upload_user(db, new_user.username, new_user.password,
                 new_user.email, new_user.avatar)
     return UserOut(
-        id = get_id_by_username(new_user.username),
+        id = get_id_by_username(db, new_user.username),
         operation_result="Succesfully created!")
 
 def valid_password(password: str) -> bool:
@@ -164,8 +169,8 @@ def valid_password(password: str) -> bool:
     Login.
 """
 @app.post("/login/", response_model=Token)
-async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
-    user = authenticate_user(form_data.username, form_data.password)
+async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Database = Depends(get_db)):
+    user = authenticate_user(db, form_data.username, form_data.password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -189,20 +194,20 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 )
 async def register_robot(
     robot_to_cr: RobotRegIn,
-    current_user: User = Depends(get_current_user)):
-    user_id = get_id_by_username(current_user.username)
-    if not valid_robot_for_user(user_id, robot_to_cr.name):
+    current_user: User = Depends(get_current_user), db: Database = Depends(get_db)):
+    user_id = get_id_by_username(db, current_user.username)
+    if not valid_robot_for_user(db, user_id, robot_to_cr.name):
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="This user has a robot with this name already."
         )
-    upload_robot(
+    upload_robot(db,
         user_id,
         robot_to_cr.name,
         robot_to_cr.avatar,
         robot_to_cr.behaviour_file
     )
-    new_robot_id = get_robot_by_user_and_name(
+    new_robot_id = get_robot_by_user_and_name(db,
         user_id,
         robot_to_cr.name
     )
@@ -222,10 +227,10 @@ async def register_robot(
 )
 async def create_match(
     match_to_cr: NewMatchIn,
-    current_user: User = Depends(get_current_user)):
-    user_id = get_id_by_username(current_user.username)
+    current_user: User = Depends(get_current_user), db: Database = Depends(get_db)):
+    user_id = get_id_by_username(db, current_user.username)
     valid_match_config(match_to_cr)
-    match_add(
+    match_add(db,
         user_id,
         match_to_cr.name,
         match_to_cr.max_players,
@@ -234,7 +239,7 @@ async def create_match(
         match_to_cr.number_of_rounds,
         match_to_cr.password
     )
-    new_match_id = get_match_by_creator_and_name(
+    new_match_id = get_match_by_creator_and_name(db,
         user_id,
         match_to_cr.name
     )
@@ -279,8 +284,8 @@ def valid_match_config(match: NewMatchIn):
     List matches.
 """
 @app.get("/matches/")
-async def show_all_matches(current_user: User = Depends(get_current_user)):
-    return get_all_matches()
+async def show_all_matches(current_user: User = Depends(get_current_user), db: Database = Depends(get_db)):
+    return get_all_matches(db)
 
 
 # ejemplo de uso: funcionalidad que requiere estar logeado
