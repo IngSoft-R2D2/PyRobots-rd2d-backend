@@ -43,15 +43,14 @@ def define_entities(db):
         composite_key(user, name)
 
 
-def define_database(**db_params):
-    db = Database(**db_params)
+def define_database():
+    db = Database(**db_prod)
     define_entities(db)
     db.generate_mapping(create_tables=True)
     return db
 
-
 db_prod = {'provider':'sqlite', 'filename':'database.sqlite', 'create_db':True}
-db_test = {'provider':'sqlite', 'filename':':memory:', 'create_db':True}
+db_test = {'provider':'sqlite', 'filename':':sharedmemory:'}
 
 
 #db.bind(provider='sqlite', filename='database.sqlite', create_db=True)

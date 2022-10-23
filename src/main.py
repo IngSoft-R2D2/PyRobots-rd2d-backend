@@ -7,19 +7,14 @@ from jose import JWTError, jwt
 from pydantic import BaseModel, EmailStr
 
 from databaseFunctions import *
-from entities import define_database, db_prod
 from fastapi.middleware.cors import CORSMiddleware
 
-db: Database 
+from entities import define_database
+
 app = FastAPI()
 
 def get_db():
-    db = define_database(**db_prod)
-    try:
-        yield db
-    finally:
-        db.disconnect()
-
+    return define_database()
 
 SECRET_KEY = "afaebb3eea9e698378e76dcd26d7d46d83e45890f662d896e538edf8d5243758"
 ALGORITHM = "HS256"
