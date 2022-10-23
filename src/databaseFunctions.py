@@ -95,7 +95,7 @@ def get_all_matches (db: Database):
         match_dict = m.to_dict()
         users_list = []
         for us in (select(ma.users for ma in db.Match if ma.id == m.id)):
-            users_list.append(us.to_dict())
+            users_list.append(us.username)
         match_dict['users'] = users_list
         matches.append(match_dict)
     jsons = {}
