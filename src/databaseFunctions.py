@@ -77,15 +77,16 @@ def upload_robot(
         behaviour_file_in:str
     ):
     
-    if avatar_in!=None:
+    if avatar_in is None:
         db.Robot(user=db.User[user_id_in],
-                        name=name_in,
-                        avatar=avatar_in,
-                        behaviour_file=behaviour_file_in)
+                    name=name_in,
+                    behaviour_file=behaviour_file_in)
     else:
         db.Robot(user=db.User[user_id_in],
-                        name=name_in,
-                        behaviour_file=behaviour_file_in)
+                name=name_in,
+                avatar=avatar_in,
+                behaviour_file=behaviour_file_in)
+
 
 @db_session
 def get_all_matches (db: Database):
@@ -134,3 +135,13 @@ def match_add(
                         number_of_rounds=number_of_rounds_in,
                         password=password_in,
                         users = [db.User[creator_id_in]])
+
+@db_session
+def get_all_user_robots(db, username):
+    user = get_user_by_username(db, username)
+    robots_list = select(r for r in db.Robot if r.user == user)[:]
+    jsons = {}
+    for r in robots_list:
+        key = str(r.id)
+        jsons[key]=r.name
+    return (jsons)

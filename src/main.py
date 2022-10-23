@@ -288,6 +288,14 @@ async def show_all_matches(current_user: User = Depends(get_current_user), db: D
     return get_all_matches(db)
 
 
+"""
+    List robots.
+"""
+@app.get("/robots/")
+async def list_user_robots(current_user: User = Depends(get_current_user), db: Database = Depends(get_db)):
+    return get_all_user_robots(db, current_user.username)
+
+
 # ejemplo de uso: funcionalidad que requiere estar logeado
 # @app.get("/path/")
 # async def function_name(current_user: User = Depends(get_current_user)):
