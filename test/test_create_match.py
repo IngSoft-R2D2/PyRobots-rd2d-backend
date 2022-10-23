@@ -1,11 +1,25 @@
 import sys
 
 sys.path.append('../src/')
+from entities import db_test, define_entities
+from main import app, get_db
 
 from fastapi.testclient import TestClient
 from fastapi import *
+from pony.orm import *
+from passlib.context import CryptContext
 
-from main import app
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+def define_database_test():
+    db = Database(**db_test)
+    define_entities(db)
+    db.generate_mapping(create_tables=True)
+    with db_session:
+        db.User(username="angelescch",email="angelescch@gmail.com",password=pwd_context.hash("ssssSSS1"),avatar="avatar.img")
+    return db
+
+app.dependency_overrides[get_db] = define_database_test
 
 
 client = TestClient(app)
@@ -18,7 +32,7 @@ wrong_token = "eyJGOiJIUzIiIsInR5cCIkpXVCJyJzdisdWNhcyIsImV46MTY2ODDc2OH6ksb20cl
 def test_login_to_get_token():
     response = client.post(
         "/login/",
-        data={"username": "lucas","password": "26Hi0284"}
+        data={"username": "angelescch","password": "ssssSSS1"}
     )
     assert response.status_code == status.HTTP_200_OK
     global access_token
@@ -33,7 +47,7 @@ fk_new_match = {
     "min_players": 2,
     "number_of_games": 100,
     "number_of_rounds": 10000,
-    "password": "cualquiercosa123"
+    "password": "secret"
 }
 fk_new_match_no_password = {
     "name": "partidasincontraseña",
@@ -41,7 +55,27 @@ fk_new_match_no_password = {
     "min_players": 2,
     "number_of_games": 100,
     "number_of_rounds": 10000,
-    "password": ""
+}
+fk_new_match_no_min_players = {
+    "name": "partida",
+    "max_players": 2,
+    "number_of_games": 125,
+    "number_of_rounds": 1010,
+    "password": "secret"
+}
+fk_new_match_no_max_players = {
+    "name": "partidas",
+    "min_players": 4,
+    "number_of_games": 5,
+    "number_of_rounds": 10,
+    "password": "secret"
+}
+fk_new_match_no_max_players_wrong_rel = {
+    "name": "partidas",
+    "min_players": 10,
+    "number_of_games": 5,
+    "number_of_rounds": 10,
+    "password": "secret"
 }
 fk_new_match_many_max_players = {
     "name": "partidallena",
@@ -49,7 +83,7 @@ fk_new_match_many_max_players = {
     "min_players": 2,
     "number_of_games": 100,
     "number_of_rounds": 10000,
-    "password": "cualquiercosa123"
+    "password": "secret"
 }
 fk_new_match_few_max_players = {
     "name": "partidallena",
@@ -57,7 +91,7 @@ fk_new_match_few_max_players = {
     "min_players": 2,
     "number_of_games": 100,
     "number_of_rounds": 10000,
-    "password": "cualquiercosa123"
+    "password": "secret"
 }
 
 fk_new_match_few_min_players = {
@@ -66,7 +100,7 @@ fk_new_match_few_min_players = {
     "min_players": 0,
     "number_of_games": 100,
     "number_of_rounds": 10000,
-    "password": "cualquiercosa123"
+    "password": "secret"
 }
 fk_new_match_many_games = {
     "name": "otrapartida",
@@ -74,7 +108,7 @@ fk_new_match_many_games = {
     "min_players": 2,
     "number_of_games": 500,
     "number_of_rounds": 10000,
-    "password": "cualquiercosa123"
+    "password": "secret"
 }
 fk_new_match_many_rounds = {
     "name": "otrapartida",
@@ -82,7 +116,7 @@ fk_new_match_many_rounds = {
     "min_players": 2,
     "number_of_games": 100,
     "number_of_rounds": 10001,
-    "password": "cualquiercosa123"
+    "password": "secret"
 }
 fk_new_match_few_games = {
     "name": "otrapartida",
@@ -90,7 +124,7 @@ fk_new_match_few_games = {
     "min_players": 2,
     "number_of_games": 0,
     "number_of_rounds": 5000,
-    "password": "cualquiercosa123"
+    "password": "secret"
 }
 fk_new_match_few_rounds = {
     "name": "otrapartida",
@@ -98,7 +132,7 @@ fk_new_match_few_rounds = {
     "min_players": 2,
     "number_of_games": 50,
     "number_of_rounds": 0,
-    "password": "cualquiercosa123"
+    "password": "secret"
 }
 fk_new_match_wrong_maxmin_relac = {
     "name": "otrapartida",
@@ -106,7 +140,7 @@ fk_new_match_wrong_maxmin_relac = {
     "min_players": 10,
     "number_of_games": 50,
     "number_of_rounds": 0,
-    "password": "cualquiercosa123"
+    "password": "secret"
 }
 
 def test_create_match_unauthorized_wrong_token():
@@ -147,6 +181,32 @@ def test_create_match_no_password():
     assert response.status_code == status.HTTP_201_CREATED
     assert response.json()["operation_result"] == "Successfully created."
 
+def test_create_match_no_min_players():
+    response = client.post(
+        "/matches/",
+        json = fk_new_match_no_min_players,
+        headers={"Authorization": token_type + " " + access_token}
+    )
+    assert response.status_code == status.HTTP_201_CREATED
+    assert response.json()["operation_result"] == "Successfully created."
+
+def test_create_match_no_max_players():
+    response = client.post(
+        "/matches/",
+        json = fk_new_match_no_max_players,
+        headers={"Authorization": token_type + " " + access_token}
+    )
+    assert response.status_code == status.HTTP_201_CREATED
+    assert response.json()["operation_result"] == "Successfully created."
+
+def test_create_match_no_max_players_wrong_rel():
+    response = client.post(
+        "/matches/",
+        json = fk_new_match_no_max_players_wrong_rel,
+        headers={"Authorization": token_type + " " + access_token}
+    )
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json()["detail"] == "Minimum number of players must not be greater than the maximun number of players."
 
 def test_create_match_with_many_max_players():
     response = client.post(
