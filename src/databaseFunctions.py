@@ -45,11 +45,6 @@ def upload_user(db: Database,
         db.User(username=username, password=pwd_context.hash(password),
              email=email, avatar=avatar)
 
-
-@db_session
-def user_id_is_valid(db: Database,user_id: int):
-    return user_id in select(u.id for u in db.User)[:]
-
 @db_session
 def valid_robot_for_user(db: Database, user_id: int, robot_name: str):
     return not (robot_name in select(r.name for r in db.Robot if r.user==db.User[user_id])[:])
@@ -103,7 +98,7 @@ def get_all_matches (db: Database):
     for p in matches:
         key = 'match_'+str(p['id'])
         jsons[key]=p
-    return (jsons)
+    return jsons
 
 # Creates a new Match and returns it's id.
 # creator_id_in must be a valid Id in Users.
@@ -140,8 +135,8 @@ def match_add(
 def get_all_user_robots(db, username):
     user = get_user_by_username(db, username)
     robots_list = select(r for r in user.robots)[:]
-    jsons = {}
+    json = {}
     for r in robots_list:
         key = str(r.id)
-        jsons[key]=r.name
-    return (jsons)
+        json[key]=r.name
+    return json

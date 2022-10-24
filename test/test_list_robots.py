@@ -19,6 +19,7 @@ fk_list_robots = {
 
 access_token = ""
 token_type = ""
+token_for_no_longer_user = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJtdXllc3BlY2lhbCIsImV4cCI6MTY2NjYzMDI3OX0.fuMlzmMIv-uqTeCp31QP_ACf2lPZkxGy-C6JNlP8PCo"
 
 def test_login_to_get_token():
     response = client.post(
@@ -30,6 +31,14 @@ def test_login_to_get_token():
     global token_type
     access_token = response.json()['access_token']
     token_type = response.json()['token_type']
+
+def test_list_no_longer_existing_user():
+    response = client.get(
+        "/robots/",
+        headers={"Authorization": token_type+" "+token_for_no_longer_user}
+        )
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    assert response.json()['detail'] == "Could not validate credentials"
 
 def test_list_user_robots():
     response = client.get(
