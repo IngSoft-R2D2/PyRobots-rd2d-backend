@@ -1,58 +1,12 @@
 import sys
-
+from database_for_testing import get_db_override
 sys.path.append('../src/')
-from entities import db_test, define_entities
 from main import app, get_db
 
 from fastapi.testclient import TestClient
-from fastapi import *
-from pony.orm import *
-from passlib.context import CryptContext
+from fastapi import status
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-def define_database_test():
-    db = Database(**db_test)
-    define_entities(db)
-    db.generate_mapping(create_tables=True)
-    with db_session:
-        db.User(username="angelescch",email="angelescch@gmail.com",
-                password=pwd_context.hash("ssssSSS1"),avatar="avatar.img")
-        db.User(username="keyword",email="keyword@gmail.com",
-                password=pwd_context.hash("htL8s1D498"),avatar="avatar.img")
-        db.Match(creator=db.User.get(username="angelescch"),
-                name="epic",
-                max_players=4,
-                min_players=2,
-                number_of_games=100,
-                number_of_rounds=10000,
-                password="secret",
-                users = [db.User.get(username="angelescch")])
-        db.Match(creator=db.User.get(username="keyword"),
-                name="pool",
-                max_players=10,
-                min_players=8,
-                number_of_games=125,
-                number_of_rounds=1010,
-                users = [db.User.get(username="keyword")])
-        db.Match(creator=db.User.get(username="keyword"),
-                name="NGBI",
-                max_players=5,
-                min_players=3,
-                number_of_games=5,
-                number_of_rounds=10,
-                password="AGSV87NG4",
-                users = [db.User.get(username="keyword")])
-        db.Match(creator=db.User.get(username="angelescch"),
-                name="KGN",
-                max_players=5,
-                min_players=3,
-                number_of_games=5,
-                number_of_rounds=10,
-                users = [db.User.get(username="angelescch")])
-    return db
-
-app.dependency_overrides[get_db] = define_database_test
+app.dependency_overrides[get_db] = get_db_override
 
 client = TestClient(app)
 
