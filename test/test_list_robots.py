@@ -1,41 +1,25 @@
 import sys
-
+from database_for_testing import get_db_override
 sys.path.append('../src/')
-from entities import db_test, define_entities
 from main import app, get_db
 
 from fastapi.testclient import TestClient
-from fastapi import *
-from pony.orm import *
-from passlib.context import CryptContext
+from fastapi import status
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-def define_database_test():
-    db = Database(**db_test)
-    define_entities(db)
-    db.generate_mapping(create_tables=True)
-    with db_session:
-        db.User(username="angelescch",email="angelescch@gmail.com",password=pwd_context.hash("ssssSSS1"),avatar="avatar.img")
-        db.Robot(user = db.User.get(username="angelescch"), name="R2D2", avatar="image.jpg", behaviour_file="RSD2.py")
-        db.Robot(user = db.User.get(username="angelescch"), name="MegaRobot", avatar="image.jpg", behaviour_file="MegaRobot.py")
-        db.Robot(user = db.User.get(username="angelescch"), name="Robot3000", avatar="image.jpg", behaviour_file="Robot3000.py")
-    return db
-
-app.dependency_overrides[get_db] = define_database_test
-
+app.dependency_overrides[get_db] = get_db_override
 
 client = TestClient(app)
 
 fk_list_robots = {
     "1": "R2D2",
     "2": "MegaRobot",
-    "3": "Robot3000"
+    "3": "Robot3000",
+    "4": "MEGATRON"
 }
-
 
 access_token = ""
 token_type = ""
+token_for_no_longer_user = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJtdXllc3BlY2lhbCIsImV4cCI6MTY2NjYzMDI3OX0.fuMlzmMIv-uqTeCp31QP_ACf2lPZkxGy-C6JNlP8PCo"
 
 def test_login_to_get_token():
     response = client.post(
@@ -48,7 +32,15 @@ def test_login_to_get_token():
     access_token = response.json()['access_token']
     token_type = response.json()['token_type']
 
-def test_print():
+def test_list_no_longer_existing_user():
+    response = client.get(
+        "/robots/",
+        headers={"Authorization": token_type+" "+token_for_no_longer_user}
+        )
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    assert response.json()['detail'] == "Could not validate credentials"
+
+def test_list_user_robots():
     response = client.get(
         "/robots/",
         headers={"Authorization": token_type+" "+access_token}
