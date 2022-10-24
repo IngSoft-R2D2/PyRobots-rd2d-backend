@@ -1,12 +1,26 @@
 import sys
 
 sys.path.append('../src/')
+from entities import db_test, define_entities
+from main import app, get_db
 
 from fastapi.testclient import TestClient
 from fastapi import *
+from pony.orm import *
+from passlib.context import CryptContext
 
-from main import app
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+def define_database_test():
+    db = Database(**db_test)
+    define_entities(db)
+    db.generate_mapping(create_tables=True)
+    with db_session:
+        db.User(username="angelescch",email="angelescch@gmail.com",password=pwd_context.hash("ssssSSS1"),avatar="avatar.img")
+        db.Robot(name="MEGATRON",user=db.User.get(username="angelescch"),avatar="64base_coded_img",behaviour_file="64base_coded_file")
+    return db
+
+app.dependency_overrides[get_db] = define_database_test
 
 client = TestClient(app)
 
@@ -18,7 +32,7 @@ wrong_token = "eyJGOiJIUzIiIsInR5cCIkpXVCJyJzdisdWNhcyIsImV46MTY2ODDc2OH6ksb20cl
 def test_login_to_get_token():
     response = client.post(
         "/login/",
-        data={"username": "lucas","password": "26Hi0284"}
+        data={"username": "angelescch","password": "ssssSSS1"}
     )
     assert response.status_code == status.HTTP_200_OK
     global access_token
@@ -28,7 +42,7 @@ def test_login_to_get_token():
 
 
 fk_reg_robot = {
-    'name': "MEGATRON",
+    'name': "RATCHET",
     'avatar': "64base_coded_img",
     'behaviour_file': "64base_coded_file"
 }
