@@ -27,7 +27,7 @@ def define_entities(db):
 
     class Robot(db.Entity):
         id = PrimaryKey(int,auto=True)
-        user = Optional(User)
+        user = Required(User)
         name = Required(str)
         avatar = Optional(str)
         behaviour_file = Required(str)
