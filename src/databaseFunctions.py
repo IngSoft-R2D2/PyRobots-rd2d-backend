@@ -1,7 +1,7 @@
 from pony.orm import *
 from typing import Optional
 from passlib.context import CryptContext
-import json
+
 """
         Function definitions:
 """
@@ -121,7 +121,8 @@ def match_add(
                         min_players=min_players_in,
                         number_of_games=number_of_games_in,
                         number_of_rounds=number_of_rounds_in,
-                        robots = [db.Robot.get(id=robot_id_in)])
+                        robots = [db.Robot[robot_id_in]],
+                        users = [db.User[creator_id_in]])
     else:
         db.Match(creator=db.User[creator_id_in],
                         name=name_in,
@@ -130,7 +131,8 @@ def match_add(
                         number_of_games=number_of_games_in,
                         number_of_rounds=number_of_rounds_in,
                         password=password_in,
-                        robots = [db.Robot.get(id=robot_id_in)])
+                        robots = [db.Robot[robot_id_in]],
+                        users = [db.User[creator_id_in]])
 
 @db_session
 def get_all_user_robots(db, username):

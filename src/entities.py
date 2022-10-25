@@ -10,6 +10,7 @@ def define_entities(db):
         is_confirmed = Required(bool, default=False, sql_default='0')
         avatar = Optional(str)
         robots = Set('Robot')
+        matches = Set('Match', reverse='users')
         created_matches = Set('Match', reverse='creator')
 
     class Match(db.Entity):
@@ -22,6 +23,7 @@ def define_entities(db):
         password = Optional(str)
         is_finished = Required(bool, default=False, sql_default='0')
         robots = Set('Robot', reverse='matches')
+        users = Set('User', reverse='matches')
         creator = Required(User, reverse='created_matches')
 
     class Robot(db.Entity):
