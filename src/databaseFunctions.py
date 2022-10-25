@@ -1,7 +1,7 @@
 from pony.orm import *
 from typing import Optional
 from passlib.context import CryptContext
-
+import json
 """
         Function definitions:
 """
@@ -89,10 +89,10 @@ def get_all_matches (db: Database):
     matches_list = (select(m for m in db.Match)[:])
     for m in matches_list:
         match_dict = m.to_dict()
-        users_list = []
-        for us in (select(ma.users for ma in db.Match if ma.id == m.id)):
-            users_list.append(us.username)
-        match_dict['users'] = users_list
+        users_robots_json = {}
+        for ur in select((r.user.username, r.name) for r in m.robots)[:]:
+            users_robots_json[str(ur[0])] = str(ur[1])
+        match_dict['users_robots'] = users_robots_json
         matches.append(match_dict)
     jsons = {}
     for p in matches:
@@ -107,6 +107,7 @@ def match_add(
         db: Database,
         creator_id_in: int,
         name_in: str,
+        robot_id_in: int,
         max_players_in: int,
         min_players_in: int,
         number_of_games_in: int,
@@ -120,7 +121,7 @@ def match_add(
                         min_players=min_players_in,
                         number_of_games=number_of_games_in,
                         number_of_rounds=number_of_rounds_in,
-                        users = [db.User[creator_id_in]])
+                        robots = [db.Robot.get(id=robot_id_in)])
     else:
         db.Match(creator=db.User[creator_id_in],
                         name=name_in,
@@ -129,7 +130,7 @@ def match_add(
                         number_of_games=number_of_games_in,
                         number_of_rounds=number_of_rounds_in,
                         password=password_in,
-                        users = [db.User[creator_id_in]])
+                        robots = [db.Robot.get(id=robot_id_in)])
 
 @db_session
 def get_all_user_robots(db, username):
