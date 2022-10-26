@@ -10,6 +10,7 @@ from databaseFunctions import *
 from fastapi.middleware.cors import CORSMiddleware
 
 from entities import define_database
+from game_logic import *
 
 app = FastAPI()
 
@@ -50,6 +51,7 @@ class RobotRegOut(BaseModel):
     id: int
     operation_result: str
 
+
 class NewMatchIn(BaseModel):
     name: str
     max_players: Optional[int] = None
@@ -68,6 +70,24 @@ class User(BaseModel):
     email: EmailStr
     avatar: Optional[str] = None
     # is_confirmed: Optional[bool] = None         # dejar para caso de uso: confirmar usuario
+
+
+class SimulationParams(BaseModel):
+	robots: Set[int]
+	number_of_rounds: int
+
+class RobotInGame(BaseModel):
+	name: str
+	health: int
+	position: Tuple[int,int]
+
+class Round(BaseModel):
+	robots: list[RobotInGame]
+	scans: dict[str,int]
+	shoots: dict[str,str]
+
+class Simulation(BaseModel):
+	rounds: list[Round]
 
 class UserIn(User):
     password: str
@@ -296,14 +316,14 @@ async def list_user_robots(current_user: User = Depends(get_current_user), db: D
     return get_all_user_robots(db, current_user.username)
 
 
-# ejemplo de uso: funcionalidad que requiere estar logeado
-# @app.get("/path/")
-# async def function_name(current_user: User = Depends(get_current_user)):
-#     """  code  """
-#     return 'something'
+"""
+	Get simulation.
+"""
+@app.get("/simulation/")
+async def get_simulation(
+	parameters: SimulationParams,
+	current_user: User = Depends(get_current_user),
+	db: Database = Depends(get_db)):
+	return run_simulation()
 
-# ejemplo de uso: funcionalidad que requiere estar logeado y confirmado (próximos sprints)
-# @app.get("/path/")
-# async def function_name(current_user: User = Depends(get_current_confirmed_user)):
-#     """  code  """
-#     return 'something'
+
