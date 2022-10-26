@@ -313,7 +313,7 @@ async def list_user_robots(current_user: User = Depends(get_current_user), db: D
 """
     Leave match.
 """
-@app.put("/matches/{match_id}/leave/")
+@app.put("/matches/leave/{match_id}/")
 async def leave_match(
         match_id: int,
         current_user: UserDb = Depends(get_current_user),
