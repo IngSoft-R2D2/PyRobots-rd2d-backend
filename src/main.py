@@ -52,7 +52,6 @@ class RobotRegOut(BaseModel):
 
 class NewMatchIn(BaseModel):
     name: str
-    robot_id: int
     max_players: Optional[int] = None
     min_players: Optional[int] = None
     number_of_games: int
@@ -68,7 +67,6 @@ class User(BaseModel):
     username: str
     email: EmailStr
     avatar: Optional[str] = None
-    # is_confirmed: Optional[bool] = None         # dejar para caso de uso: confirmar usuario
 
 class UserIn(User):
     password: str
@@ -91,7 +89,9 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     return encoded_jwt
 
 
-async def get_current_user(token: str = Depends(oauth2_scheme), db: Database = Depends(get_db)):
+async def get_current_user(
+        token: str = Depends(oauth2_scheme), db: Database = Depends(get_db)
+    ):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -110,16 +110,13 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Database = D
         raise credentials_exception
     return user
 
+
 # TODO: implementation
 @app.get("/")
 async def root():
     pass
 
-# chequear si el usuario está confirmado: dejar para caso de uso confirmar usuario (próximos sprints)
-# async def get_current_confirmed_user(current_user: User = Depends(get_current_user)):
-#     if not current_user.is_confirmed:
-#         raise HTTPException(status_code=400, detail="The user is not confirmed")
-#     return current_user
+
 """
     Create user.
 """
@@ -170,17 +167,30 @@ def valid_password(password: str) -> bool:
     Login.
 """
 @app.post("/login/", response_model=Token)
-async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Database = Depends(get_db)):
-    user = authenticate_user(db, form_data.username, form_data.password)
-    if not user:
+async def login_for_access_token(
+        form_data: OAuth2PasswordRequestForm = Depends(),
+        db: Database = Depends(get_db)
+    ):
+    if not username_exists(db, form_data.username):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="This username does not exist",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    if not authenticate_user(db, form_data.username, form_data.password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    if not is_user_confirmed(db, form_data.username):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="The user is not confirmed"
+        )
     access_token_expires = timedelta(days=ACCESS_TOKEN_EXPIRE_DAYS)
     access_token = create_access_token(
-        data={"sub": user.username}, expires_delta=access_token_expires
+        data={"sub": form_data.username}, expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
@@ -234,7 +244,6 @@ async def create_match(
     match_add(db,
         user_id,
         match_to_cr.name,
-        match_to_cr.robot_id,
         match_to_cr.max_players,
         match_to_cr.min_players,
         match_to_cr.number_of_games,
@@ -296,16 +305,3 @@ async def show_all_matches(current_user: User = Depends(get_current_user), db: D
 @app.get("/robots/")
 async def list_user_robots(current_user: User = Depends(get_current_user), db: Database = Depends(get_db)):
     return get_all_user_robots(db, current_user.username)
-
-
-# ejemplo de uso: funcionalidad que requiere estar logeado
-# @app.get("/path/")
-# async def function_name(current_user: User = Depends(get_current_user)):
-#     """  code  """
-#     return 'something'
-
-# ejemplo de uso: funcionalidad que requiere estar logeado y confirmado (próximos sprints)
-# @app.get("/path/")
-# async def function_name(current_user: User = Depends(get_current_confirmed_user)):
-#     """  code  """
-#     return 'something'

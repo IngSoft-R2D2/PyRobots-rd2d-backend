@@ -20,14 +20,14 @@ def test_login_user():
     assert response.json()['token_type'] == "bearer"
 
 
-def test_login_user_unauthorized_wrong_username():
+def test_login_user_unauthorized_no_existing_username():
     response = client.post("/login/",
     data={
         "username": "angelescchh",
         "password": "ssssSSS1"
         })
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
-    assert response.json()['detail'] == "Incorrect username or password"
+    assert response.json()['detail'] == "This username does not exist"
 
 
 def test_login_user_unauthorized_wrong_password():
@@ -39,12 +39,20 @@ def test_login_user_unauthorized_wrong_password():
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
     assert response.json()['detail'] == "Incorrect username or password"
 
-
-def test_login_user_unauthorized_unregistered_username():
+def test_login_user_unauthorized_wrong_username():
     response = client.post("/login/",
     data={
-        "username": "jose",
-        "password": "2B6y0284e"
+        "username": "keyword",
+        "password": "ssssSSS1"
         })
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
     assert response.json()['detail'] == "Incorrect username or password"
+
+def test_login_user_unauthorized_not_confirmed_user():
+    response = client.post("/login/",
+    data={
+        "username": "fake",
+        "password": "8924F35bi"
+        })
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json()['detail'] == "The user is not confirmed"
