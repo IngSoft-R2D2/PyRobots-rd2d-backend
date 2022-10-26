@@ -140,3 +140,11 @@ def get_all_user_robots(db, username):
         key = str(r.id)
         json[key]=r.name
     return json
+
+@db_session
+def remove_user_from_match(
+    db: Database,
+    match_id: int,
+    user_id: int):
+    db.Match[match_id].users.remove(db.User[user_id])
+    

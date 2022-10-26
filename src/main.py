@@ -72,6 +72,9 @@ class User(BaseModel):
 class UserIn(User):
     password: str
 
+class UserDb(User):
+    id: int
+
 class Token(BaseModel):
     access_token: str
     token_type: str
@@ -296,14 +299,14 @@ async def list_user_robots(current_user: User = Depends(get_current_user), db: D
     return get_all_user_robots(db, current_user.username)
 
 
-# ejemplo de uso: funcionalidad que requiere estar logeado
-# @app.get("/path/")
-# async def function_name(current_user: User = Depends(get_current_user)):
-#     """  code  """
-#     return 'something'
-
-# ejemplo de uso: funcionalidad que requiere estar logeado y confirmado (próximos sprints)
-# @app.get("/path/")
-# async def function_name(current_user: User = Depends(get_current_confirmed_user)):
-#     """  code  """
-#     return 'something'
+"""
+    Leave match.
+"""
+@app.put("/matches/{match_id}/leave/")
+async def leave_match(
+    match_id: int,
+    current_user: UserDb = Depends(get_current_user),
+    db: Database = Depends(get_db)
+):
+    remove_user_from_match(db, match_id=match_id, user_id=current_user.id)
+    return {"detail": "Successfully abandoned."}
