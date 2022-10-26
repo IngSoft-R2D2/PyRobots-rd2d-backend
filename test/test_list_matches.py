@@ -12,7 +12,6 @@ client = TestClient(app)
 
 access_token = ""
 token_type = ""
-wrong_token = "eyJGOiJIUzIiIsInR5cCIkpXVCJyJzdisdWNhcyIsImV46MTY2ODDc2OH6ksb20clr.sg05kd.y-1k4Ul9hYApOgRTRnkgXpSTsm7PuuEvVx8UbBTJfbp7E4SEXQU"
 
 def test_login_to_get_token():
     response = client.post(
@@ -35,7 +34,7 @@ check = {
                 'password': 'secret',
                 'is_finished': False,
                 'creator': 1,
-                'users': ['angelescch']},
+                'users_robots': {'angelescch':'R2D2'}},
     'match_2': {'id': 2,
                 'name': 'pool',
                 'min_players': 8,
@@ -45,7 +44,7 @@ check = {
                 'password': '',
                 'is_finished': False,
                 'creator': 2,
-                'users': ['keyword']},
+                'users_robots': {'keyword':'MEGATRON'}},
     'match_3': {'id': 3,
                 'name': 'NGBI',
                 'min_players': 3,
@@ -55,7 +54,7 @@ check = {
                 'password': 'AGSV87NG4',
                 'is_finished': False,
                 'creator': 2,
-                'users': ['keyword']},
+                'users_robots': {'keyword':'MEGATRON'}},
     'match_4': {'id': 4,
                 'name': 'KGN',
                 'min_players': 3,
@@ -65,17 +64,8 @@ check = {
                 'password': '',
                 'is_finished': False,
                 'creator': 1,
-                'users': ['angelescch']}
+                'users_robots': {'angelescch':'Robot3000'}}
 }
-
-
-def test_get_matches_unauthorized_wrong_token():
-    response = client.get(
-        "/matches/",
-        headers={"Authorization": token_type + " " + wrong_token}
-    )
-    assert response.status_code == status.HTTP_401_UNAUTHORIZED
-    assert response.json()["detail"] == "Could not validate credentials"
 
 
 def test_register_robot_no_header_authorization():

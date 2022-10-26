@@ -9,7 +9,7 @@ def define_entities(db):
         email = Required(str, unique=True)
         is_confirmed = Required(bool, default=False, sql_default='0')
         avatar = Optional(str)
-        robots = Set('Robot') 
+        robots = Set('Robot')
         matches = Set('Match', reverse='users')
         created_matches = Set('Match', reverse='creator')
 
@@ -22,7 +22,8 @@ def define_entities(db):
         number_of_rounds = Required(int)
         password = Optional(str)
         is_finished = Required(bool, default=False, sql_default='0')
-        users = Set(User, reverse='matches')
+        robots = Set('Robot', reverse='matches')
+        users = Set('User', reverse='matches')
         creator = Required(User, reverse='created_matches')
 
     class Robot(db.Entity):
@@ -35,6 +36,7 @@ def define_entities(db):
         matches_won = Required(int, default=0)
         matches_lost = Required(int, default=0)
         matches_drawed = Required(int, default=0)
+        matches = Set('Match', reverse='robots')
         composite_key(user, name)
 
 

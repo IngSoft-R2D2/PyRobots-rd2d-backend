@@ -52,6 +52,7 @@ class RobotRegOut(BaseModel):
 
 class NewMatchIn(BaseModel):
     name: str
+    robot_id: int
     max_players: Optional[int] = None
     min_players: Optional[int] = None
     number_of_games: int
@@ -236,6 +237,7 @@ async def create_match(
     match_add(db,
         user_id,
         match_to_cr.name,
+        match_to_cr.robot_id,
         match_to_cr.max_players,
         match_to_cr.min_players,
         match_to_cr.number_of_games,
