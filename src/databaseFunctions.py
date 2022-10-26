@@ -12,7 +12,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 @db_session
 def get_id_by_username(db: Database, username: str):
-    return db.User.get(username=username).id
+    return get_user_by_username(db,username).id
 
 @db_session
 def get_all_usernames(db: Database):
@@ -27,13 +27,19 @@ def get_user_by_username(db: Database, username: str):
     return db.User.get(username=username)
 
 @db_session
+def username_exists(db: Database, username: str):
+    return db.User.exists(username=username)
+
+@db_session
 def authenticate_user(db: Database, username: str, password: str):
     user = get_user_by_username(db, username)
-    if not user:
-        return False
-    if not pwd_context.verify(password, user.password):
-        return False
-    return user
+    if pwd_context.verify(password, user.password):
+        return True
+    return False
+
+@db_session
+def is_user_confirmed(db: Database, username: str):
+    return get_user_by_username(db,username).is_confirmed
 
 @db_session
 def upload_user(db: Database, 
@@ -90,10 +96,10 @@ def get_all_matches (db: Database):
     matches_list = (select(m for m in db.Match)[:])
     for m in matches_list:
         match_dict = m.to_dict()
-        users_robots_json = {}
-        for ur in select((r.user.username, r.name) for r in m.robots)[:]:
-            users_robots_json[str(ur[0])] = str(ur[1])
-        match_dict['users_robots'] = users_robots_json
+        users_list = []
+        for us in (select(ma.users for ma in db.Match if ma.id == m.id)):
+            users_list.append(us.username)
+        match_dict['users'] = users_list
         matches.append(match_dict)
     jsons = {}
     for p in matches:
@@ -108,7 +114,6 @@ def match_add(
         db: Database,
         creator_id_in: int,
         name_in: str,
-        robot_id_in: int,
         max_players_in: int,
         min_players_in: int,
         number_of_games_in: int,
@@ -122,7 +127,6 @@ def match_add(
                         min_players=min_players_in,
                         number_of_games=number_of_games_in,
                         number_of_rounds=number_of_rounds_in,
-                        robots = [db.Robot[robot_id_in]],
                         users = [db.User[creator_id_in]])
     else:
         db.Match(creator=db.User[creator_id_in],
@@ -132,7 +136,6 @@ def match_add(
                         number_of_games=number_of_games_in,
                         number_of_rounds=number_of_rounds_in,
                         password=password_in,
-                        robots = [db.Robot[robot_id_in]],
                         users = [db.User[creator_id_in]])
 
 @db_session
