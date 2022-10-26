@@ -306,9 +306,23 @@ async def list_user_robots(current_user: User = Depends(get_current_user), db: D
 """
 @app.put("/matches/{match_id}/leave/")
 async def leave_match(
-    match_id: int,
-    current_user: UserDb = Depends(get_current_user),
-    db: Database = Depends(get_db)
-):
-    remove_user_from_match(db, match_id=match_id, user_id=current_user.id)
+        match_id: int,
+        current_user: UserDb = Depends(get_current_user),
+        db: Database = Depends(get_db)
+    ):
+    if not match_exists(match_id=match_id):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Match not found."
+        )
+    if user_in_match():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found in the given match."
+        )
+    remove_user_with_robots_from_match(
+        db,
+        match_id=match_id,
+        user_id=current_user.id
+    )
     return {"detail": "Successfully abandoned."}
