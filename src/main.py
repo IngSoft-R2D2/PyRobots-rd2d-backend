@@ -1,13 +1,17 @@
+import os
 from datetime import datetime, timedelta
+from re import TEMPLATE
 from typing import Optional
 
 from fastapi import *
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
 from jose import JWTError, jwt
 from pydantic import BaseModel, EmailStr
 
 from databaseFunctions import *
 from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
 
 from entities import define_database
 
@@ -307,3 +311,30 @@ async def show_all_matches(current_user: User = Depends(get_current_user), db: D
 @app.get("/robots/")
 async def list_user_robots(current_user: User = Depends(get_current_user), db: Database = Depends(get_db)):
     return get_all_user_robots(db, current_user.username)
+
+
+"""
+send email
+"""
+
+load_dotenv('.env')
+conf = ConnectionConfig(
+    MAIL_FROM = os.getenv('MAIL_FROM'),
+    MAIL_PASSWORD = os.getenv('MAIL_PASSWORD'),
+    MAIL_PORT = 587,
+    MAIL_SERVER = 'smtp.gmail.com',
+    MAIL_FROM_NAME = 'Verification',
+    MAIL_TLS = True,
+    MAIL_SSL = False,
+    TEMPLATE_FOLDER = './templates'
+)
+
+async def send_email_async(email_to: EmailStr, body: dict):
+    message = MessageSchema(
+        subject = 'PyRobots: Account Verification',
+        recipient = email_to,
+        body = body,
+        subtype = 'html',
+    )
+    fm = FastMail(conf)
+    await fm.send_message(message, template_name='email.html')
