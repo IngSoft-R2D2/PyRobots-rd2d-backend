@@ -63,6 +63,8 @@ class NewMatchOut(BaseModel):
     match_id: int
     operation_result: str
 
+class JoinMatchOut(BaseModel):
+    operation_result: str
 
 class User(BaseModel):
     username: str
@@ -71,6 +73,9 @@ class User(BaseModel):
 
 class UserIn(User):
     password: str
+
+class UserDb(User):
+    id: int
 
 class Token(BaseModel):
     access_token: str
@@ -307,3 +312,42 @@ async def show_all_matches(current_user: User = Depends(get_current_user), db: D
 @app.get("/robots/")
 async def list_user_robots(current_user: User = Depends(get_current_user), db: Database = Depends(get_db)):
     return get_all_user_robots(db, current_user.username)
+
+
+"""
+    Join match.
+"""
+@app.put(
+    "/matches/join/{match_id}/robot/{robot_id}",
+    response_model = JoinMatchOut,
+    status_code = status.HTTP_200_OK
+)
+async def join_match(
+        match_id: int,
+        robot_id: int,
+        current_user: UserDb = Depends(get_current_user),
+        db: Database = Depends(get_db)
+    ):
+    if not match_exists(db=db, match_id=match_id):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Match not found."
+        )
+    if user_in_match(
+            db=db,
+            user_id=current_user.id,
+            match_id=match_id
+        ):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User is in match already."
+        )
+    add_user_with_robot_to_match(
+        db=db,
+        match_id=match_id,
+        user_id=current_user.id,
+        robot_id=robot_id
+    )
+    return JoinMatchOut(
+            operation_result="Successfully joined."
+        )
