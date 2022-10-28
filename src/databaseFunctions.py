@@ -161,7 +161,16 @@ def user_in_match(
         user_id:int,
         match_id: int
     ):
-    return db.User[user_id] in db.Match.users
+    return db.User[user_id] in db.Match[match_id].users
+
+@db_session
+def user_is_creator_of_the_match(
+        db:Database,
+        user_id:int,
+        match_id: int
+    ):
+    return db.User[user_id]==db.Match[match_id].creator
+
 
 @db_session
 def remove_user_with_robots_from_match(
