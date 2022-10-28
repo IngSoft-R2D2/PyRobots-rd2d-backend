@@ -362,10 +362,10 @@ async def verify_user(
         validation: str,
         db: Database = Depends(get_db)
     ):
-    validation_exception = Code403Exception(
-        status_code=status.HTTP_403_FORBIDDEN,
+    validation_exception = HTTPException(
+        status_code=status.HTTP_302_FOUND,
         detail="Could not validate account",
-        headers={"WWW-Authenticate": "Bearer"},
+        headers = {"Location": "http://localhost:3000/"}
     )
     try:
         payload = jwt.decode(validation, SECRET_KEY, algorithms=[ALGORITHM])
@@ -380,11 +380,3 @@ async def verify_user(
     if token_data.id != id_in_db:
         raise validation_exception
     return "http://localhost:3000/home"
-
-class Code403Exception(StarletteHTTPException):
-    pass
-
-
-@app.exception_handler(Code403Exception)
-async def custom_403_handler(request: Request, exc: Code403Exception):
-    return RedirectResponse("http://localhost:3000/home")
