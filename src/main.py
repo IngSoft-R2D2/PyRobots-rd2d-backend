@@ -1,6 +1,5 @@
 import os
 from datetime import datetime, timedelta
-from re import TEMPLATE
 from typing import Optional
 
 from fastapi import *
@@ -13,6 +12,9 @@ from databaseFunctions import *
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from jinja2 import Environment, select_autoescape, PackageLoader
+
+from fastapi.responses import RedirectResponse
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from entities import define_database
 
@@ -83,6 +85,7 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     username: Optional[str] = None
+    id: Optional[int] = None
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
@@ -347,3 +350,41 @@ async def show_all_matches(current_user: User = Depends(get_current_user), db: D
 @app.get("/robots/")
 async def list_user_robots(current_user: User = Depends(get_current_user), db: Database = Depends(get_db)):
     return get_all_user_robots(db, current_user.username)
+
+
+"""
+    Verify code
+"""
+@app.get("/user/", response_class=RedirectResponse,
+         response_description="Account verified successfully"
+        )
+async def verify_user(
+        validation: str,
+        db: Database = Depends(get_db)
+    ):
+    validation_exception = Code403Exception(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="Could not validate account",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(validation, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get('sub')
+        id: int = payload.get('id')
+        if username is None or id is None:
+            raise validation_exception
+        token_data = TokenData(username=username, id=id)
+    except JWTError:
+        raise validation_exception
+    id_in_db = get_id_by_username(db, token_data.username)
+    if token_data.id != id_in_db:
+        raise validation_exception
+    return "http://localhost:3000/home"
+
+class Code403Exception(StarletteHTTPException):
+    pass
+
+
+@app.exception_handler(Code403Exception)
+async def custom_403_handler(request: Request, exc: Code403Exception):
+    return RedirectResponse("http://localhost:3000/home")
