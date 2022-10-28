@@ -149,3 +149,7 @@ def get_all_user_robots(db, username):
         key = str(r.id)
         json[key]=r.name
     return json
+
+@db_session
+def confirm_user(db: Database, id: int):
+    db.User[id].is_confirmed = True

@@ -379,4 +379,5 @@ async def verify_user(
     id_in_db = get_id_by_username(db, token_data.username)
     if token_data.id != id_in_db:
         raise validation_exception
+    confirm_user(db, id_in_db)
     return "http://localhost:3000/home"
