@@ -152,6 +152,10 @@ def get_all_user_robots(db, username):
     return json
 
 @db_session
+def confirm_user(db: Database, id: int):
+    db.User[id].is_confirmed = True
+
+@db_session
 def match_exists(db:Database, match_id: int):
     return db.Match.exists(id=match_id)
 
