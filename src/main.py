@@ -1,11 +1,11 @@
 import os
 from datetime import datetime, timedelta
-from re import TEMPLATE
 from typing import Optional
 
 from fastapi import *
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
+from email_validator import validate_email
 from jose import JWTError, jwt
 from pydantic import BaseModel, EmailStr
 
@@ -180,6 +180,13 @@ async def create_user(new_user: UserIn, db: Database = Depends(get_db)):
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, 
             detail="Invalid password format"
         )
+    try:
+        existing_email = validate_email(new_user.email)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, 
+            detail="Email address does not exist"
+        ) from None
     upload_user(db, new_user.username, new_user.password,
                 new_user.email, new_user.avatar)
     id = get_id_by_username(db, new_user.username)
