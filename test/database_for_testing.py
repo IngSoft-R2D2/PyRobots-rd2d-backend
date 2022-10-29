@@ -130,6 +130,31 @@ def define_database_for_testing():
                 number_of_rounds=1010,
                 robots = [db.Robot[4]],
                 users = [db.User.get(username="keyword")])
+        db.Match(creator=db.User.get(username="keyword"),
+                name="full_match",
+                max_players=2,
+                min_players=2,
+                number_of_games=125,
+                number_of_rounds=1010,
+                robots = [db.Robot[4],db.Robot[1]],
+                users = [
+                    db.User.get(username="keyword"),
+                    db.User.get(username="angelescch")
+                ]
+            )
+        db.Match(creator=db.User.get(username="keyword"),
+                name="finished_match",
+                max_players=10,
+                min_players=8,
+                number_of_games=125,
+                number_of_rounds=1010,
+                robots = [db.Robot[4],db.Robot[1]],
+                users = [
+                    db.User.get(username="keyword"),
+                    db.User.get(username="angelescch")
+                ],
+                is_finished=True
+            )
         
     return db
 
