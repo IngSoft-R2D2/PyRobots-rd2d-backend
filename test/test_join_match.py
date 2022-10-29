@@ -28,52 +28,45 @@ def test_login_to_get_token():
     token_type = response.json()['token_type']
 
 
-successfull_case_match_id = 5
+successfull_case_match_id = 10
 error_case_not_valid_match_id = 50
-error_case_user_not_in_match = 6
-error_case_user_creator_of_the_match = 7
-error_case_user_not_authenticated = 8
+error_case_user_in_match = 9
+error_case_user_not_authenticated = 11
+
+successfull_case_robot_id = 2
+error_case_robot_id = 4
 
 
-def test_leave_match_success():
+def test_join_match_success():
     response = client.put(
-        "/matches/leave/"+str(successfull_case_match_id),
+        "/matches/join/"+str(successfull_case_match_id)+"robot"+str(successfull_case_robot_id),
         headers={"Authorization": token_type + " " + access_token}
     )
     assert response.status_code == status.HTTP_200_OK
-    assert response.json()['operation_result'] == "Successfully abandoned."
+    assert response.json()['operation_result'] == "Successfully joined."
 
 
-def test_leave_match_not_valid_match():
+def test_join_match_not_valid_match():
     response = client.put(
-        "/matches/leave/"+str(error_case_not_valid_match_id),
+        "/matches/join/"+str(error_case_not_valid_match_id)+"robot"+str(successfull_case_robot_id),
         headers={"Authorization": token_type + " " + access_token}
     )
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json() == {"detail":"Match not found."}
 
 
-def test_leave_match_user_not_in_match():
+def test_join_match_user_in_match_already():
     response = client.put(
-        "/matches/leave/"+str(error_case_user_not_in_match),
-        headers={"Authorization": token_type + " " + access_token}
-    )
-    assert response.status_code == status.HTTP_404_NOT_FOUND
-    assert response.json() == {"detail":"User not found in the given match."}
-
-
-def test_leave_match_user_creator_of_the_match():
-    response = client.put(
-        "/matches/leave/"+str(error_case_user_creator_of_the_match),
+        "/matches/join/"+str(error_case_user_in_match)+"robot"+str(successfull_case_robot_id),
         headers={"Authorization": token_type + " " + access_token}
     )
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response.json() == {"detail":"Creator of the match is not allowed to leave."}
+    assert response.json() == {"detail":"User is in match already."}
 
 
-def test_leave_match_not_authenticated_user():
+def test_join_match_not_authenticated_user():
     response = client.put(
-        "/matches/leave/"+str(error_case_user_not_authenticated),
+        "/matches/join/"+str(error_case_user_not_authenticated)+"robot"+str(error_case_robot_id),
         headers={"Authorization": token_type + " " + wrong_token}
     )
     assert response.status_code == status.HTTP_401_UNAUTHORIZED

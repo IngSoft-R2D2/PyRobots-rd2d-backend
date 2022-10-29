@@ -91,7 +91,7 @@ def define_database_for_testing():
                 robots = [db.Robot[1]],
                 users = [db.User.get(username="angelescch")])
         db.Match(creator=db.User.get(username="keyword"),
-                name="pool3",
+                name="pool4",
                 max_players=10,
                 min_players=8,
                 number_of_games=125,
@@ -102,6 +102,34 @@ def define_database_for_testing():
                     db.User.get(username="angelescch")
                 ]
             )
+        db.Match(creator=db.User.get(username="keyword"),
+                name="fake_match_for_join_1",
+                max_players=10,
+                min_players=8,
+                number_of_games=125,
+                number_of_rounds=1010,
+                robots = [db.Robot[4],db.Robot[1]],
+                users = [
+                    db.User.get(username="keyword"),
+                    db.User.get(username="angelescch")
+                ]
+            )
+        db.Match(creator=db.User.get(username="keyword"),
+                name="fake_match_for_join_2",
+                max_players=10,
+                min_players=8,
+                number_of_games=125,
+                number_of_rounds=1010,
+                robots = [db.Robot[4]],
+                users = [db.User.get(username="keyword")])
+        db.Match(creator=db.User.get(username="keyword"),
+                name="fake_match_for_join_3",
+                max_players=10,
+                min_players=8,
+                number_of_games=125,
+                number_of_rounds=1010,
+                robots = [db.Robot[4]],
+                users = [db.User.get(username="keyword")])
         
     return db
 
