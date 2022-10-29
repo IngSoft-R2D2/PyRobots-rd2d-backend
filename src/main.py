@@ -5,6 +5,7 @@ from typing import Optional
 from fastapi import *
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
+from email_validator import validate_email
 from jose import JWTError, jwt
 from pydantic import BaseModel, EmailStr
 
@@ -14,7 +15,6 @@ from dotenv import load_dotenv
 from jinja2 import Environment, select_autoescape, PackageLoader
 
 from fastapi.responses import RedirectResponse
-from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from entities import define_database
 
@@ -70,6 +70,8 @@ class NewMatchOut(BaseModel):
     match_id: int
     operation_result: str
 
+class JoinMatchOut(BaseModel):
+    operation_result: str
 
 class User(BaseModel):
     username: str
@@ -78,6 +80,12 @@ class User(BaseModel):
 
 class UserIn(User):
     password: str
+
+class UserDb(User):
+    id: int
+
+class LeaveMatchOut(BaseModel):
+    operation_result: str
 
 class Token(BaseModel):
     access_token: str
@@ -183,6 +191,13 @@ async def create_user(new_user: UserIn, db: Database = Depends(get_db)):
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, 
             detail="Invalid password format"
         )
+    try:
+        existing_email = validate_email(new_user.email)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, 
+            detail="Email address does not exist"
+        ) from None
     upload_user(db, new_user.username, new_user.password,
                 new_user.email, new_user.avatar)
     id = get_id_by_username(db, new_user.username)
@@ -381,3 +396,87 @@ async def verify_user(
         raise validation_exception
     confirm_user(db, id_in_db)
     return "http://localhost:3000/home"
+
+"""
+    Join match.
+"""
+@app.put(
+    "/matches/join/{match_id}robot{robot_id}",
+    response_model = JoinMatchOut,
+    status_code = status.HTTP_200_OK
+)
+async def join_match(
+        match_id: int,
+        robot_id: int,
+        current_user: UserDb = Depends(get_current_user),
+        db: Database = Depends(get_db)
+    ):
+    if not match_exists(db=db, match_id=match_id):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Match not found."
+        )
+    if user_in_match(
+            db=db,
+            user_id=current_user.id,
+            match_id=match_id
+        ):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User is in match already."
+        )
+    add_user_with_robot_to_match(
+        db=db,
+        match_id=match_id,
+        user_id=current_user.id,
+        robot_id=robot_id
+    )
+    return JoinMatchOut(
+            operation_result="Successfully joined."
+        )
+
+
+"""
+    Leave match.
+"""
+@app.put(
+    "/matches/leave/{match_id}",
+    response_model = LeaveMatchOut,
+    status_code = status.HTTP_200_OK
+)
+async def leave_match(
+        match_id: int,
+        current_user: UserDb = Depends(get_current_user),
+        db: Database = Depends(get_db)
+    ):
+    if not match_exists(db=db, match_id=match_id):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Match not found."
+        )
+    if not user_in_match(
+            db=db,
+            user_id=current_user.id,
+            match_id=match_id
+        ):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found in the given match."
+        )
+    if user_is_creator_of_the_match(
+            db=db,
+            user_id=current_user.id,
+            match_id=match_id
+        ):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Creator of the match is not allowed to leave."
+        )
+    remove_user_with_robots_from_match(
+        db,
+        match_id=match_id,
+        user_id=current_user.id
+    )
+    return LeaveMatchOut(
+            operation_result="Successfully abandoned."
+        )

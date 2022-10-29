@@ -2,6 +2,7 @@ from pony.orm import *
 from typing import Optional
 from passlib.context import CryptContext
 
+
 """
         Function definitions:
 """
@@ -153,3 +154,44 @@ def get_all_user_robots(db, username):
 @db_session
 def confirm_user(db: Database, id: int):
     db.User[id].is_confirmed = True
+
+@db_session
+def match_exists(db:Database, match_id: int):
+    return db.Match.exists(id=match_id)
+
+@db_session
+def user_in_match(
+        db:Database,
+        user_id:int,
+        match_id: int
+    ):
+    return db.User[user_id] in db.Match[match_id].users
+
+@db_session
+def add_user_with_robot_to_match(
+        db:Database,
+        match_id: int,
+        user_id:int,
+        robot_id:int
+    ):
+    db.Match[match_id].users.add(db.User[user_id])
+    db.Match[match_id].robots.add(db.Robot[robot_id])
+
+@db_session
+def user_is_creator_of_the_match(
+        db:Database,
+        user_id:int,
+        match_id: int
+    ):
+    return db.User[user_id]==db.Match[match_id].creator
+
+@db_session
+def remove_user_with_robots_from_match(
+    db: Database,
+    match_id: int,
+    user_id: int
+    ):
+    for robot in select(r for r in db.Robot if r.user==db.User[user_id]):
+        db.Match[match_id].robots.remove(robot)
+    db.Match[match_id].users.remove(db.User[user_id])
+    
