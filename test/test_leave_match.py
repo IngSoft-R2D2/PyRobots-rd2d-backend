@@ -28,16 +28,16 @@ def test_login_to_get_token():
     token_type = response.json()['token_type']
 
 
-successfull_case_match_id = "5"
-error_case_not_valid_match_id = "9"
-error_case_user_not_in_match = "6"
-error_case_user_creator_of_the_match = "7"
-error_case_user_not_authenticated = "8"
+successfull_case_match_id = 5
+error_case_not_valid_match_id = 9
+error_case_user_not_in_match = 6
+error_case_user_creator_of_the_match = 7
+error_case_user_not_authenticated = 8
 
 
 def test_leave_match_success():
     response = client.put(
-        "/matches/leave/"+successfull_case_match_id,
+        "/matches/leave/"+str(successfull_case_match_id),
         headers={"Authorization": token_type + " " + access_token}
     )
     assert response.status_code == status.HTTP_200_OK
@@ -46,7 +46,7 @@ def test_leave_match_success():
 
 def test_leave_match_not_valid_match():
     response = client.put(
-        "/matches/leave/"+error_case_not_valid_match_id,
+        "/matches/leave/"+str(error_case_not_valid_match_id),
         headers={"Authorization": token_type + " " + access_token}
     )
     assert response.status_code == status.HTTP_404_NOT_FOUND
@@ -55,7 +55,7 @@ def test_leave_match_not_valid_match():
 
 def test_leave_match_user_not_in_match():
     response = client.put(
-        "/matches/leave/"+error_case_user_not_in_match,
+        "/matches/leave/"+str(error_case_user_not_in_match),
         headers={"Authorization": token_type + " " + access_token}
     )
     assert response.status_code == status.HTTP_404_NOT_FOUND
@@ -64,7 +64,7 @@ def test_leave_match_user_not_in_match():
 
 def test_leave_match_user_creator_of_the_match():
     response = client.put(
-        "/matches/leave/"+error_case_user_creator_of_the_match,
+        "/matches/leave/"+str(error_case_user_creator_of_the_match),
         headers={"Authorization": token_type + " " + access_token}
     )
     assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -73,7 +73,7 @@ def test_leave_match_user_creator_of_the_match():
 
 def test_leave_match_not_authenticated_user():
     response = client.put(
-        "/matches/leave/"+error_case_user_not_authenticated,
+        "/matches/leave/"+str(error_case_user_not_authenticated),
         headers={"Authorization": token_type + " " + wrong_token}
     )
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
