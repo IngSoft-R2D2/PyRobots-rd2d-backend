@@ -61,6 +61,48 @@ def define_database_for_testing():
                 number_of_rounds=10,
                 robots = [db.Robot[3]],
                 users = [db.User.get(username="angelescch")])
+        db.Match(creator=db.User.get(username="keyword"),
+                name="pool2",
+                max_players=10,
+                min_players=8,
+                number_of_games=125,
+                number_of_rounds=1010,
+                robots = [db.Robot[4],db.Robot[1]],
+                users = [
+                    db.User.get(username="keyword"),
+                    db.User.get(username="angelescch")
+                ]
+            )
+        db.Match(creator=db.User.get(username="keyword"),
+                name="pool3",
+                max_players=10,
+                min_players=8,
+                number_of_games=125,
+                number_of_rounds=1010,
+                robots = [db.Robot[4]],
+                users = [db.User.get(username="keyword")])
+        db.Match(creator=db.User.get(username="angelescch"),
+                name="epic2",
+                max_players=4,
+                min_players=2,
+                number_of_games=100,
+                number_of_rounds=10000,
+                password="secret",
+                robots = [db.Robot[1]],
+                users = [db.User.get(username="angelescch")])
+        db.Match(creator=db.User.get(username="keyword"),
+                name="pool3",
+                max_players=10,
+                min_players=8,
+                number_of_games=125,
+                number_of_rounds=1010,
+                robots = [db.Robot[4],db.Robot[1]],
+                users = [
+                    db.User.get(username="keyword"),
+                    db.User.get(username="angelescch")
+                ]
+            )
+        
     return db
 
 def get_db_override():

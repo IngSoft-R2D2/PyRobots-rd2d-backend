@@ -1,13 +1,18 @@
+import os
 from datetime import datetime, timedelta
 from typing import Optional
 
 from fastapi import *
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
+from email_validator import validate_email
 from jose import JWTError, jwt
 from pydantic import BaseModel, EmailStr
 
 from databaseFunctions import *
 from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
+from jinja2 import Environment, select_autoescape, PackageLoader
 
 from entities import define_database
 
@@ -77,6 +82,9 @@ class UserIn(User):
 class UserDb(User):
     id: int
 
+class LeaveMatchOut(BaseModel):
+    operation_result: str
+
 class Token(BaseModel):
     access_token: str
     token_type: str
@@ -124,11 +132,44 @@ async def root():
 
 
 """
+send email
+"""
+load_dotenv('.env')
+conf = ConnectionConfig(
+    MAIL_USERNAME = os.getenv('MAIL_USERNAME'),
+    MAIL_FROM = os.getenv('MAIL_FROM'),
+    MAIL_PASSWORD = os.getenv('MAIL_PASSWORD'),
+    MAIL_PORT = os.getenv('MAIL_PORT'),
+    MAIL_SERVER = os.getenv('MAIL_SERVER'),
+    MAIL_FROM_NAME = os.getenv('MAIL_FROM_NAME'),
+    MAIL_STARTTLS = True,
+    MAIL_SSL_TLS = False,
+    TEMPLATE_FOLDER = './templates'
+)
+
+env = Environment(
+    loader=PackageLoader('templates', ''),
+    autoescape=select_autoescape(['html', 'xml'])
+)
+
+template = env.get_template(f'email.html')
+
+async def send_email_async(email_to: EmailStr, username: str, code: str):
+    message = MessageSchema(
+        subject = 'PyRobots: Validation Code',
+        recipients = [email_to],
+        body = template.render(username = username, code = code),
+        subtype = 'html',
+    )
+    fm = FastMail(conf)
+    await fm.send_message(message, template_name='email.html')
+
+
+"""
     Create user.
 """
 @app.post(
     "/users/",
-    response_model=UserOut,
     status_code=status.HTTP_201_CREATED
 )
 async def create_user(new_user: UserIn, db: Database = Depends(get_db)):
@@ -147,11 +188,20 @@ async def create_user(new_user: UserIn, db: Database = Depends(get_db)):
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, 
             detail="Invalid password format"
         )
+    try:
+        existing_email = validate_email(new_user.email)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, 
+            detail="Email address does not exist"
+        ) from None
     upload_user(db, new_user.username, new_user.password,
                 new_user.email, new_user.avatar)
-    return UserOut(
-        id = get_id_by_username(db, new_user.username),
-        operation_result="Succesfully created!")
+    id = get_id_by_username(db, new_user.username)
+    code = create_access_token({'sub': new_user.username, 'id': id})
+    await send_email_async(new_user.email, new_user.username, code)
+    return {'operation_result':
+                'Verification code successfully sent to your email'}
 
 def valid_password(password: str) -> bool:
     l, u, d = 0, 0, 0
@@ -314,6 +364,7 @@ async def list_user_robots(current_user: User = Depends(get_current_user), db: D
     return get_all_user_robots(db, current_user.username)
 
 
+
 """
     Join match.
 """
@@ -350,4 +401,50 @@ async def join_match(
     )
     return JoinMatchOut(
             operation_result="Successfully joined."
+        )
+
+
+"""
+    Leave match.
+"""
+@app.put(
+    "/matches/leave/{match_id}",
+    response_model = LeaveMatchOut,
+    status_code = status.HTTP_200_OK
+)
+async def leave_match(
+        match_id: int,
+        current_user: UserDb = Depends(get_current_user),
+        db: Database = Depends(get_db)
+    ):
+    if not match_exists(db=db, match_id=match_id):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Match not found."
+        )
+    if not user_in_match(
+            db=db,
+            user_id=current_user.id,
+            match_id=match_id
+        ):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found in the given match."
+        )
+    if user_is_creator_of_the_match(
+            db=db,
+            user_id=current_user.id,
+            match_id=match_id
+        ):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Creator of the match is not allowed to leave."
+        )
+    remove_user_with_robots_from_match(
+        db,
+        match_id=match_id,
+        user_id=current_user.id
+    )
+    return LeaveMatchOut(
+            operation_result="Successfully abandoned."
         )
