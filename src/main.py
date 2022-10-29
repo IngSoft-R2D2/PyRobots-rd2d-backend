@@ -352,11 +352,12 @@ def valid_match_config(match: NewMatchIn):
 
 
 """
-    List matches.
+    List joinable matches.
 """
 @app.get("/matches/")
-async def show_all_matches(current_user: User = Depends(get_current_user), db: Database = Depends(get_db)):
-    return get_all_matches(db)
+async def show_joinable_matches(current_user: User = Depends(get_current_user),
+                                  db: Database = Depends(get_db)):
+    return get_joinable_matches(db, current_user.id)
 
 
 """
