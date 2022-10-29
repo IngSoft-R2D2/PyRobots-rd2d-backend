@@ -318,7 +318,7 @@ async def list_user_robots(current_user: User = Depends(get_current_user), db: D
     Join match.
 """
 @app.put(
-    "/matches/join/{match_id}/robot/{robot_id}",
+    "/matches/join/{match_id}robot{robot_id}",
     response_model = JoinMatchOut,
     status_code = status.HTTP_200_OK
 )
