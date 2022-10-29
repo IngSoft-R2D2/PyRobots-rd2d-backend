@@ -1,7 +1,7 @@
 from pony.orm import *
 from typing import Optional
 from passlib.context import CryptContext
-from sqlalchemy import true
+
 
 """
         Function definitions:

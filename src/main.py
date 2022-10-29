@@ -319,7 +319,7 @@ async def list_user_robots(current_user: User = Depends(get_current_user), db: D
     Leave match.
 """
 @app.put(
-    "/matches/leave/{match_id}/",
+    "/matches/leave/{match_id}",
     response_model = LeaveMatchOut,
     status_code = status.HTTP_200_OK
 )
