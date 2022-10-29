@@ -77,6 +77,12 @@ class User(BaseModel):
 class UserIn(User):
     password: str
 
+class UserDb(User):
+    id: int
+
+class LeaveMatchOut(BaseModel):
+    operation_result: str
+
 class Token(BaseModel):
     access_token: str
     token_type: str
@@ -354,3 +360,50 @@ async def show_all_matches(current_user: User = Depends(get_current_user), db: D
 @app.get("/robots/")
 async def list_user_robots(current_user: User = Depends(get_current_user), db: Database = Depends(get_db)):
     return get_all_user_robots(db, current_user.username)
+
+
+"""
+    Leave match.
+"""
+@app.put(
+    "/matches/leave/{match_id}",
+    response_model = LeaveMatchOut,
+    status_code = status.HTTP_200_OK
+)
+async def leave_match(
+        match_id: int,
+        current_user: UserDb = Depends(get_current_user),
+        db: Database = Depends(get_db)
+    ):
+    if not match_exists(db=db, match_id=match_id):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Match not found."
+        )
+    if not user_in_match(
+            db=db,
+            user_id=current_user.id,
+            match_id=match_id
+        ):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found in the given match."
+        )
+    if user_is_creator_of_the_match(
+            db=db,
+            user_id=current_user.id,
+            match_id=match_id
+        ):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Creator of the match is not allowed to leave."
+        )
+    remove_user_with_robots_from_match(
+        db,
+        match_id=match_id,
+        user_id=current_user.id
+    )
+    return LeaveMatchOut(
+            operation_result="Successfully abandoned."
+        )
+
