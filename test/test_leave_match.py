@@ -29,7 +29,7 @@ def test_login_to_get_token():
 
 
 successfull_case_match_id = 5
-error_case_not_valid_match_id = 9
+error_case_not_valid_match_id = 50
 error_case_user_not_in_match = 6
 error_case_user_creator_of_the_match = 7
 error_case_user_not_authenticated = 8
