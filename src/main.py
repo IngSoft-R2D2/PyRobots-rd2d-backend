@@ -396,7 +396,7 @@ async def verify_user(
     if token_data.id != id_in_db:
         raise validation_exception
     confirm_user(db, id_in_db)
-    return "http://localhost:3000/home"
+    return "http://localhost:3000/users/verified"
 
 """
     Join match.
