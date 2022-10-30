@@ -110,14 +110,14 @@ check = {
 
 
 def test_register_robot_no_header_authorization():
-    response = client.get("/matches/")
+    response = client.get("/matches/join")
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
     assert response.json()["detail"] == "Not authenticated"
 
 
 def test_get_matches():
     response = client.get(
-        "/matches/",
+        "/matches/join",
         headers={"Authorization": token_type+" "+access_token}
         )
     assert response.status_code == status.HTTP_200_OK

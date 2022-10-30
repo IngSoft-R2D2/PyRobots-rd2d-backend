@@ -110,6 +110,27 @@ def get_joinable_matches (db: Database, current_user_id: int):
         jsons[key]=p
     return jsons
 
+# Lists unfinished matches created by the current user 
+# that have at least the minimum ammmount of players
+@db_session
+def get_matches_to_begin(db: Database, current_user_id: int):
+    matches = []
+    matches_list = (select(m for m in db.Match if m.is_finished == False and 
+                           (m.creator).id == current_user_id and
+                            count(m.users)>=m.min_players)[:])
+    for m in matches_list:
+        match_dict = m.to_dict()
+        users_robots_json = {}
+        for ur in select((r.user.username, r.name) for r in m.robots)[:]:
+            users_robots_json[str(ur[0])] = str(ur[1])
+        match_dict['users_robots'] = users_robots_json
+        matches.append(match_dict)
+    jsons = {}
+    for p in matches:
+        key = 'match_'+str(p['id'])
+        jsons[key]=p
+    return jsons
+
 # Creates a new Match and returns it's id.
 # creator_id_in must be a valid Id in Users.
 @db_session
