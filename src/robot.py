@@ -1,6 +1,4 @@
 from __future__ import annotations
-from asyncio.windows_events import INFINITE
-from turtle import distance
 from constants import *
 import random
 import math
@@ -16,7 +14,7 @@ class Robot:
     __scann_result: float
 
     def __init__(self):
-        self.__position = (500,500)#(random.randint(FIRST_COORD,LAST_COORD), random.randint(FIRST_COORD,LAST_COORD))
+        self.__position = (random.randint(FIRST_COORD,LAST_COORD), random.randint(FIRST_COORD,LAST_COORD))
         self.__wall_collision = False
 
     def get_direction(self):
@@ -120,8 +118,22 @@ class Robot:
                     theta = 90
                 elif (y2 < y1):
                     theta = 270
-            if (self.__scanner_direction-self.__resolution <= theta <= self.__scanner_direction+self.__resolution):
+            if (self.__scanner_direction-self.__resolution < 0):
+                right = 360 + self.__scanner_direction-self.__resolution
+                if not (self.__scanner_direction+self.__resolution< theta <right):
+                    d =  math.sqrt((x2-x1)**2+(y2-y1)**2)
+                    if d < dist:
+                        dist = d
+            if (self.__scanner_direction+self.__resolution > 359):
+                left = 360 - self.__scanner_direction+self.__resolution
+                if not (left < theta <self.__scanner_direction-self.__resolution):
+                    d =  math.sqrt((x2-x1)**2+(y2-y1)**2)
+                    if d < dist:
+                        dist = d
+            elif (self.__scanner_direction-self.__resolution <= theta <= self.__scanner_direction+self.__resolution):
                 d =  math.sqrt((x2-x1)**2+(y2-y1)**2)
                 if d < dist:
                     dist = d
         self.__scann_result = dist
+
+
