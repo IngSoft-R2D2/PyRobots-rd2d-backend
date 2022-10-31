@@ -1,4 +1,6 @@
 # Max velocity (in meters) per round
-VELOCITY = 5
+VELOCITY = 50
+
+# Board dimensions
 FIRST_COORD = 0
 LAST_COORD = 999
