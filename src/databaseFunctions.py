@@ -90,13 +90,14 @@ def upload_robot(
                 behaviour_file=behaviour_file_in)
 
 # Lists unfinished matches not created by the current user 
-# that aren't full
+# that aren't full, where the user isn't already joined.
 @db_session
 def get_joinable_matches (db: Database, current_user_id: int):
     matches = []
     matches_list = (select(m for m in db.Match if m.is_finished == False and 
                            (m.creator).id != current_user_id and
-                            count(m.users)<m.max_players)[:])
+                            count(m.users)<m.max_players and
+                            current_user_id not in m.users.id)[:])
     for m in matches_list:
         match_dict = m.to_dict()
         users_robots_json = {}
