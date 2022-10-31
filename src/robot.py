@@ -50,8 +50,8 @@ class Robot:
         else:
             alpha = 360 -self.get_direction()
         sen = math.sin(math.radians(alpha))
-        x = math.sqrt(((VELOCITY*self.get_velocity())/100)**2/(1+sen**2))
-        y = sen * x
+        y = sen * ((VELOCITY*self.get_velocity())/100)
+        x = math.sqrt(((VELOCITY*self.get_velocity())/100)**2-y**2)
         if (self.get_direction() == 0):
             x_axis = self.__position[0]+(VELOCITY*self.get_velocity())/100
             y_axis = self.__position[1]
