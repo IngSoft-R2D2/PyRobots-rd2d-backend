@@ -93,12 +93,33 @@ class Robot:
         self.__position = (x_axis,y_axis)
 
     def __scann(self, list_of_robots: list[Robot]):
+        (x1,y1) = self.get_position()
         dist = float('inf')
         for robot in list_of_robots:
-            (x1,y1) = self.get_position()
             (x2,y2) = robot.get_position()
-            m = (y2-y1)/(x2-x1)
-            theta = math.degrees(math.atan(m))
+            if (x2-x1) != 0:
+                m = (y2 - y1)/(x2-x1)
+                if m > 0:
+                    if x2 >= x1 and y2 >= y1:
+                        theta = math.degrees(math.atan(m))
+                    if x2 <= x1 and y2 <= y1:
+                        theta = math.degrees(math.atan(m))+180
+                if m < 0:
+                    if x2 <= x1 and y2 >= y1:
+                        theta = math.degrees(math.atan(m))+180
+                    if x2 >= x1 and y2 <= y1:
+                        theta = math.degrees(math.atan(m))+360
+                if m == 0:
+                    if x2 > x1:
+                        theta = 0
+                    if x2 < x1:
+                        theta = 180
+                print(m)
+            else:
+                if (y2 > y1):
+                    theta = 90
+                elif (y2 < y1):
+                    theta = 270
             if (self.__scanner_direction-self.__resolution <= theta <= self.__scanner_direction+self.__resolution):
                 d =  math.sqrt((x2-x1)**2+(y2-y1)**2)
                 if d < dist:
