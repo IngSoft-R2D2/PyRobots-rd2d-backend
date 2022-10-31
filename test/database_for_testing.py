@@ -155,6 +155,20 @@ def define_database_for_testing():
                 ],
                 is_finished=True
             )
+        db.Match(creator=db.User.get(username="angelescch"),
+                name="match_that_can_begin",
+                max_players=10,
+                min_players=2,
+                number_of_games=125,
+                number_of_rounds=1010,
+                robots = [db.Robot[4],db.Robot[1]],
+                users = [
+                    db.User.get(username="keyword"),
+                    db.User.get(username="angelescch")
+                ],
+                is_finished=False
+            )
+        
         
     return db
 
