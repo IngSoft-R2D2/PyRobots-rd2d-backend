@@ -1,6 +1,8 @@
+from __future__ import annotations
 from constants import *
 import random
 import math
+import time
 
 class Robot:
     direction: int
@@ -8,9 +10,12 @@ class Robot:
     __position: tuple[float,float]
     __damage: int
     __wall_collision: bool
+    __cannon_degree: int
+    __cannon_distance: float
+    __reload_time_counter: float
 
     def __init__(self):
-        self.__position = (500,500)#(random.randint(FIRST_COORD,LAST_COORD), random.randint(FIRST_COORD,LAST_COORD))
+        self.__position = (random.randint(FIRST_COORD,LAST_COORD), random.randint(FIRST_COORD,LAST_COORD))
         self.__wall_collision = False
 
     def get_direction(self):
@@ -24,6 +29,14 @@ class Robot:
 
     def get_damage(self):
         return self.__damage
+    
+    def is_cannon_ready(self):
+        elapsed_time_since_start_reload = time.perf_counter() - self.__reload_time_counter
+        return elapsed_time_since_start_reload >= RELOAD_TIME
+
+    def cannon(self, degree: int, distance: float):
+        self.__cannon_degree = degree
+        self.__cannon_distance = distance
 
     def drive(self, direction: int, velocity: int):
         self.direction = direction
@@ -78,3 +91,11 @@ class Robot:
             x_axis = 999
             __wall_collision = True
         self.__position = (x_axis,y_axis)
+
+    def __attack(self, robot: Robot):
+        target = self.scanned()
+        if (self.is_cannon_ready()):
+            # attack !!!
+            pass
+        # Start reload time after the shoot.
+        self.__reload_time_counter = time.perf_counter()
