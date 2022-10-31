@@ -16,3 +16,4 @@ MISSILE_DAMAGE_5_METERS = 10
 
 # Cannon reload time.
 RELOAD_TIME = 1
+
