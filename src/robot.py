@@ -120,13 +120,13 @@ class Robot:
                     theta = 270
             if (self.__scanner_direction-self.__resolution < 0):
                 right = 360 + self.__scanner_direction-self.__resolution
-                if not (self.__scanner_direction+self.__resolution< theta <right):
+                if not (self.__scanner_direction+self.__resolution < theta < right):
                     d =  math.sqrt((x2-x1)**2+(y2-y1)**2)
                     if d < dist:
                         dist = d
-            if (self.__scanner_direction+self.__resolution > 359):
+            elif (self.__scanner_direction+self.__resolution > 359):
                 left = 360 - self.__scanner_direction+self.__resolution
-                if not (left < theta <self.__scanner_direction-self.__resolution):
+                if not (left < theta < self.__scanner_direction-self.__resolution):
                     d =  math.sqrt((x2-x1)**2+(y2-y1)**2)
                     if d < dist:
                         dist = d
@@ -135,5 +135,3 @@ class Robot:
                 if d < dist:
                     dist = d
         self.__scann_result = dist
-
-
