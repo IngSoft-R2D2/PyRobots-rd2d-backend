@@ -77,25 +77,13 @@ class Robot:
         sen = math.sin(math.radians(alpha))
         y = sen * ((VELOCITY*self.get_velocity())/100)
         x = math.sqrt(((VELOCITY*self.get_velocity())/100)**2-y**2)
-        if (self.get_direction() == 0):
-            x_axis = self.__position[0]+(VELOCITY*self.get_velocity())/100
-            y_axis = self.__position[1]
-        elif (self.get_direction() == 90):
-            x_axis = self.__position[0]
-            y_axis = self.__position[1]+(VELOCITY*self.get_velocity())/100
-        elif (self.get_direction() == 180):
-            x_axis = self.__position[0]-(VELOCITY*self.get_velocity())/100
-            y_axis = self.__position[1]
-        elif (self.get_direction() == 270):
-            x_axis = self.__position[0]
-            y_axis = self.__position[1]-(VELOCITY*self.get_velocity())/100
-        elif (self.get_direction() > 0 and self.get_direction() < 90):
+        if (self.get_direction() >= 0 and self.get_direction() <= 90):
             x_axis = self.__position[0]+x
             y_axis = self.__position[1]+y
-        elif (self.get_direction() > 90 and self.get_direction() < 180):
+        elif (self.get_direction() > 90 and self.get_direction() <= 180):
             x_axis = self.__position[0]-x
             y_axis = self.__position[1]+y
-        elif (self.get_direction() > 180 and self.get_direction() < 270):
+        elif (self.get_direction() > 180 and self.get_direction() <= 270):
             x_axis = self.__position[0]-x
             y_axis = self.__position[1]-y
         else:
