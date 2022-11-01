@@ -10,12 +10,6 @@ app.dependency_overrides[get_db] = get_db_override
 
 client = TestClient(app)
 
-fk_list_robots = {
-    "1": "R2D2",
-    "2": "MEGATRON",
-    "3": "Robot3000"
-}
-
 access_token = ""
 token_type = ""
 
@@ -30,11 +24,29 @@ def test_login_to_get_token():
     access_token = response.json()['access_token']
     token_type = response.json()['token_type']
 
+check = {
+        'match_14': {'creator': 1,
+                      'id': 14,
+                      'is_finished': False,
+                      'max_players': 10,
+                      'min_players': 2,
+                      'name': 'match_that_can_begin',
+                      'number_of_games': 125,
+                      'number_of_rounds': 1010,
+                      'password': '',
+                      'users_robots': {'angelescch': 'R2D2', 'keyword': 'MEGATRON'}}
+}
 
-def test_list_user_robots():
+def test_register_robot_no_header_authorization():
+    response = client.get("/matches/begin")
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    assert response.json()["detail"] == "Not authenticated"
+
+
+def test_get_matches():
     response = client.get(
-        "/robots/",
+        "/matches/begin",
         headers={"Authorization": token_type+" "+access_token}
         )
     assert response.status_code == status.HTTP_200_OK
-    assert response.json() == fk_list_robots
+    assert response.json() == check

@@ -33,7 +33,8 @@ fk_new_match = {
     "min_players": 2,
     "number_of_games": 100,
     "number_of_rounds": 10000,
-    "password": "secret"
+    "password": "secret",
+    "robot_id": 3
 }
 fk_new_match_no_password = {
     "name": "partidasincontraseña",
@@ -41,27 +42,31 @@ fk_new_match_no_password = {
     "min_players": 2,
     "number_of_games": 100,
     "number_of_rounds": 10000,
+    "robot_id": 3
 }
 fk_new_match_no_min_players = {
     "name": "partida",
     "max_players": 2,
     "number_of_games": 125,
     "number_of_rounds": 1010,
-    "password": "secret"
+    "password": "secret",
+    "robot_id": 3
 }
 fk_new_match_no_max_players = {
     "name": "partidas",
     "min_players": 4,
     "number_of_games": 5,
     "number_of_rounds": 10,
-    "password": "secret"
+    "password": "secret",
+    "robot_id": 2
 }
 fk_new_match_no_max_players_wrong_rel = {
     "name": "partidas",
     "min_players": 10,
     "number_of_games": 5,
     "number_of_rounds": 10,
-    "password": "secret"
+    "password": "secret",
+    "robot_id": 2
 }
 fk_new_match_many_max_players = {
     "name": "partidallena",
@@ -69,7 +74,8 @@ fk_new_match_many_max_players = {
     "min_players": 2,
     "number_of_games": 100,
     "number_of_rounds": 10000,
-    "password": "secret"
+    "password": "secret",
+    "robot_id": 2
 }
 fk_new_match_few_max_players = {
     "name": "partidallena",
@@ -77,7 +83,8 @@ fk_new_match_few_max_players = {
     "min_players": 2,
     "number_of_games": 100,
     "number_of_rounds": 10000,
-    "password": "secret"
+    "password": "secret",
+    "robot_id": 1
 }
 
 fk_new_match_few_min_players = {
@@ -86,7 +93,8 @@ fk_new_match_few_min_players = {
     "min_players": 0,
     "number_of_games": 100,
     "number_of_rounds": 10000,
-    "password": "secret"
+    "password": "secret",
+    "robot_id": 1
 }
 fk_new_match_many_games = {
     "name": "otrapartida",
@@ -94,7 +102,8 @@ fk_new_match_many_games = {
     "min_players": 2,
     "number_of_games": 500,
     "number_of_rounds": 10000,
-    "password": "secret"
+    "password": "secret",
+    "robot_id": 1
 }
 fk_new_match_many_rounds = {
     "name": "otrapartida",
@@ -102,7 +111,8 @@ fk_new_match_many_rounds = {
     "min_players": 2,
     "number_of_games": 100,
     "number_of_rounds": 10001,
-    "password": "secret"
+    "password": "secret",
+    "robot_id": 1
 }
 fk_new_match_few_games = {
     "name": "otrapartida",
@@ -110,7 +120,8 @@ fk_new_match_few_games = {
     "min_players": 2,
     "number_of_games": 0,
     "number_of_rounds": 5000,
-    "password": "secret"
+    "password": "secret",
+    "robot_id": 2
 }
 fk_new_match_few_rounds = {
     "name": "otrapartida",
@@ -118,7 +129,8 @@ fk_new_match_few_rounds = {
     "min_players": 2,
     "number_of_games": 50,
     "number_of_rounds": 0,
-    "password": "secret"
+    "password": "secret",
+    "robot_id": 3
 }
 fk_new_match_wrong_maxmin_relac = {
     "name": "otrapartida",
@@ -126,7 +138,8 @@ fk_new_match_wrong_maxmin_relac = {
     "min_players": 10,
     "number_of_games": 50,
     "number_of_rounds": 0,
-    "password": "secret"
+    "password": "secret",
+    "robot_id": 1
 }
 
 def test_create_match_unauthorized_wrong_token():

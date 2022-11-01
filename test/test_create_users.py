@@ -14,7 +14,7 @@ def test_create_user_existing_username():
     response = client.post("/users/",
     json={
         "username": "angelescch",
-        "email": "mati@example.com",
+        "email": "angeles@gmail.com",
         "avatar": "salu",
         "password": "26Hi0284"
         })
@@ -26,23 +26,33 @@ def test_create_user():
     response1 = client.post("/users/",
     json={
         "username": "lucas",
-        "email": "lucas@example.com",
+        "email": "lucas@gmail.com",
         "avatar": "salu",
         "password": "26Hi0284"
         })
     assert response1.status_code == status.HTTP_201_CREATED
-    assert response1.json()['operation_result'] == "Succesfully created!"
+    assert response1.json()['operation_result'] == "Verification code successfully sent to your email"
 
 
 def test_create_user_no_avatar():
     response1 = client.post("/users/",
     json={
         "username": "pedro",
-        "email": "pedro@example.com",
+        "email": "pedro@gmail.com",
         "password": "2B6y0284e"
         })
     assert response1.status_code == status.HTTP_201_CREATED
-    assert response1.json()['operation_result'] == "Succesfully created!"
+    assert response1.json()['operation_result'] == "Verification code successfully sent to your email"
+
+def test_create_user_no_existing_email():
+    response1 = client.post("/users/",
+    json={
+        "username": "fandjfaof",
+        "email": "fandjfaof@example.com",
+        "password": "78q34uhbdfvAe"
+        })
+    assert response1.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert response1.json()['detail'] == "Email address does not exist"
 
 
 def test_create_user_existing_email():
@@ -74,7 +84,7 @@ def test_create_user_invalid_password_less_than_8():
     response1 = client.post("/users/",
     json={
         "username": "pass",
-        "email": "pass@example.com",
+        "email": "pass@gmail.com",
         "avatar": "string",
         "password": "1234"
         })
@@ -85,7 +95,7 @@ def test_create_user_invalid_password_no_uppercase():
     response1 = client.post("/users/",
     json={
         "username": "pass",
-        "email": "pass@example.com",
+        "email": "pass@gmail.com",
         "avatar": "string",
         "password": "hola1234"
         })
@@ -96,7 +106,7 @@ def test_create_user_invalid_password_no_lowercase():
     response1 = client.post("/users/",
     json={
         "username": "pass",
-        "email": "pass@example.com",
+        "email": "pass@gmail.com",
         "avatar": "string",
         "password": "HOLA1234"
         })
@@ -108,7 +118,7 @@ def test_create_user_invalid_password_no_digit():
     response1 = client.post("/users/",
     json={
         "username": "pass",
-        "email": "pass@example.com",
+        "email": "pass@gmail.com",
         "avatar": "string",
         "password": "hOLAHola"
         })
