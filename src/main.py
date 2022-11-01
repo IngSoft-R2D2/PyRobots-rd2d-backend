@@ -22,7 +22,6 @@ from fastapi.responses import RedirectResponse
 
 from entities import define_database
 from simulation import *
-from round import Round
 
 app = FastAPI()
 
@@ -89,11 +88,6 @@ class RobotInGame(BaseModel):
 	name: str
 	health: int
 	position: Tuple[int,int]
-
-class Round(BaseModel):
-	robots: list[RobotInGame]
-	scans: dict[str,int]
-	shoots: dict[str,str]
 
 class SimulationIn(BaseModel):
     robots_id: List[int] = None
@@ -525,7 +519,7 @@ async def start_simulation(
         current_user: UserDb = Depends(get_current_user),
         db: Database = Depends(get_db)
     ):
-    rounds: list[Round] = generate_simulation(
+    rounds: list[dict] = generate_simulation(
         de=db,
         user_id=current_user.id,
         number_of_round=simulation.number_of_rounds,

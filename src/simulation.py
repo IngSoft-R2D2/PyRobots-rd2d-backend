@@ -9,5 +9,5 @@ def generate_simulation(
 	user_id: int,
 	number_of_round: int,
 	robots_id: List[int]
-) -> list[Round]:
+) -> list[dict]:
 	pass

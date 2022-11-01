@@ -1,2 +1,2 @@
-class Round:
+def Round():
     pass
