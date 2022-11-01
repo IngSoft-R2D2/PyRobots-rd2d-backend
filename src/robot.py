@@ -92,15 +92,16 @@ class Robot:
         if x_axis < 0:
             x_axis = 0
             __wall_collision = True
+        elif x_axis > 999:
+            x_axis = 999
+            __wall_collision = True
         if y_axis < 0:
             y_axis = 0
             __wall_collision = True
-        if y_axis > 999:
+        elif y_axis > 999:
             y_axis = 999
             __wall_collision = True
-        if x_axis > 999:
-            x_axis = 999
-            __wall_collision = True
+
         self.__position = (x_axis,y_axis)
 
     def __scann(self, list_of_robots: list[Robot]):
