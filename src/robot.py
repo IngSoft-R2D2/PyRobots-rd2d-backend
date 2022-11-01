@@ -18,6 +18,7 @@ class Robot:
     __scanner_direction: int
     __resolution: int
     __scann_result: float
+    __missile: tuple[float, float]
 
 
     def __init__(self):
@@ -170,6 +171,8 @@ class Robot:
                 self.__cannon_degree,
                 self.__cannon_distance
             )
+            # Generate missile
+            self.__missile = explosion_position
             robots_damage_5_meters: list[Robot] = get_robots_in_range(
                 robots,
                 explosion_position,
@@ -193,6 +196,9 @@ class Robot:
                 robot.__inflict_damage(MISSILE_DAMAGE_40_METERS)
             # start reload time
             self.__reload_time_counter = time.perf_counter()
+    
+    def __get_missile(self):
+        return self.__missile
 
 
 
