@@ -18,6 +18,8 @@ from fastapi.responses import RedirectResponse
 
 from entities import define_database
 
+import aiofiles
+
 app = FastAPI()
 
 def get_db():
@@ -51,7 +53,7 @@ class UserOut(BaseModel):
 class RobotRegIn(BaseModel):
     name: str
     avatar: Optional[str] = None
-    behaviour_file: str
+    behaviour_file: UploadFile
 
 class RobotRegOut(BaseModel):
     id: int
@@ -271,11 +273,15 @@ async def register_robot(
             status_code=status.HTTP_409_CONFLICT,
             detail="This user has a robot with this name already."
         )
+    f = open("robots_code/"+robot_to_cr.behaviour_file.filename, "x")
+    async with aiofiles.open(robot_to_cr.behaviour_file.filename, 'wb') as out_file:
+        content = await robot_to_cr.behaviour_file.read()  # async read
+        await out_file.write(content)
     upload_robot(db,
         user_id,
         robot_to_cr.name,
         robot_to_cr.avatar,
-        robot_to_cr.behaviour_file
+        robot_to_cr.behaviour_file.filename
     )
     new_robot_id = get_robot_by_user_and_name(db,
         user_id,
