@@ -700,14 +700,14 @@ async def start_simulation(
         current_user: User = Depends(get_current_user),
         db: Database = Depends(get_db)
     ):
-    robots_for_game = generate_robots_for_game(
-        db=db,
-        robots_id=simulation.robots_id
-    )
-    rounds: dict = game(
-        number_of_rounds=simulation.number_of_rounds,
-        robots=robots_for_game
-    )
+    # robots_for_game = generate_robots_for_game(
+    #     db=db,
+    #     robots_id=simulation.robots_id
+    # )
+    # rounds: dict = game(
+    #     number_of_rounds=simulation.number_of_rounds,
+    #     robots=robots_for_game
+    # )
     return SimulationOut(
         simulation_json=fk_simulation,
         operation_result="Simulation successfully runned."
