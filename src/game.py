@@ -1,3 +1,4 @@
+from pony.orm import *
 from robot import *
 
 def round(robots: list[Robot]) -> dict:
@@ -37,7 +38,7 @@ def round(robots: list[Robot]) -> dict:
 
     return round_json
 
-def game(number_of_rounds: int, robots: list[Robot]) -> dict[dict]:
+def game(number_of_rounds: int, robots: list[Robot]) -> dict:
     game_json = {}
     for round_index in range(number_of_rounds):
         key = "round_" + str(round_index)
