@@ -224,12 +224,14 @@ def remove_user_with_robots_from_match(
 @db_session
 def generate_robots_for_game(
         db: Database,
+        user_id: int,
         robots_id: list[int]
     ) -> list[Robot]:
     robots: list[Robot] = []
     for index, r_id in robots_id:
         r = db.Robot[r_id]
-        exec(open(r.filename).read())
+        filename_path = f"robots/user_id_{user_id}/"+r.filename
+        exec(open(filename_path).read())
         without_suffix = r.behaviour_file.removesuffix('.py')
         words_list_lowercase = without_suffix.split('_')
         words_list_capitalize = [word.capitalize() for word in words_list_lowercase]
@@ -238,5 +240,6 @@ def generate_robots_for_game(
         to_execute = "bot = " + class_name + "(\"" + robot_name + "\")"
         bot: Robot
         exec(to_execute, globals())
+        bot.initialize()
         robots.append(bot)
     return robots
