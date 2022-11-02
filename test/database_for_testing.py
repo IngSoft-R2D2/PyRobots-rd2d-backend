@@ -26,7 +26,7 @@ def define_database_for_testing():
         db.Robot(user = db.User.get(username="angelescch"), name="Robot3000",
                  avatar="image.jpg", behaviour_file="Robot3000.py")
         db.Robot(user=db.User.get(username="keyword"), name="MEGATRON",
-                 avatar="64base_coded_img", behaviour_file="64base_coded_file")
+                 avatar="64base_coded_img", behaviour_file="rob.py")
         db.Match(creator=db.User.get(username="angelescch"),
                 name="epic",
                 max_players=4,
