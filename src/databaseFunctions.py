@@ -228,18 +228,21 @@ def generate_robots_for_game(
         robots_id: list[int]
     ) -> list[Robot]:
     robots: list[Robot] = []
-    for index, r_id in robots_id:
+    index = 1
+    for r_id in robots_id:
         r = db.Robot[r_id]
-        filename_path = f"robots/user_id_{user_id}/"+r.filename
-        exec(open(filename_path).read())
+        filename_path = f"robots/user_id_{user_id}/"+r.behaviour_file
+        exec(open(filename_path).read(), globals())
         without_suffix = r.behaviour_file.removesuffix('.py')
         words_list_lowercase = without_suffix.split('_')
         words_list_capitalize = [word.capitalize() for word in words_list_lowercase]
         class_name = ''.join(words_list_capitalize)
         robot_name = f"R{index}_{r.name}"
         to_execute = "bot = " + class_name + "(\"" + robot_name + "\")"
-        bot: Robot
-        exec(to_execute, globals())
+        ldict = {}
+        exec(to_execute, globals(),ldict)
+        bot = ldict['bot']
         bot.initialize()
         robots.append(bot)
+        index += 1
     return robots
