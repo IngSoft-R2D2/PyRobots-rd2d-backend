@@ -266,8 +266,11 @@ async def login_for_access_token(
     status_code=status.HTTP_201_CREATED
 )
 async def register_robot(
-    name: str, avatar: Optional[str] = None, behaviour_file: UploadFile = File(...),
-    current_user: User = Depends(get_current_user), db: Database = Depends(get_db)):
+        name: str, 
+        avatar: Optional[str] = None, 
+        behaviour_file: UploadFile = File(...),
+        current_user: User = Depends(get_current_user), db: Database = Depends(get_db)
+    ):
     user_id = get_id_by_username(db, current_user.username)
     existing_robot_name = HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -298,7 +301,7 @@ async def register_robot(
     )
     return RobotRegOut(
         id=new_robot_id,
-        operation_result="Successfully created." 
+        operation_result="Successfully created."
     )
 
 
