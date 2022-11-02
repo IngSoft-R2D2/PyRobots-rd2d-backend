@@ -12,6 +12,7 @@ from pydantic import BaseModel, EmailStr
 from typing import (
     Deque, Dict, FrozenSet, List, Optional, Sequence, Set, Tuple, Union
 )
+import json
 
 from databaseFunctions import *
 from fastapi.middleware.cors import CORSMiddleware
@@ -514,7 +515,7 @@ async def leave_match(
         )
 
 
-fk_simulation = simulation = """{
+fk_simulation =  {
                                     'round_1': {
                                             'R1': {
                                                 'damage':0,
@@ -684,7 +685,7 @@ fk_simulation = simulation = """{
                                             'position': (832,712)
                                         }
                                         },
-                                    }"""
+                                    }
 
 
 """
@@ -692,7 +693,7 @@ fk_simulation = simulation = """{
 """
 @app.post(
     "/simulation/",
-    response_model = SimulationIn,
+    response_model = SimulationOut,
     status_code = status.HTTP_201_CREATED,
 )
 async def start_simulation(
