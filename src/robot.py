@@ -32,8 +32,6 @@ class Robot:
         self.__cannon_distance = round(random.uniform(0,CANNON_RANGE), 2)
         self.__reload_time_counter = RELOAD_TIME
         self.__wall_collision = False
-        self.__robot_collision = False
-        self.__robots_number_collision = 0
 
     def get_direction(self):
         return self.direction
@@ -46,7 +44,7 @@ class Robot:
 
     def get_damage(self):
         return self.__damage
-    
+
     def is_cannon_ready(self):
         elapsed_time_since_start_reload = time.perf_counter() - self.__reload_time_counter
         return elapsed_time_since_start_reload >= RELOAD_TIME
@@ -205,7 +203,7 @@ class Robot:
             self.__reload_time_counter = time.perf_counter()
 
     def __check_collision(self, robots: list[Robot]):
-        robots_collision = get_robots_in_range(list[Robot], self.get_position(), (0,5))
+        robots_collision = get_robots_in_range(robots, self.get_position(), (0,5))
         for _ in range(len(robots_collision)):
             self.__inflict_collision_damage()
         if self.__wall_collision:

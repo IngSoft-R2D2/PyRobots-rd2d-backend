@@ -27,9 +27,9 @@ def round(robots: list[Robot]) -> dict:
         bot._Robot__move()
 
     for bot in robots:
-        robots_to_scann = robots[:]
-        robots_to_scann.remove(bot)
-        bot._Robot__check_collision()
+        robots_collision = robots[:]
+        robots_collision.remove(bot)
+        bot._Robot__check_collision(robots_collision)
 
     for bot in robots:
         round_json[bot_name]['damage'] = bot._Robot__get_damage()
