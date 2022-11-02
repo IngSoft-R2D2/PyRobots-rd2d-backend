@@ -18,6 +18,9 @@ from fastapi.responses import RedirectResponse
 
 from entities import define_database
 
+import shutil
+import os.path
+
 app = FastAPI()
 
 def get_db():
@@ -51,7 +54,7 @@ class UserOut(BaseModel):
 class RobotRegIn(BaseModel):
     name: str
     avatar: Optional[str] = None
-    behaviour_file: str
+    behaviour_file: UploadFile
 
 class RobotRegOut(BaseModel):
     id: int
@@ -263,27 +266,42 @@ async def login_for_access_token(
     status_code=status.HTTP_201_CREATED
 )
 async def register_robot(
-    robot_to_cr: RobotRegIn,
-    current_user: User = Depends(get_current_user), db: Database = Depends(get_db)):
+        name: str, 
+        avatar: Optional[str] = None, 
+        behaviour_file: UploadFile = File(...),
+        current_user: User = Depends(get_current_user), db: Database = Depends(get_db)
+    ):
     user_id = get_id_by_username(db, current_user.username)
-    if not valid_robot_for_user(db, user_id, robot_to_cr.name):
-        raise HTTPException(
+    existing_robot_name = HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="This user has a robot with this name already."
         )
+    existing_robot_filename = HTTPException(
+        status_code=status.HTTP_409_CONFLICT,
+        detail="This user has a robot with this filename already."
+    )
+    if not valid_robot_for_user(db, user_id, name):
+        raise existing_robot_name
+    newpath = f"robots/user_id_{user_id}/"
+    if not os.path.exists(newpath):
+        os.makedirs(newpath)
+    if os.path.exists(f'{newpath}{behaviour_file.filename}'):
+        raise existing_robot_filename
+    with open(f'{newpath}{behaviour_file.filename}', 'wb') as out_file:
+        shutil.copyfileobj(behaviour_file.file, out_file)
     upload_robot(db,
         user_id,
-        robot_to_cr.name,
-        robot_to_cr.avatar,
-        robot_to_cr.behaviour_file
+        name,
+        avatar,
+        behaviour_file.filename
     )
     new_robot_id = get_robot_by_user_and_name(db,
         user_id,
-        robot_to_cr.name
+        name
     )
     return RobotRegOut(
         id=new_robot_id,
-        operation_result="Successfully created." 
+        operation_result="Successfully created."
     )
 
 

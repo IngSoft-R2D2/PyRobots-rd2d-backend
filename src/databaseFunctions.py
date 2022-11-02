@@ -76,18 +76,18 @@ def upload_robot(
         user_id_in: int,
         name_in: str,
         avatar_in: Optional[str],
-        behaviour_file_in:str
+        behaviour_file_path: str
     ):
     
     if avatar_in is None:
         db.Robot(user=db.User[user_id_in],
                     name=name_in,
-                    behaviour_file=behaviour_file_in)
+                    behaviour_file=behaviour_file_path)
     else:
         db.Robot(user=db.User[user_id_in],
                 name=name_in,
                 avatar=avatar_in,
-                behaviour_file=behaviour_file_in)
+                behaviour_file=behaviour_file_path)
 
 # Lists unfinished matches not created by the current user 
 # that aren't full, where the user isn't already joined.
