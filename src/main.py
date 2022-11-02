@@ -21,7 +21,7 @@ from jinja2 import Environment, select_autoescape, PackageLoader
 from fastapi.responses import RedirectResponse
 
 from entities import define_database
-from simulation import *
+from game import game
 
 import shutil
 import os.path
@@ -51,20 +51,10 @@ app.add_middleware(
     allow_headers= ["*"],
 )
 
-class UserOut(BaseModel):
-    id: int
-    operation_result: str
-
-
-class RobotRegIn(BaseModel):
-    name: str
-    avatar: Optional[str] = None
-    behaviour_file: UploadFile
 
 class RobotRegOut(BaseModel):
     id: int
     operation_result: str
-
 
 class NewMatchIn(BaseModel):
     name: str
@@ -87,14 +77,13 @@ class User(BaseModel):
     email: EmailStr
     avatar: Optional[str] = None
 
-class RobotInGame(BaseModel):
-	name: str
-	health: int
-	position: Tuple[int,int]
-
 class SimulationIn(BaseModel):
-    robots_id: List[int] = None
+    robots_id: List[int]
     number_of_rounds: int
+
+class SimulationOut(BaseModel):
+    simulation_json: Dict
+    operation_result: str
 
 class UserIn(User):
     password: str
@@ -112,6 +101,7 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     username: Optional[str] = None
     id: Optional[int] = None
+
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
@@ -525,22 +515,27 @@ async def leave_match(
 
 
 """
-	Get simulation.
+    Get simulation.
 """
 @app.post(
     "/simulation/",
     response_model = SimulationIn,
-    status_code = status.HTTP_201_CREATED
+    status_code = status.HTTP_201_CREATED,
 )
 async def start_simulation(
         simulation: SimulationIn,
-        current_user: UserDb = Depends(get_current_user),
+        current_user: User = Depends(get_current_user),
         db: Database = Depends(get_db)
     ):
-    rounds: list[dict] = generate_simulation(
-        de=db,
-        user_id=current_user.id,
-        number_of_round=simulation.number_of_rounds,
+    robots_for_game = generate_robots_for_game(
+        db=db,
         robots_id=simulation.robots_id
     )
-    return "simulacion"
+    rounds: dict = game(
+        number_of_rounds=simulation.number_of_rounds,
+        robots=robots_for_game
+    )
+    return SimulationOut(
+        simulation_json=rounds,
+        operation_result="Simulation successfully runned."
+    )

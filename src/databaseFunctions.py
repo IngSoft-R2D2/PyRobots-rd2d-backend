@@ -1,6 +1,7 @@
 from pony.orm import *
 from typing import Optional
 from passlib.context import CryptContext
+from robot import Robot
 
 
 """
@@ -212,11 +213,30 @@ def user_is_creator_of_the_match(
 
 @db_session
 def remove_user_with_robots_from_match(
-    db: Database,
-    match_id: int,
-    user_id: int
+        db: Database,
+        match_id: int,
+        user_id: int
     ):
     for robot in select(r for r in db.Robot if r.user==db.User[user_id]):
         db.Match[match_id].robots.remove(robot)
     db.Match[match_id].users.remove(db.User[user_id])
-    
+
+@db_session
+def generate_robots_for_game(
+        db: Database,
+        robots_id: list[int]
+    ) -> list[Robot]:
+    robots: list[Robot] = []
+    for index, r_id in robots_id:
+        r = db.Robot[r_id]
+        exec(open(r.filename).read())
+        without_suffix = r.behaviour_file.removesuffix('.py')
+        words_list_lowercase = without_suffix.split('_')
+        words_list_capitalize = [word.capitalize() for word in words_list_lowercase]
+        class_name = ''.join(words_list_capitalize)
+        robot_name = f"R{index}_{r.name}"
+        to_execute = "bot = " + class_name + "(\"" + robot_name + "\")"
+        bot: Robot
+        exec(to_execute, globals())
+        robots.append(bot)
+    return robots
