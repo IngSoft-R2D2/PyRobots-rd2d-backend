@@ -118,14 +118,14 @@ class Robot:
             if (x2-x1) != 0:
                 m = (y2 - y1)/(x2-x1)
                 if m > 0:
-                    if x2 >= x1 and y2 >= y1:
+                    if x2 > x1 and y2 >= y1:
                         theta = math.degrees(math.atan(m))
-                    elif x2 <= x1 and y2 <= y1:
+                    elif x2 < x1 and y2 <= y1:
                         theta = math.degrees(math.atan(m))+180
                 elif m < 0:
-                    if x2 <= x1 and y2 >= y1:
+                    if x2 < x1 and y2 >= y1:
                         theta = math.degrees(math.atan(m))+180
-                    elif x2 >= x1 and y2 <= y1:
+                    elif x2 > x1 and y2 <= y1:
                         theta = math.degrees(math.atan(m))+360
                 else:
                     if x2 > x1:
