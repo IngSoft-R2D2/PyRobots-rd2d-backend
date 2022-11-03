@@ -97,16 +97,16 @@ class Robot:
             y_axis = self.__position[1]-y
         if x_axis < 0:
             x_axis = 0
-            __wall_collision = True
+            self.__wall_collision = True
         elif x_axis > 999:
             x_axis = 999
-            __wall_collision = True
+            self.__wall_collision = True
         if y_axis < 0:
             y_axis = 0
-            __wall_collision = True
+            self.__wall_collision = True
         elif y_axis > 999:
             y_axis = 999
-            __wall_collision = True
+            self.__wall_collision = True
 
         self.__position = (x_axis,y_axis)
 
@@ -120,17 +120,17 @@ class Robot:
                 if m > 0:
                     if x2 >= x1 and y2 >= y1:
                         theta = math.degrees(math.atan(m))
-                    if x2 <= x1 and y2 <= y1:
+                    elif x2 <= x1 and y2 <= y1:
                         theta = math.degrees(math.atan(m))+180
-                if m < 0:
+                elif m < 0:
                     if x2 <= x1 and y2 >= y1:
                         theta = math.degrees(math.atan(m))+180
-                    if x2 >= x1 and y2 <= y1:
+                    elif x2 >= x1 and y2 <= y1:
                         theta = math.degrees(math.atan(m))+360
-                if m == 0:
+                else:
                     if x2 > x1:
                         theta = 0
-                    if x2 < x1:
+                    elif x2 < x1:
                         theta = 180
                 print(m)
             else:
@@ -138,6 +138,9 @@ class Robot:
                     theta = 90
                 elif (y2 < y1):
                     theta = 270
+                else:
+                    dist = 0
+                    break
             if (self.__scanner_direction-self.__resolution < 0):
                 right = 360 + self.__scanner_direction-self.__resolution
                 if not (self.__scanner_direction+self.__resolution < theta < right):
