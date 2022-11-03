@@ -224,8 +224,8 @@ def remove_user_with_robots_from_match(
 @db_session
 def generate_robots_for_game(
         db: Database,
-        robots_id: list[int]
-    ) -> list[Robot]:
+        robots_id: "list[int]"
+    ) -> "list[Robot]":
     robots: list[Robot] = []
     for index, r_id in robots_id:
         r = db.Robot[r_id]
