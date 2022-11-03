@@ -212,6 +212,9 @@ class Robot:
     def __get_missile(self):
         return self.__missile
 
+    def __set_damage(self, damage):
+        self.__damage = damage
+
 
 
 

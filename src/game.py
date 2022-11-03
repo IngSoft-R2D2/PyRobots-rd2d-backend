@@ -21,6 +21,7 @@ def round(robots: list[Robot]) -> dict:
 
     for bot in robots:
         missile = bot._Robot__get_missile()
+        bot_name = bot._Robot__get_name()
         round_json[bot_name]['missile'] = missile
 
     for bot in robots:
@@ -32,14 +33,17 @@ def round(robots: list[Robot]) -> dict:
         bot._Robot__check_collision(robots_collision)
 
     for bot in robots:
-        round_json[bot_name]['damage'] = bot._Robot__get_damage()
-        if bot._Robot__get_damage() == 100:
+        bot_name = bot._Robot__get_name()
+        round_json[bot_name]['damage'] = bot.get_damage()
+        if bot.get_damage() == 100:
             robots.remove(bot)
 
     return round_json
 
 def game(number_of_rounds: int, robots: list[Robot]) -> dict:
     game_json = {}
+    for bot in robots:
+        bot._Robot__set_damage(0)
     for round_index in range(number_of_rounds):
         key = "round_" + str(round_index)
         game_json[key] = round(robots)

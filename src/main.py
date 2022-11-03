@@ -519,7 +519,7 @@ async def leave_match(
 """
 @app.post(
     "/simulation/",
-    response_model = SimulationIn,
+    response_model = SimulationOut,
     status_code = status.HTTP_201_CREATED,
 )
 async def start_simulation(
