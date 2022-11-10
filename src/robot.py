@@ -34,7 +34,7 @@ class Robot:
         self.__wall_collision = False
         self.__scanner_direction = random.randint(0,359)
         self.__resolution = 0
-        self.__scann_result = self.__scann(self.__scanner_direction, self.__resolution)
+        self.__scann_result = float('inf')
 
     def get_direction(self):
         return self.__direction

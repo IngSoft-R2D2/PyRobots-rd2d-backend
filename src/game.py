@@ -1,7 +1,7 @@
 from pony.orm import *
 from robot import *
 
-def round(robots: list[Robot]) -> dict:
+def round(robots: "list[Robot]") -> dict:
     round_json = {}
     for bot in robots:
         bot.respond()
@@ -40,7 +40,7 @@ def round(robots: list[Robot]) -> dict:
 
     return round_json
 
-def game(number_of_rounds: int, robots: list[Robot]) -> dict:
+def game(number_of_rounds: int, robots: "list[Robot]") -> dict:
     game_json = {}
     for bot in robots:
         bot._Robot__set_damage(0)

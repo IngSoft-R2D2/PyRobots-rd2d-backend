@@ -225,8 +225,8 @@ def remove_user_with_robots_from_match(
 def generate_robots_for_game(
         db: Database,
         user_id: int,
-        robots_id: list[int]
-    ) -> list[Robot]:
+        robots_id: "list[int]"
+    ) -> "list[Robot]":
     robots: list[Robot] = []
     index = 1
     for r_id in robots_id:

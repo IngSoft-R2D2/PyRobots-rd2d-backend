@@ -527,6 +527,16 @@ async def start_simulation(
         current_user: UserDb = Depends(get_current_user),
         db: Database = Depends(get_db)
     ):
+    if not (2 <= len(simulation.robots_id) <= 4):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid number of robots"
+        )
+    if not (1 <= simulation.number_of_rounds <= 10000):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid number of rounds"
+        )
     robots_for_game = generate_robots_for_game(
         db,
         current_user.id,
