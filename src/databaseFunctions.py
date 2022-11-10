@@ -242,7 +242,6 @@ def generate_robots_for_game(
         ldict = {}
         exec(to_execute, globals(),ldict)
         bot = ldict['bot']
-        bot.initialize()
         robots.append(bot)
         index += 1
     return robots
