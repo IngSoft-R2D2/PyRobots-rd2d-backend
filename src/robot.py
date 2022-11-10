@@ -5,10 +5,9 @@ import math
 import time
 
 
-
 class Robot:
-    direction: int
-    velocity: int
+    __direction: int
+    __velocity: int
     __name: str
     __position: tuple[float,float]
     __damage: int
@@ -21,32 +20,32 @@ class Robot:
     __scann_result: float
     __missile: tuple[float, float]
 
-
     def __init__(self, name: str):
         self.__name = name
-        self.direction = random.randint(0,359)
-        self.velocity = random.randint(1,VELOCITY)
+        self.__direction = random.randint(0,359)
+        self.__velocity = random.randint(1,VELOCITY)
         self.__position = (random.randint(FIRST_COORD,LAST_COORD), random.randint(FIRST_COORD,LAST_COORD))
         self.__damage = 0
         self.__cannon_degree = random.randint(0,359)
         self.__cannon_distance = round(random.uniform(0,CANNON_RANGE), 2)
         self.__reload_time_counter = RELOAD_TIME
         self.__wall_collision = False
-        self.__robot_collision = False
-        self.__robots_number_collision = 0
+        self.__scanner_direction = random.randint(0,359)
+        self.__resolution = 0
+        self.__scann_result = float('inf')
 
     def get_direction(self):
-        return self.direction
+        return self.__direction
 
     def get_velocity(self):
-        return self.velocity
+        return self.__velocity
 
     def get_position(self):
         return self.__position
 
     def get_damage(self):
         return self.__damage
-    
+
     def is_cannon_ready(self):
         elapsed_time_since_start_reload = time.perf_counter() - self.__reload_time_counter
         return elapsed_time_since_start_reload >= RELOAD_TIME
@@ -67,8 +66,8 @@ class Robot:
         return self.__scann_result
 
     def drive(self, direction: int, velocity: int):
-        self.direction = direction
-        self.velocity = velocity
+        self.__direction = direction
+        self.__velocity = velocity
 
     def __get_name(self):
         return self.__name
@@ -81,35 +80,34 @@ class Robot:
         elif (self.get_direction() > 180 and self.get_direction() <= 270):
             alpha = self.get_direction() - 180
         else:
-            alpha = 360 -self.get_direction()
+            alpha = 360 - self.get_direction()
         sen = math.sin(math.radians(alpha))
         y = sen * ((VELOCITY*self.get_velocity())/100)
         x = math.sqrt(((VELOCITY*self.get_velocity())/100)**2-y**2)
         if (self.get_direction() >= 0 and self.get_direction() <= 90):
-            x_axis = self.__position[0]+x
-            y_axis = self.__position[1]+y
+            x_axis = self.get_position()[0]+x
+            y_axis = self.get_position()[1]+y
         elif (self.get_direction() > 90 and self.get_direction() <= 180):
-            x_axis = self.__position[0]-x
-            y_axis = self.__position[1]+y
+            x_axis = self.get_position()[0]-x
+            y_axis = self.get_position()[1]+y
         elif (self.get_direction() > 180 and self.get_direction() <= 270):
-            x_axis = self.__position[0]-x
-            y_axis = self.__position[1]-y
+            x_axis = self.get_position()[0]-x
+            y_axis = self.get_position()[1]-y
         else:
-            x_axis = self.__position[0]+x
-            y_axis = self.__position[1]-y
+            x_axis = self.get_position()[0]+x
+            y_axis = self.get_position()[1]-y
         if x_axis < 0:
             x_axis = 0
-            __wall_collision = True
+            self.__wall_collision = True
         elif x_axis > 999:
             x_axis = 999
-            __wall_collision = True
+            self.__wall_collision = True
         if y_axis < 0:
             y_axis = 0
-            __wall_collision = True
+            self.__wall_collision = True
         elif y_axis > 999:
             y_axis = 999
-            __wall_collision = True
-
+            self.__wall_collision = True
         self.__position = (x_axis,y_axis)
 
     def __scann(self, list_of_robots: list[Robot]):
@@ -120,26 +118,28 @@ class Robot:
             if (x2-x1) != 0:
                 m = (y2 - y1)/(x2-x1)
                 if m > 0:
-                    if x2 >= x1 and y2 >= y1:
+                    if x2 > x1 and y2 > y1:
                         theta = math.degrees(math.atan(m))
-                    if x2 <= x1 and y2 <= y1:
+                    elif x2 < x1 and y2 < y1:
                         theta = math.degrees(math.atan(m))+180
-                if m < 0:
-                    if x2 <= x1 and y2 >= y1:
+                elif m < 0:
+                    if x2 < x1 and y2 > y1:
                         theta = math.degrees(math.atan(m))+180
-                    if x2 >= x1 and y2 <= y1:
+                    elif x2 > x1 and y2 < y1:
                         theta = math.degrees(math.atan(m))+360
-                if m == 0:
+                else:
                     if x2 > x1:
                         theta = 0
-                    if x2 < x1:
+                    elif x2 < x1:
                         theta = 180
-                print(m)
             else:
                 if (y2 > y1):
                     theta = 90
                 elif (y2 < y1):
                     theta = 270
+                else:
+                    dist = 0
+                    break
             if (self.__scanner_direction-self.__resolution < 0):
                 right = 360 + self.__scanner_direction-self.__resolution
                 if not (self.__scanner_direction+self.__resolution < theta < right):
@@ -160,21 +160,21 @@ class Robot:
 
     def __inflict_damage(self, damage: int):
         if (0 <= damage <= 100):
-            if ((self.__damage + damage) <= 100):
-                self.__damage = self.__damage + damage
+            if ((self.get_damage() + damage) <= 100):
+                self.__damage = self.get_damage() + damage
             else:
                 self.__damage = 100
 
     def __inflict_collision_damage(self):
-        if ((self.__damage + COLLISION_DAMAGE) <= 100):
-            self.__damage = self.__damage + COLLISION_DAMAGE
+        if ((self.get_damage() + COLLISION_DAMAGE) <= 100):
+            self.__damage = self.get_damage() + COLLISION_DAMAGE
         else:
             self.__damage = 100
 
     def __attack(self, robots: list[Robot]):
         if (self.is_cannon_ready()):
             explosion_position = get_explosion_position(
-                self.__position,
+                self.get_position(),
                 self.__cannon_degree,
                 self.__cannon_distance
             )
@@ -205,7 +205,7 @@ class Robot:
             self.__reload_time_counter = time.perf_counter()
 
     def __check_collision(self, robots: list[Robot]):
-        robots_collision = get_robots_in_range(list[Robot], self.get_position(), (0,5))
+        robots_collision = get_robots_in_range(robots, self.get_position(), (0,5))
         for _ in range(len(robots_collision)):
             self.__inflict_collision_damage()
         if self.__wall_collision:
@@ -214,7 +214,8 @@ class Robot:
     def __get_missile(self):
         return self.__missile
 
-
+    def __set_damage(self, damage):
+        self.__damage = damage
 
 
 def get_explosion_position(
@@ -230,28 +231,16 @@ def get_explosion_position(
         alpha = shooting_degree - 180
     else:
         alpha = 360 - shooting_degree
-        sen = math.sin(math.radians(alpha))
-        y = sen * shooting_distance
-        x = math.sqrt(shooting_distance**2-y**2)
-    if (shooting_degree == 0):
-        x_axis = robot_position[0] + shooting_distance
-        y_axis = robot_position[1]
-    elif (shooting_degree == 90):
-        x_axis = robot_position[0]
-        y_axis = robot_position[1] + shooting_distance
-    elif (shooting_degree == 180):
-        x_axis = robot_position[0] - shooting_distance
-        y_axis = robot_position[1]
-    elif (shooting_degree == 270):
-        x_axis = robot_position[0]
-        y_axis = robot_position[1] - shooting_distance
-    elif (shooting_degree > 0 and shooting_degree < 90):
+    sen = math.sin(math.radians(alpha))
+    y = sen * shooting_distance
+    x = math.sqrt(shooting_distance**2-y**2)
+    if (shooting_degree >= 0 and shooting_degree <= 90):
         x_axis = robot_position[0] + x
         y_axis = robot_position[1] + y
-    elif (shooting_degree > 90 and shooting_degree < 180):
+    elif (shooting_degree > 90 and shooting_degree <= 180):
         x_axis = robot_position[0] - x
         y_axis = robot_position[1] + y
-    elif (shooting_degree > 180 and shooting_degree < 270):
+    elif (shooting_degree > 180 and shooting_degree <= 270):
         x_axis = robot_position[0] - x
         y_axis = robot_position[1] - y
     else:
@@ -266,6 +255,7 @@ def get_explosion_position(
     if x_axis > 999:
         x_axis = 999
     return (x_axis,y_axis)
+
 
 def get_robots_in_range(
         robots: list[Robot],

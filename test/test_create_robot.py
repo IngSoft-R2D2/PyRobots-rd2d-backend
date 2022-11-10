@@ -26,23 +26,6 @@ def test_login_to_get_token():
     access_token = response.json()['access_token']
     token_type = response.json()['token_type']
 
-
-fk_reg_robot = {
-    'name': "RATCHET",
-    'avatar': "64base_coded_img",
-    'behaviour_file': "64base_coded_file"
-}
-fk_reg_robot_no_avatar = {
-    'name': "OPTIMUS_PRIME",
-    'behaviour_file': "64base_coded_file"
-}
-fk_reg_robot_inv_robot_name = {
-    'name': "MEGATRON",
-    'avatar': "64base_coded_img",
-    'behaviour_file': "64base_coded_file"
-}
-
-
 def test_register_robot():
     with open("files_for_testing/robotito.py", "rb") as f1:
         files = {"behaviour_file": f1}
