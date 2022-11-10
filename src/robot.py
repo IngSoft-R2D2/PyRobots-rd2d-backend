@@ -5,7 +5,6 @@ import math
 import time
 
 
-
 class Robot:
     __direction: int
     __velocity: int
@@ -20,7 +19,6 @@ class Robot:
     __resolution: int
     __scann_result: float
     __missile: tuple[float, float]
-
 
     def __init__(self, name: str):
         self.__name = name
@@ -110,7 +108,6 @@ class Robot:
         elif y_axis > 999:
             y_axis = 999
             self.__wall_collision = True
-
         self.__position = (x_axis,y_axis)
 
     def __scann(self, list_of_robots: list[Robot]):
@@ -221,8 +218,6 @@ class Robot:
         self.__damage = damage
 
 
-
-
 def get_explosion_position(
         robot_position: tuple[int, int],
         shooting_degree: int, 
@@ -236,28 +231,16 @@ def get_explosion_position(
         alpha = shooting_degree - 180
     else:
         alpha = 360 - shooting_degree
-        sen = math.sin(math.radians(alpha))
-        y = sen * shooting_distance
-        x = math.sqrt(shooting_distance**2-y**2)
-    if (shooting_degree == 0):
-        x_axis = robot_position[0] + shooting_distance
-        y_axis = robot_position[1]
-    elif (shooting_degree == 90):
-        x_axis = robot_position[0]
-        y_axis = robot_position[1] + shooting_distance
-    elif (shooting_degree == 180):
-        x_axis = robot_position[0] - shooting_distance
-        y_axis = robot_position[1]
-    elif (shooting_degree == 270):
-        x_axis = robot_position[0]
-        y_axis = robot_position[1] - shooting_distance
-    elif (shooting_degree > 0 and shooting_degree < 90):
+    sen = math.sin(math.radians(alpha))
+    y = sen * shooting_distance
+    x = math.sqrt(shooting_distance**2-y**2)
+    if (shooting_degree >= 0 and shooting_degree <= 90):
         x_axis = robot_position[0] + x
         y_axis = robot_position[1] + y
-    elif (shooting_degree > 90 and shooting_degree < 180):
+    elif (shooting_degree > 90 and shooting_degree <= 180):
         x_axis = robot_position[0] - x
         y_axis = robot_position[1] + y
-    elif (shooting_degree > 180 and shooting_degree < 270):
+    elif (shooting_degree > 180 and shooting_degree <= 270):
         x_axis = robot_position[0] - x
         y_axis = robot_position[1] - y
     else:
@@ -272,6 +255,7 @@ def get_explosion_position(
     if x_axis > 999:
         x_axis = 999
     return (x_axis,y_axis)
+
 
 def get_robots_in_range(
         robots: list[Robot],
