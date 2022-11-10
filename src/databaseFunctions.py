@@ -194,6 +194,31 @@ def user_in_match(
     return db.User[user_id] in db.Match[match_id].users
 
 @db_session
+def is_valid_robot_id(
+        db: Database,
+        robot_id: int
+    ):
+    return db.Robot.exists(id=robot_id)
+
+@db_session
+def is_robot_user(
+        db: Database,
+        user_id: int,
+        robot_id: int
+    ):
+    return db.Robot[robot_id] in db.User[user_id].robots
+
+@db_session
+def room_is_full(
+        db: Database,
+        match_id: int
+    ):
+    match = db.Match[match_id]
+    max_players = match.max_players
+    users_number = len(select(u for u in db.Match[match_id].users)[:])
+    return max_players==users_number
+
+@db_session
 def add_user_with_robot_to_match(
         db:Database,
         match_id: int,

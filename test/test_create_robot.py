@@ -26,67 +26,35 @@ def test_login_to_get_token():
     access_token = response.json()['access_token']
     token_type = response.json()['token_type']
 
-
-fk_reg_robot = {
-    'name': "RATCHET",
-    'avatar': "64base_coded_img",
-    'behaviour_file': "64base_coded_file"
-}
-fk_reg_robot_no_avatar = {
-    'name': "OPTIMUS PRIME",
-    'behaviour_file': "64base_coded_file"
-}
-fk_reg_robot_inv_robot_name = {
-    'name': "MEGATRON",
-    'avatar': "64base_coded_img",
-    'behaviour_file': "64base_coded_file"
-}
-
-
-def test_register_robot_unauthorized_wrong_token():
-    response = client.post(
-        "/robots/",
-        json = fk_reg_robot,
-        headers={"Authorization": token_type + " " + wrong_token}
-    )
-    assert response.status_code == status.HTTP_401_UNAUTHORIZED
-    assert response.json()["detail"] == "Could not validate credentials"
-
-
-def test_register_robot_no_header_authorization():
-    response = client.post(
-        "/robots/",
-        json = fk_reg_robot
-    )
-    assert response.status_code == status.HTTP_401_UNAUTHORIZED
-    assert response.json()["detail"] == "Not authenticated"
-
-
 def test_register_robot():
-    response = client.post(
-        "/robots/",
-        json = fk_reg_robot,
-        headers={"Authorization": token_type + " " + access_token}
-    )
+    with open("files_for_testing/robotito.py", "rb") as f1:
+        files = {"behaviour_file": f1}
+        response = client.post(
+            "/robots/?name=RATCHET&avatar=64base_coded_img",
+            headers={"Authorization": token_type + " " + access_token},
+            files=files
+        )
     assert response.status_code == status.HTTP_201_CREATED
     assert response.json()["operation_result"] == "Successfully created."
-
 
 def test_register_robot_no_avatar():
-    response = client.post(
-        "/robots/",
-        json = fk_reg_robot_no_avatar,
-        headers={"Authorization": token_type + " " + access_token}
-    )
+    with open("files_for_testing/rir.py", "rb") as f1:
+        files = {"behaviour_file": f1}
+        response = client.post(
+            "/robots/?name=OPTIMUS_PRIME",
+            headers={"Authorization": token_type + " " + access_token},
+            files=files
+        )
     assert response.status_code == status.HTTP_201_CREATED
     assert response.json()["operation_result"] == "Successfully created."
 
-
 def test_register_robot_with_robot_name_in_user_robots():
-    response = client.post(
-        "/robots/",
-        json = fk_reg_robot_inv_robot_name,
-        headers={"Authorization": token_type + " " + access_token}
-    )
+    with open("files_for_testing/roboto.py", "rb") as f1:
+        files = {"behaviour_file": f1}
+        response = client.post(
+            "/robots/?name=MEGATRON&avatar=coded_img",
+            headers={"Authorization": token_type + " " + access_token},
+            files=files
+        )
     assert response.status_code == status.HTTP_409_CONFLICT
     assert response.json()["detail"] == "This user has a robot with this name already."

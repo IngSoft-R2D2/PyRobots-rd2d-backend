@@ -272,7 +272,7 @@ async def login_for_access_token(
 )
 async def register_robot(
         name: str, 
-        avatar: Optional[str] = None, 
+        avatar: Optional[str] = None,
         behaviour_file: UploadFile = File(...),
         current_user: User = Depends(get_current_user), db: Database = Depends(get_db)
     ):
@@ -448,6 +448,23 @@ async def join_match(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Match not found."
         )
+    if not is_valid_robot_id(
+            db=db,
+            robot_id=robot_id
+        ):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Not valid robot."
+        )
+    if not is_robot_user(
+            db=db,
+            user_id=current_user.id,
+            robot_id=robot_id
+        ):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Not valid robot for user."
+        )
     if user_in_match(
             db=db,
             user_id=current_user.id,
@@ -456,6 +473,14 @@ async def join_match(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="User is in match already."
+        )
+    if room_is_full(
+            db=db,
+            match_id=match_id
+        ):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="The room is full already."
         )
     add_user_with_robot_to_match(
         db=db,
@@ -542,11 +567,11 @@ async def start_simulation(
         current_user.id,
         simulation.robots_id
     )
-    rounds: dict = game(
+    simulation_json: dict = game(
         simulation.number_of_rounds,
         robots_for_game
     )
     return SimulationOut(
-        simulation_json=rounds,
+        simulation_json=simulation_json,
         operation_result="Simulation successfully runned."
     )
