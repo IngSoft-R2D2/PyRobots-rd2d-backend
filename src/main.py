@@ -338,6 +338,8 @@ async def create_match(
         user_id,
         match_to_cr.name
     )
+    global active_matches
+    active_matches[new_match_id] = MatchRoomManager()
     return NewMatchOut(
         match_id=new_match_id,
         operation_result="Successfully created."
@@ -464,6 +466,9 @@ async def join_match(
         user_id=current_user.id,
         robot_id=robot_id
     )
+    msg = {}
+    msg["event"] = f"Player {current_user.username} join the match"
+    await active_matches[match_id].broadcast(msg)
     return JoinMatchOut(
             operation_result="Successfully joined."
         )
@@ -510,6 +515,10 @@ async def leave_match(
         match_id=match_id,
         user_id=current_user.id
     )
+    #active_matches[match_id].disconnect(websocket)
+    msg = {}
+    msg["event"] = f"Player {current_user.username} left the match"
+    await active_matches[match_id].broadcast(msg)
     return LeaveMatchOut(
             operation_result="Successfully abandoned."
         )
@@ -686,6 +695,45 @@ fk_simulation =  {
                                         }
                                         },
                                     }
+
+"""
+    WebSocket
+"""
+
+active_matches = dict()
+
+class MatchRoomManager:
+    def __init__(self):
+        self.active_connections: List[WebSocket] = []
+
+    async def connect(self, websocket: WebSocket):
+        await websocket.accept()
+        self.active_connections.append(websocket)
+
+    def disconnect(self, websocket: WebSocket):
+        self.active_connections.remove(websocket)
+
+    async def broadcast(self, message):
+        for connection in self.active_connections:
+            await connection.send_json(message)
+
+
+@app.websocket("/ws/{match_id}")
+async def websocket_endpoint(
+        websocket: WebSocket, match_id: int,
+        current_user: UserDb = Depends(get_current_user),
+        db: Database = Depends(get_db)
+    ):
+    manager = active_matches[match_id]
+    await manager.connect(websocket)
+    try:
+        while True:
+            pass
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
+        msg = {}
+        msg["event"] = f"Player {current_user.username} left the match"
+        await manager.broadcast(msg)
 
 
 """
