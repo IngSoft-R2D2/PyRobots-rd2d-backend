@@ -18,7 +18,7 @@ wrong_token = "eyJGOiJIUzIiIsInR5cCIkpXVCJyJzdisdWNhcyIsImV46MTY2ODDc2OH6ksb20cl
 
 def test_login_to_get_token():
     response = client.post(
-        "/login/",
+        "/login",
         data={"username": "angelescch","password": "ssssSSS1"}
     )
     assert response.status_code == status.HTTP_200_OK
@@ -39,7 +39,7 @@ error_case_robot_id = 4
 
 def test_join_match_success():
     response = client.put(
-        "/matches/join/"+str(successfull_case_match_id)+"robot"+str(successfull_case_robot_id),
+        "/matches/join/"+str(successfull_case_match_id)+"/robot/"+str(successfull_case_robot_id),
         headers={"Authorization": token_type + " " + access_token}
     )
     assert response.status_code == status.HTTP_200_OK
@@ -48,7 +48,7 @@ def test_join_match_success():
 
 def test_join_match_not_valid_match():
     response = client.put(
-        "/matches/join/"+str(error_case_not_valid_match_id)+"robot"+str(successfull_case_robot_id),
+        "/matches/join/"+str(error_case_not_valid_match_id)+"/robot/"+str(successfull_case_robot_id),
         headers={"Authorization": token_type + " " + access_token}
     )
     assert response.status_code == status.HTTP_404_NOT_FOUND
@@ -57,7 +57,7 @@ def test_join_match_not_valid_match():
 
 def test_join_match_user_in_match_already():
     response = client.put(
-        "/matches/join/"+str(error_case_user_in_match)+"robot"+str(successfull_case_robot_id),
+        "/matches/join/"+str(error_case_user_in_match)+"/robot/"+str(successfull_case_robot_id),
         headers={"Authorization": token_type + " " + access_token}
     )
     assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -66,7 +66,7 @@ def test_join_match_user_in_match_already():
 
 def test_join_match_not_authenticated_user():
     response = client.put(
-        "/matches/join/"+str(error_case_user_not_authenticated)+"robot"+str(error_case_robot_id),
+        "/matches/join/"+str(error_case_user_not_authenticated)+"/robot/"+str(error_case_robot_id),
         headers={"Authorization": token_type + " " + wrong_token}
     )
     assert response.status_code == status.HTTP_401_UNAUTHORIZED

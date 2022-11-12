@@ -11,7 +11,7 @@ app.dependency_overrides[get_db] = get_db_override
 client = TestClient(app)
 
 def test_create_user_existing_username():
-    response = client.post("/users/",
+    response = client.post("/users",
     json={
         "username": "angelescch",
         "email": "angeles@gmail.com",
@@ -23,7 +23,7 @@ def test_create_user_existing_username():
 
 
 def test_create_user():
-    response1 = client.post("/users/",
+    response1 = client.post("/users",
     json={
         "username": "lucas",
         "email": "lucas@gmail.com",
@@ -35,7 +35,7 @@ def test_create_user():
 
 
 def test_create_user_no_avatar():
-    response1 = client.post("/users/",
+    response1 = client.post("/users",
     json={
         "username": "pedro",
         "email": "pedro@gmail.com",
@@ -45,7 +45,7 @@ def test_create_user_no_avatar():
     assert response1.json()['operation_result'] == "Verification code successfully sent to your email"
 
 def test_create_user_no_existing_email():
-    response1 = client.post("/users/",
+    response1 = client.post("/users",
     json={
         "username": "fandjfaof",
         "email": "fandjfaof@example.com",
@@ -56,7 +56,7 @@ def test_create_user_no_existing_email():
 
 
 def test_create_user_existing_email():
-    response1 = client.post("/users/",
+    response1 = client.post("/users",
     json={
         "username": "raro",
         "email": "angelescch@gmail.com",
@@ -67,7 +67,7 @@ def test_create_user_existing_email():
 
 
 def test_create_user_no_email_format():
-    response1 = client.post("/users/",
+    response1 = client.post("/users",
     json={
         "username": "lucas",
         "email": "lucasexample.com",
@@ -81,7 +81,7 @@ def test_create_user_no_email_format():
 
 
 def test_create_user_invalid_password_less_than_8():
-    response1 = client.post("/users/",
+    response1 = client.post("/users",
     json={
         "username": "pass",
         "email": "pass@gmail.com",
@@ -92,7 +92,7 @@ def test_create_user_invalid_password_less_than_8():
     assert response1.json() == {"detail": "Invalid password format"}
 
 def test_create_user_invalid_password_no_uppercase():
-    response1 = client.post("/users/",
+    response1 = client.post("/users",
     json={
         "username": "pass",
         "email": "pass@gmail.com",
@@ -103,7 +103,7 @@ def test_create_user_invalid_password_no_uppercase():
     assert response1.json() == {"detail": "Invalid password format"}
 
 def test_create_user_invalid_password_no_lowercase():
-    response1 = client.post("/users/",
+    response1 = client.post("/users",
     json={
         "username": "pass",
         "email": "pass@gmail.com",
@@ -115,7 +115,7 @@ def test_create_user_invalid_password_no_lowercase():
 
 
 def test_create_user_invalid_password_no_digit():
-    response1 = client.post("/users/",
+    response1 = client.post("/users",
     json={
         "username": "pass",
         "email": "pass@gmail.com",

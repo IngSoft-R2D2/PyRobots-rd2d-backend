@@ -15,7 +15,7 @@ token_type = ""
 
 def test_login_to_get_token():
     response = client.post(
-        "/login/",
+        "/login",
         data={"username": "angelescch","password": "ssssSSS1"}
     )
     assert response.status_code == status.HTTP_200_OK
@@ -24,7 +24,7 @@ def test_login_to_get_token():
     access_token = response.json()['access_token']
     token_type = response.json()['token_type']
 
-check = {
+matches_to_start = {
         'match_14': {'creator': 1,
                       'id': 14,
                       'is_finished': False,
@@ -37,16 +37,11 @@ check = {
                       'users_robots': {'angelescch': 'R2D2', 'keyword': 'MEGATRON'}}
 }
 
-def test_register_robot_no_header_authorization():
-    response = client.get("/matches/begin")
-    assert response.status_code == status.HTTP_401_UNAUTHORIZED
-    assert response.json()["detail"] == "Not authenticated"
 
-
-def test_get_matches():
+def test_get_matches_to_start():
     response = client.get(
-        "/matches/begin",
+        "/matches/start",
         headers={"Authorization": token_type+" "+access_token}
         )
     assert response.status_code == status.HTTP_200_OK
-    assert response.json() == check
+    assert response.json() == matches_to_start

@@ -17,7 +17,7 @@ wrong_token = "eyJGOiJIUzIiIsInR5cCIkpXVCJyJzdisdWNhcyIsImV46MTY2ODDc2OH6ksb20cl
 
 def test_login_to_get_token():
     response = client.post(
-        "/login/",
+        "/login",
         data={"username": "angelescch","password": "ssssSSS1"}
     )
     assert response.status_code == status.HTTP_200_OK
@@ -144,7 +144,7 @@ fk_new_match_wrong_maxmin_relac = {
 
 def test_create_match_unauthorized_wrong_token():
     response = client.post(
-        "/matches/",
+        "/matches",
         json = fk_new_match,
         headers={"Authorization": token_type + " " + wrong_token}
     )
@@ -154,7 +154,7 @@ def test_create_match_unauthorized_wrong_token():
 
 def test_create_match_no_header_authorization():
     response = client.post(
-        "/matches/",
+        "/matches",
         json = fk_new_match
     )
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
@@ -163,7 +163,7 @@ def test_create_match_no_header_authorization():
 
 def test_create_match():
     response = client.post(
-        "/matches/",
+        "/matches",
         json = fk_new_match,
         headers={"Authorization": token_type + " " + access_token}
     )
@@ -173,7 +173,7 @@ def test_create_match():
 
 def test_create_match_no_password():
     response = client.post(
-        "/matches/",
+        "/matches",
         json = fk_new_match_no_password,
         headers={"Authorization": token_type + " " + access_token}
     )
@@ -182,7 +182,7 @@ def test_create_match_no_password():
 
 def test_create_match_no_min_players():
     response = client.post(
-        "/matches/",
+        "/matches",
         json = fk_new_match_no_min_players,
         headers={"Authorization": token_type + " " + access_token}
     )
@@ -191,7 +191,7 @@ def test_create_match_no_min_players():
 
 def test_create_match_no_max_players():
     response = client.post(
-        "/matches/",
+        "/matches",
         json = fk_new_match_no_max_players,
         headers={"Authorization": token_type + " " + access_token}
     )
@@ -200,7 +200,7 @@ def test_create_match_no_max_players():
 
 def test_create_match_no_max_players_wrong_rel():
     response = client.post(
-        "/matches/",
+        "/matches",
         json = fk_new_match_no_max_players_wrong_rel,
         headers={"Authorization": token_type + " " + access_token}
     )
@@ -209,7 +209,7 @@ def test_create_match_no_max_players_wrong_rel():
 
 def test_create_match_with_many_max_players():
     response = client.post(
-        "/matches/",
+        "/matches",
         json = fk_new_match_many_max_players,
         headers={"Authorization": token_type + " " + access_token}
     )
@@ -218,7 +218,7 @@ def test_create_match_with_many_max_players():
 
 def test_create_match_with_few_max_players():
     response = client.post(
-        "/matches/",
+        "/matches",
         json = fk_new_match_few_max_players,
         headers={"Authorization": token_type + " " + access_token}
     )
@@ -228,7 +228,7 @@ def test_create_match_with_few_max_players():
 
 def test_create_match_with_few_min_players():
     response = client.post(
-        "/matches/",
+        "/matches",
         json = fk_new_match_few_min_players,
         headers={"Authorization": token_type + " " + access_token}
     )
@@ -238,7 +238,7 @@ def test_create_match_with_few_min_players():
 
 def test_create_match_with_many_rounds():
     response = client.post(
-        "/matches/",
+        "/matches",
         json = fk_new_match_many_rounds,
         headers={"Authorization": token_type + " " + access_token}
     )
@@ -247,7 +247,7 @@ def test_create_match_with_many_rounds():
 
 def test_create_match_with_few_rounds():
     response = client.post(
-        "/matches/",
+        "/matches",
         json = fk_new_match_few_rounds,
         headers={"Authorization": token_type + " " + access_token}
     )
@@ -257,7 +257,7 @@ def test_create_match_with_few_rounds():
 
 def test_create_match_with_many_games():
     response = client.post(
-        "/matches/",
+        "/matches",
         json = fk_new_match_many_games,
         headers={"Authorization": token_type + " " + access_token}
     )
@@ -267,7 +267,7 @@ def test_create_match_with_many_games():
 
 def test_create_match_with_few_games():
     response = client.post(
-        "/matches/",
+        "/matches",
         json = fk_new_match_few_games,
         headers={"Authorization": token_type + " " + access_token}
     )
@@ -277,7 +277,7 @@ def test_create_match_with_few_games():
 
 def test_create_match_with_wrong_maxmin_relac():
     response = client.post(
-        "/matches/",
+        "/matches",
         json = fk_new_match_wrong_maxmin_relac,
         headers={"Authorization": token_type + " " + access_token}
     )
