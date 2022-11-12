@@ -18,7 +18,7 @@ wrong_token = "eyJGOiJIUzIiIsInR5cCIkpXVCJyJzdisdWNhcyIsImV46MTY2ODDc2OH6ksb20cl
 
 def test_login_to_get_token():
     response = client.post(
-        "/login/",
+        "/login",
         data={"username": "angelescch","password": "ssssSSS1"}
     )
     assert response.status_code == status.HTTP_200_OK

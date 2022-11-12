@@ -21,7 +21,7 @@ token_type = ""
 
 def test_login_to_get_token():
     response = client.post(
-        "/login/",
+        "/login",
         data={"username": "angelescch","password": "ssssSSS1"}
     )
     assert response.status_code == status.HTTP_200_OK
@@ -33,7 +33,7 @@ def test_login_to_get_token():
 
 def test_list_user_robots():
     response = client.get(
-        "/robots/",
+        "/robots",
         headers={"Authorization": token_type+" "+access_token}
         )
     assert response.status_code == status.HTTP_200_OK

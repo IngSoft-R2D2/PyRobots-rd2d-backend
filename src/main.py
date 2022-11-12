@@ -12,7 +12,6 @@ from pydantic import BaseModel, EmailStr
 from typing import (
     Deque, Dict, FrozenSet, List, Optional, Sequence, Set, Tuple, Union
 )
-import json
 
 from databaseFunctions import *
 from fastapi.middleware.cors import CORSMiddleware
@@ -181,7 +180,7 @@ async def send_email_async(email_to: EmailStr, username: str, code: str):
     Create user.
 """
 @app.post(
-    "/users/",
+    "/users",
     status_code=status.HTTP_201_CREATED
 )
 async def create_user(new_user: UserIn, db: Database = Depends(get_db)):
@@ -234,7 +233,7 @@ def valid_password(password: str) -> bool:
 """
     Login.
 """
-@app.post("/login/", response_model=Token)
+@app.post("/login", response_model=Token)
 async def login_for_access_token(
         form_data: OAuth2PasswordRequestForm = Depends(),
         db: Database = Depends(get_db)
@@ -264,16 +263,16 @@ async def login_for_access_token(
 
 
 """
-    Register robot.
+    Create robot.
 """
 @app.post(
     "/robots/",
     response_model=RobotRegOut,
     status_code=status.HTTP_201_CREATED
 )
-async def register_robot(
+async def create_robot(
         name: str, 
-        avatar: Optional[str] = None, 
+        avatar: Optional[str] = None,
         behaviour_file: UploadFile = File(...),
         current_user: User = Depends(get_current_user), db: Database = Depends(get_db)
     ):
@@ -315,7 +314,7 @@ async def register_robot(
     Create Match.
 """
 @app.post(
-    "/matches/",
+    "/matches",
     response_model=NewMatchOut,
     status_code=status.HTTP_201_CREATED
 )
@@ -378,26 +377,26 @@ def valid_match_config(match: NewMatchIn):
 
 
 """
-    List joinable matches.
+    List matches to join.
 """
 @app.get("/matches/join")
-async def show_joinable_matches(current_user: User = Depends(get_current_user),
+async def list_matches_to_join(current_user: User = Depends(get_current_user),
                                   db: Database = Depends(get_db)):
-    return get_joinable_matches(db, current_user.id)
+    return get_matches_to_join(db, current_user.id)
 
 """
-    List matches to begin.
+    List matches to start.
 """
-@app.get("/matches/begin")
-async def show_matches_to_begin(current_user: User = Depends(get_current_user),
+@app.get("/matches/start")
+async def list_matches_to_start(current_user: User = Depends(get_current_user),
                                   db: Database = Depends(get_db)):
-    return get_matches_to_begin(db, current_user.id)
+    return get_matches_to_start(db, current_user.id)
 
 
 """
     List robots.
 """
-@app.get("/robots/")
+@app.get("/robots")
 async def list_user_robots(current_user: User = Depends(get_current_user), db: Database = Depends(get_db)):
     return get_all_user_robots(db, current_user.username)
 
@@ -436,7 +435,7 @@ async def verify_user(
     Join match.
 """
 @app.put(
-    "/matches/join/{match_id}robot{robot_id}",
+    "/matches/join/{match_id}/robot/{robot_id}",
     response_model = JoinMatchOut,
     status_code = status.HTTP_200_OK
 )
@@ -451,6 +450,23 @@ async def join_match(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Match not found."
         )
+    if not is_valid_robot_id(
+            db=db,
+            robot_id=robot_id
+        ):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Not valid robot."
+        )
+    if not is_robot_user(
+            db=db,
+            user_id=current_user.id,
+            robot_id=robot_id
+        ):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Not valid robot for user."
+        )
     if user_in_match(
             db=db,
             user_id=current_user.id,
@@ -459,6 +475,14 @@ async def join_match(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="User is in match already."
+        )
+    if room_is_full(
+            db=db,
+            match_id=match_id
+        ):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="The room is full already."
         )
     add_user_with_robot_to_match(
         db=db,
@@ -524,178 +548,6 @@ async def leave_match(
         )
 
 
-fk_simulation =  {
-                                    'round_1': {
-                                            'R1': {
-                                                'damage':0,
-                                                'position': (300,500),
-                                                'missile': (450,500)
-                                            },
-                                            'R2': {
-                                                'damage':0,
-                                                'position': (100,990),
-                                                'missile': (300,500)
-                                            },
-                                            'R3': {
-                                                'damage':0,
-                                                'position': (276,893),
-                                                'missile': (328,582)
-                                            },
-                                            'R4': {
-                                                'damage':0,
-                                                'position': (832,923),
-                                                'missile': (302,623)
-                                            }
-                                            },
-                                    'round_2': {
-                                                'R1': {
-                                                    'damage':30,
-                                                    'position': (349,567),
-                                                    'missile': (456,523)
-                                                },
-                                                'R2': {
-                                                    'damage':8,
-                                                    'position': (189,923),
-                                                    'missile': (256,736)
-                                                },
-                                                'R3': {
-                                                    'damage':0,
-                                                    'position': (375,789),
-                                                    'missile': (423,824)
-                                                },
-                                                'R4': {
-                                                    'damage':0,
-                                                    'position': (782,903),
-                                                    'missile': (812,989)
-                                                }
-                                            },
-                                    'round_3': {
-                                                'R1': {
-                                                'damage':33,
-                                                'position': (298,599),
-                                                'missile': (423,550)
-                                                },
-                                                'R2': {
-                                                'damage':26,
-                                                'position': (50,989),
-                                                'missile': (305,489)
-                                                },
-                                                'R3': {
-                                                'damage':16,
-                                                'position': (256,878),
-                                                'missile': (300,500)
-                                                },
-                                                'R4': {
-                                                'damage':5,
-                                                'position': (817,878),
-                                                'missile': (278,623)
-                                                }
-                                            },
-                                    'round_4': {
-                                            'R1': {
-                                                'damage':93,
-                                                'position': (322,480),
-                                                'missile': (450,500)
-                                            },
-                                            'R2': {
-                                                'damage':48,
-                                                'position': (189,999),
-                                                'missile': (500,473)
-                                            },
-                                            'R3': {
-                                                'damage':22,
-                                                'position': (312,872),
-                                                'missile': (289,645)
-                                            },
-                                            'R4': {
-                                                'damage':20,
-                                                'position': (777,956),
-                                                'missile': (482,734)
-                                            }
-                                        },
-                                    'round_5': {
-                                            'R2': {
-                                            'damage':58,
-                                            'position': (232,902),
-                                            'missile': (689,599)
-                                            },
-                                            'R3': {
-                                            'damage':33,
-                                            'position': (345,900),
-                                            'missile': (467,745)
-                                            },
-                                            'R4': {
-                                            'damage':28,
-                                            'position': (789,723),
-                                            'missile': (323,897)
-                                            }
-                                        },
-                                    'round_6': {
-                                        'R2': {
-                                            'damage':60,
-                                            'position': (245,972),
-                                            'missile': (989,399)
-                                        },
-                                        'R3': {
-                                            'damage':40,
-                                            'position': (345,900),
-                                            'missile': (467,745)
-                                        },
-                                        'R4': {
-                                            'damage':30,
-                                            'position': (789,723),
-                                            'missile': (323,897)
-                                        }
-                                        },
-                                    'round_7': {
-                                        'R2': {
-                                            'damage':75,
-                                            'position': (308,952),
-                                            'missile': (723,498)
-                                        },
-                                        'R3': {
-                                            'damage':50,
-                                            'position': (333,922),
-                                            'missile': (582,865)
-                                        },
-                                        'R4': {
-                                            'damage':35,
-                                            'position': (800,700),
-                                            'missile': (300,912)
-                                        }
-                                        },
-                                    'round_8': {
-                                        'R3': {
-                                            'damage':56,
-                                            'position': (356,944),
-                                            'missile': (629,999)
-                                        },
-                                        'R4': {
-                                            'damage':45,
-                                            'position': (832,712),
-                                            'missile': (343,923)
-                                        }
-                                        },
-                                    'round_9': {
-                                        'R3': {
-                                            'damage':98,
-                                            'position': (367,956),
-                                            'missile': (429,599)
-                                        },
-                                        'R4': {
-                                            'damage':50,
-                                            'position': (832,712),
-                                            'missile': (343,923)
-                                        }
-                                        },
-                                    'round_10': {
-                                        'R4': {
-                                            'damage':60,
-                                            'position': (832,712)
-                                        }
-                                        },
-                                    }
-
 """
     WebSocket
 """
@@ -740,24 +592,35 @@ async def websocket_endpoint(
     Get simulation.
 """
 @app.post(
-    "/simulation/",
+    "/simulation",
     response_model = SimulationOut,
     status_code = status.HTTP_201_CREATED,
 )
 async def start_simulation(
         simulation: SimulationIn,
-        current_user: User = Depends(get_current_user),
+        current_user: UserDb = Depends(get_current_user),
         db: Database = Depends(get_db)
     ):
-    # robots_for_game = generate_robots_for_game(
-    #     db=db,
-    #     robots_id=simulation.robots_id
-    # )
-    # rounds: dict = game(
-    #     number_of_rounds=simulation.number_of_rounds,
-    #     robots=robots_for_game
-    # )
+    if not (2 <= len(simulation.robots_id) <= 4):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid number of robots"
+        )
+    if not (1 <= simulation.number_of_rounds <= 10000):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid number of rounds"
+        )
+    robots_for_game = generate_robots_for_game(
+        db,
+        current_user.id,
+        simulation.robots_id
+    )
+    simulation_json: dict = game(
+        simulation.number_of_rounds,
+        robots_for_game
+    )
     return SimulationOut(
-        simulation_json=fk_simulation,
+        simulation_json=simulation_json,
         operation_result="Simulation successfully runned."
     )

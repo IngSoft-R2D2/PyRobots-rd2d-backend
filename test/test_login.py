@@ -11,7 +11,7 @@ app.dependency_overrides[get_db] = get_db_override
 client = TestClient(app)
 
 def test_login_user():
-    response = client.post("/login/",
+    response = client.post("/login",
     data={
         "username": "angelescch",
         "password": "ssssSSS1"
@@ -21,7 +21,7 @@ def test_login_user():
 
 
 def test_login_user_unauthorized_no_existing_username():
-    response = client.post("/login/",
+    response = client.post("/login",
     data={
         "username": "angelescchh",
         "password": "ssssSSS1"
@@ -31,7 +31,7 @@ def test_login_user_unauthorized_no_existing_username():
 
 
 def test_login_user_unauthorized_wrong_password():
-    response = client.post("/login/",
+    response = client.post("/login",
     data={
         "username": "angelescch",
         "password": "ssssSSS11"
@@ -40,7 +40,7 @@ def test_login_user_unauthorized_wrong_password():
     assert response.json()['detail'] == "Incorrect username or password"
 
 def test_login_user_unauthorized_wrong_username():
-    response = client.post("/login/",
+    response = client.post("/login",
     data={
         "username": "keyword",
         "password": "ssssSSS1"
@@ -49,7 +49,7 @@ def test_login_user_unauthorized_wrong_username():
     assert response.json()['detail'] == "Incorrect username or password"
 
 def test_login_user_unauthorized_not_confirmed_user():
-    response = client.post("/login/",
+    response = client.post("/login",
     data={
         "username": "fake",
         "password": "8924F35bi"

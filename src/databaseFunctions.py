@@ -93,7 +93,7 @@ def upload_robot(
 # Lists unfinished matches not created by the current user 
 # that aren't full, where the user isn't already joined.
 @db_session
-def get_joinable_matches (db: Database, current_user_id: int):
+def get_matches_to_join (db: Database, current_user_id: int):
     matches = []
     matches_list = (select(m for m in db.Match if m.is_finished == False and 
                            (m.creator).id != current_user_id and
@@ -115,7 +115,7 @@ def get_joinable_matches (db: Database, current_user_id: int):
 # Lists unfinished matches created by the current user 
 # that have at least the minimum ammmount of players
 @db_session
-def get_matches_to_begin(db: Database, current_user_id: int):
+def get_matches_to_start(db: Database, current_user_id: int):
     matches = []
     matches_list = (select(m for m in db.Match if m.is_finished == False and 
                            (m.creator).id == current_user_id and
@@ -194,6 +194,31 @@ def user_in_match(
     return db.User[user_id] in db.Match[match_id].users
 
 @db_session
+def is_valid_robot_id(
+        db: Database,
+        robot_id: int
+    ):
+    return db.Robot.exists(id=robot_id)
+
+@db_session
+def is_robot_user(
+        db: Database,
+        user_id: int,
+        robot_id: int
+    ):
+    return db.Robot[robot_id] in db.User[user_id].robots
+
+@db_session
+def room_is_full(
+        db: Database,
+        match_id: int
+    ):
+    match = db.Match[match_id]
+    max_players = match.max_players
+    users_number = len(select(u for u in db.Match[match_id].users)[:])
+    return max_players==users_number
+
+@db_session
 def add_user_with_robot_to_match(
         db:Database,
         match_id: int,
@@ -224,19 +249,24 @@ def remove_user_with_robots_from_match(
 @db_session
 def generate_robots_for_game(
         db: Database,
-        robots_id: list[int]
-    ) -> list[Robot]:
+        user_id: int,
+        robots_id: "list[int]"
+    ) -> "list[Robot]":
     robots: list[Robot] = []
-    for index, r_id in robots_id:
+    index = 1
+    for r_id in robots_id:
         r = db.Robot[r_id]
-        exec(open(r.filename).read())
+        filename_path = f"robots/user_id_{user_id}/"+r.behaviour_file
+        exec(open(filename_path).read(), globals())
         without_suffix = r.behaviour_file.removesuffix('.py')
         words_list_lowercase = without_suffix.split('_')
         words_list_capitalize = [word.capitalize() for word in words_list_lowercase]
         class_name = ''.join(words_list_capitalize)
         robot_name = f"R{index}_{r.name}"
         to_execute = "bot = " + class_name + "(\"" + robot_name + "\")"
-        bot: Robot
-        exec(to_execute, globals())
+        ldict = {}
+        exec(to_execute, globals(),ldict)
+        bot = ldict['bot']
         robots.append(bot)
+        index += 1
     return robots
