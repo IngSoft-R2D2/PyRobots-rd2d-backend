@@ -93,7 +93,7 @@ def upload_robot(
 # Lists unfinished matches not created by the current user 
 # that aren't full, where the user isn't already joined.
 @db_session
-def get_joinable_matches (db: Database, current_user_id: int):
+def get_matches_to_join (db: Database, current_user_id: int):
     matches = []
     matches_list = (select(m for m in db.Match if m.is_finished == False and 
                            (m.creator).id != current_user_id and
@@ -115,7 +115,7 @@ def get_joinable_matches (db: Database, current_user_id: int):
 # Lists unfinished matches created by the current user 
 # that have at least the minimum ammmount of players
 @db_session
-def get_matches_to_begin(db: Database, current_user_id: int):
+def get_matches_to_start(db: Database, current_user_id: int):
     matches = []
     matches_list = (select(m for m in db.Match if m.is_finished == False and 
                            (m.creator).id == current_user_id and

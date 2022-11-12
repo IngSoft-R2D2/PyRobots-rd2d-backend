@@ -180,7 +180,7 @@ async def send_email_async(email_to: EmailStr, username: str, code: str):
     Create user.
 """
 @app.post(
-    "/users/",
+    "/users",
     status_code=status.HTTP_201_CREATED
 )
 async def create_user(new_user: UserIn, db: Database = Depends(get_db)):
@@ -233,7 +233,7 @@ def valid_password(password: str) -> bool:
 """
     Login.
 """
-@app.post("/login/", response_model=Token)
+@app.post("/login", response_model=Token)
 async def login_for_access_token(
         form_data: OAuth2PasswordRequestForm = Depends(),
         db: Database = Depends(get_db)
@@ -263,14 +263,14 @@ async def login_for_access_token(
 
 
 """
-    Register robot.
+    Create robot.
 """
 @app.post(
     "/robots/",
     response_model=RobotRegOut,
     status_code=status.HTTP_201_CREATED
 )
-async def register_robot(
+async def create_robot(
         name: str, 
         avatar: Optional[str] = None,
         behaviour_file: UploadFile = File(...),
@@ -314,7 +314,7 @@ async def register_robot(
     Create Match.
 """
 @app.post(
-    "/matches/",
+    "/matches",
     response_model=NewMatchOut,
     status_code=status.HTTP_201_CREATED
 )
@@ -375,26 +375,26 @@ def valid_match_config(match: NewMatchIn):
 
 
 """
-    List joinable matches.
+    List matches to join.
 """
 @app.get("/matches/join")
-async def show_joinable_matches(current_user: User = Depends(get_current_user),
+async def list_matches_to_join(current_user: User = Depends(get_current_user),
                                   db: Database = Depends(get_db)):
-    return get_joinable_matches(db, current_user.id)
+    return get_matches_to_join(db, current_user.id)
 
 """
-    List matches to begin.
+    List matches to start.
 """
-@app.get("/matches/begin")
-async def show_matches_to_begin(current_user: User = Depends(get_current_user),
+@app.get("/matches/start")
+async def list_matches_to_start(current_user: User = Depends(get_current_user),
                                   db: Database = Depends(get_db)):
-    return get_matches_to_begin(db, current_user.id)
+    return get_matches_to_start(db, current_user.id)
 
 
 """
     List robots.
 """
-@app.get("/robots/")
+@app.get("/robots")
 async def list_user_robots(current_user: User = Depends(get_current_user), db: Database = Depends(get_db)):
     return get_all_user_robots(db, current_user.username)
 
@@ -433,7 +433,7 @@ async def verify_user(
     Join match.
 """
 @app.put(
-    "/matches/join/{match_id}robot{robot_id}",
+    "/matches/join/{match_id}/robot/{robot_id}",
     response_model = JoinMatchOut,
     status_code = status.HTTP_200_OK
 )
@@ -543,7 +543,7 @@ async def leave_match(
     Get simulation.
 """
 @app.post(
-    "/simulation/",
+    "/simulation",
     response_model = SimulationOut,
     status_code = status.HTTP_201_CREATED,
 )
