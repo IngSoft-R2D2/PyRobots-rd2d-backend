@@ -102,6 +102,8 @@ class TokenData(BaseModel):
     username: Optional[str] = None
     id: Optional[int] = None
 
+class JoinMatch(BaseModel):
+    password: Optional[str]
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
@@ -443,6 +445,7 @@ async def verify_user(
 async def join_match(
         match_id: int,
         robot_id: int,
+        body: JoinMatch,
         current_user: UserDb = Depends(get_current_user),
         db: Database = Depends(get_db)
     ):
@@ -484,6 +487,22 @@ async def join_match(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="The room is full already."
+        )
+    if not is_secured_match(db=db, match_id=match_id) and not (body.password is None):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="This match does not require password."
+        )
+    if is_secured_match(db=db, match_id=match_id) and body.password is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Password is required."
+        )
+    if (is_secured_match(db=db, match_id=match_id) and
+        not is_valid_password(db=db, match_id=match_id, password=body.password)):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid password."
         )
     add_user_with_robot_to_match(
         db=db,
