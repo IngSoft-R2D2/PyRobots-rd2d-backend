@@ -13,6 +13,7 @@ client = TestClient(app)
 fk_list_robots = {
     "1": {
         'name':"R2D2",
+        'avatar':"image1.64base_coded_img",
         'matches_played':0,
         'matches_won':0,
         'matches_lost':0,
@@ -20,6 +21,7 @@ fk_list_robots = {
     },
     "2": {
         'name':"MEGATRON",
+        'avatar':"image2.64base_coded_img",
         'matches_played':0,
         'matches_won':0,
         'matches_lost':0,
@@ -27,6 +29,7 @@ fk_list_robots = {
     },
     "3": {
         'name':"Robot3000",
+        'avatar':"image3.64base_coded_img",
         'matches_played':0,
         'matches_won':0,
         'matches_lost':0,

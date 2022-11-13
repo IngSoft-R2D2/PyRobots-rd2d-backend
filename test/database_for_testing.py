@@ -20,11 +20,11 @@ def define_database_for_testing():
                 password=pwd_context.hash("8924F35bi"),avatar="avatar.img",
                 is_confirmed=False)
         db.Robot(user = db.User.get(username="angelescch"), name="R2D2",
-                 avatar="image.jpg", behaviour_file="RSD2.py")
+                 avatar="image1.64base_coded_img", behaviour_file="RSD2.py")
         db.Robot(user = db.User.get(username="angelescch"), name="MEGATRON",
-                 avatar="image.jpg", behaviour_file="MegaRobot.py")
+                 avatar="image2.64base_coded_img", behaviour_file="MegaRobot.py")
         db.Robot(user = db.User.get(username="angelescch"), name="Robot3000",
-                 avatar="image.jpg", behaviour_file="Robot3000.py")
+                 avatar="image3.64base_coded_img", behaviour_file="Robot3000.py")
         db.Robot(user=db.User.get(username="keyword"), name="MEGATRON",
                  avatar="64base_coded_img", behaviour_file="rob.py")
         db.Match(creator=db.User.get(username="angelescch"),

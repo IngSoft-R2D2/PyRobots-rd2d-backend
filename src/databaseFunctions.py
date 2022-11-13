@@ -178,6 +178,7 @@ def get_all_user_robots(db, username) -> Dict:
         key = str(r.id)
         robot_info = {}
         robot_info['name'] = r.name
+        robot_info['avatar'] = r.avatar
         robot_info['matches_played'] = r.matches_played
         robot_info['matches_won'] = r.matches_won
         robot_info['matches_lost'] = r.matches_lost
