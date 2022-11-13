@@ -103,6 +103,7 @@ def get_matches_to_join (db: Database, current_user_id: int):
                             current_user_id not in m.users.id)[:])
     for m in matches_list:
         match_dict = m.to_dict()
+        del match_dict['password']
         users_robots_json = {}
         for ur in select((r.user.username, r.name) for r in m.robots)[:]:
             users_robots_json[str(ur[0])] = str(ur[1])
@@ -135,7 +136,7 @@ def get_matches_to_start(db: Database, current_user_id: int):
         jsons[key]=p
     return jsons
 
-# Creates a new Match and returns it's id.
+# Creates a new Match.
 # creator_id_in must be a valid Id in Users.
 @db_session
 def match_add(
@@ -151,23 +152,26 @@ def match_add(
     ):
     if password_in is None:
         db.Match(creator=db.User[creator_id_in],
-                        name=name_in,
-                        max_players=max_players_in,
-                        min_players=min_players_in,
-                        number_of_games=number_of_games_in,
-                        number_of_rounds=number_of_rounds_in,
-                        robots = [db.Robot[robot_id_in]],
-                        users = [db.User[creator_id_in]])
+            name=name_in,
+            max_players=max_players_in,
+            min_players=min_players_in,
+            number_of_games=number_of_games_in,
+            number_of_rounds=number_of_rounds_in,
+            robots = [db.Robot[robot_id_in]],
+            users = [db.User[creator_id_in]]
+        )
     else:
         db.Match(creator=db.User[creator_id_in],
-                        name=name_in,
-                        max_players=max_players_in,
-                        min_players=min_players_in,
-                        number_of_games=number_of_games_in,
-                        number_of_rounds=number_of_rounds_in,
-                        password=password_in,
-                        robots = [db.Robot[robot_id_in]],
-                        users = [db.User[creator_id_in]])
+            name=name_in,
+            max_players=max_players_in,
+            min_players=min_players_in,
+            number_of_games=number_of_games_in,
+            number_of_rounds=number_of_rounds_in,
+            robots=[db.Robot[robot_id_in]],
+            users=[db.User[creator_id_in]],
+            is_secured=True,
+            password = pwd_context.hash(password_in)
+        )
 
 @db_session
 def get_all_user_robots(db, username) -> Dict:
@@ -256,6 +260,20 @@ def remove_user_with_robots_from_match(
     db.Match[match_id].users.remove(db.User[user_id])
 
 @db_session
+def is_secured_match(
+        db: Database,
+        match_id: int
+    ):
+    return db.Match[match_id].is_secured
+
+@db_session
+def is_valid_password(
+        db: Database,
+        match_id: int,
+        password: str
+    ):
+    return pwd_context.verify(password, db.Match[match_id].password)
+
 def get_robot_name_in_match(
         db: Database,
         match_id: int,

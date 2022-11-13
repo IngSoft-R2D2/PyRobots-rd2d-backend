@@ -20,6 +20,7 @@ def define_entities(db):
         max_players = Required(int)
         number_of_games = Required(int)
         number_of_rounds = Required(int)
+        is_secured = Required(bool, default=False, sql_default='0')
         password = Optional(str)
         is_finished = Required(bool, default=False, sql_default='0')
         robots = Set('Robot', reverse='matches')
