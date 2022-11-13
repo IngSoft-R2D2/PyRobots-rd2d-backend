@@ -22,6 +22,7 @@ def define_entities(db):
         number_of_rounds = Required(int)
         is_secured = Required(bool, default=False, sql_default='0')
         password = Optional(str)
+        is_started = Required(bool, default=False, sql_default='0')
         is_finished = Required(bool, default=False, sql_default='0')
         robots = Set('Robot', reverse='matches')
         users = Set('User', reverse='matches')

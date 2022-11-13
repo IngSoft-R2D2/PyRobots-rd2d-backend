@@ -1,6 +1,6 @@
 from pony.orm import *
 from typing import (
-    Deque, Dict, FrozenSet, List, Optional, Sequence, Set, Tuple, Union
+    Dict, List, Optional, Tuple
 )
 from passlib.context import CryptContext
 from robot import Robot
@@ -36,9 +36,7 @@ def username_exists(db: Database, username: str):
 @db_session
 def authenticate_user(db: Database, username: str, password: str):
     user = get_user_by_username(db, username)
-    if pwd_context.verify(password, user.password):
-        return True
-    return False
+    return pwd_context.verify(password, user.password)
 
 @db_session
 def is_user_confirmed(db: Database, username: str):
@@ -97,7 +95,8 @@ def upload_robot(
 @db_session
 def get_matches_to_join (db: Database, current_user_id: int):
     matches = []
-    matches_list = (select(m for m in db.Match if m.is_finished == False and 
+    matches_list = (select(m for m in db.Match if m.is_finished == False and
+                            m.is_started == False and
                            (m.creator).id != current_user_id and
                             count(m.users)<m.max_players and
                             current_user_id not in m.users.id)[:])
@@ -120,7 +119,8 @@ def get_matches_to_join (db: Database, current_user_id: int):
 @db_session
 def get_matches_to_start(db: Database, current_user_id: int):
     matches = []
-    matches_list = (select(m for m in db.Match if m.is_finished == False and 
+    matches_list = (select(m for m in db.Match if m.is_finished == False and
+                            m.is_started == False and
                            (m.creator).id == current_user_id and
                             count(m.users)>=m.min_players)[:])
     for m in matches_list:
@@ -274,6 +274,7 @@ def is_valid_password(
     ):
     return pwd_context.verify(password, db.Match[match_id].password)
 
+@db_session
 def get_robot_name_in_match(
         db: Database,
         match_id: int,
@@ -289,15 +290,57 @@ def get_robot_name_by_id(
     return db.Robot[robot_id].name
 
 @db_session
+def get_user_creator_by_robot_id(
+        db: Database,
+        robot_id: int
+    ):
+    return db.Robot[robot_id].user.username
+
+@db_session
+def user_is_creator_of_match(db, match_id, user_id):
+    return db.Match[match_id].creator.id == user_id
+
+@db_session
+def start_match_db(
+        db: Database,
+        match_id: int
+    ):
+    db.Match[match_id].is_started = True
+
+@db_session
+def end_match_db(
+        db: Database,
+        match_id: int
+    ):
+    db.Match[match_id].is_finished = True
+
+# Returns (z,x,y) where z robots_id's, x number of games and y number of rounds.
+@db_session
+def get_match_parameters(
+        db: Database,
+        match_id: int
+    ) -> Tuple[List[int], int, int]:
+    robot_ids_list: List[int] = []
+    robots: List[Robot] = db.Match[match_id].robots
+    for r in robots:
+        robot_ids_list.append(r.id)
+    params: Tuple[List[int], int, int] = (
+        robot_ids_list, 
+        db.Match[match_id].number_of_games, 
+        db.Match[match_id].number_of_rounds
+    )
+    return params
+
+@db_session
 def generate_robots_for_game(
         db: Database,
-        user_id: int,
         robots_id: "list[int]"
-    ) -> "list[Robot]":
-    robots: list[Robot] = []
+    ) -> List[Robot]:
+    robots: List[Robot] = []
     index = 1
     for r_id in robots_id:
         r = db.Robot[r_id]
+        user_id = db.Robot[r_id].user.id
         filename_path = f"robots/user_id_{user_id}/"+r.behaviour_file
         exec(open(filename_path).read(), globals())
         without_suffix = r.behaviour_file.removesuffix('.py')
@@ -305,7 +348,7 @@ def generate_robots_for_game(
         words_list_capitalize = [word.capitalize() for word in words_list_lowercase]
         class_name = ''.join(words_list_capitalize)
         robot_name = f"R{index}_{r.name}"
-        to_execute = "bot = " + class_name + "(\"" + robot_name + "\")"
+        to_execute = "bot = " + class_name + "(\"" + robot_name  + "\"" + ", " + str(r_id) + ")"
         ldict = {}
         exec(to_execute, globals(),ldict)
         bot = ldict['bot']
