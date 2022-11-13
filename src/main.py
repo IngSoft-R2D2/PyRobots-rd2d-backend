@@ -611,7 +611,7 @@ async def websocket_endpoint(
 
 
 """
-    Get simulation.
+    Start simulation.
 """
 @app.post(
     "/simulation",
@@ -645,4 +645,50 @@ async def start_simulation(
     return SimulationOut(
         simulation_json=simulation_json,
         operation_result="Simulation successfully runned."
+    )
+
+class RobotResult(BaseModel):
+    pass
+
+class StartMatchIn(BaseModel):
+    match_id: int
+
+class MatchResults(BaseModel):
+    robots: Dict[RobotResult]
+
+"""
+    Start match.
+"""
+@app.put(
+    "/matches/start",
+    response_model = MatchResults,
+    status_code = status.HTTP_201_CREATED,
+)
+async def start_simulation(
+        simulation: StartMatchIn,
+        current_user: UserDb = Depends(get_current_user),
+        db: Database = Depends(get_db)
+    ):
+    if not (2 <= len(simulation.robots_id) <= 4):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid number of robots"
+        )
+    if not (1 <= simulation.number_of_rounds <= 10000):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid number of rounds"
+        )
+    robots_for_game = generate_robots_for_game(
+        db,
+        current_user.id,
+        simulation.robots_id
+    )
+    simulation_json: dict = game(
+        simulation.number_of_rounds,
+        robots_for_game
+    )
+    return MatchResults(
+        simulation_json=,
+        operation_result="Match successfully runned."
     )
