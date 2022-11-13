@@ -1,7 +1,5 @@
 import os
 from datetime import datetime, timedelta
-from pickle import NONE
-from typing import Optional
 
 from fastapi import *
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
@@ -10,7 +8,7 @@ from email_validator import validate_email
 from jose import JWTError, jwt
 from pydantic import BaseModel, EmailStr
 from typing import (
-    Deque, Dict, FrozenSet, List, Optional, Sequence, Set, Tuple, Union
+    Dict, List, Optional
 )
 
 from databaseFunctions import *
@@ -23,6 +21,7 @@ from fastapi.responses import RedirectResponse
 from entities import define_database
 from game import game
 
+import json
 import shutil
 import os.path
 
@@ -384,6 +383,7 @@ async def list_matches_to_join(current_user: User = Depends(get_current_user),
                                   db: Database = Depends(get_db)):
     return get_matches_to_join(db, current_user.id)
 
+
 """
     List matches to start.
 """
@@ -430,6 +430,7 @@ async def verify_user(
         raise validation_exception
     confirm_user(db, id_in_db)
     return "http://localhost:3000/users/verified"
+
 
 """
     Join match.
@@ -490,8 +491,8 @@ async def join_match(
         user_id=current_user.id,
         robot_id=robot_id
     )
-    msg = {}
-    msg["event"] = f"Player {current_user.username} join the match"
+    robot_name = get_robot_name_by_id(db, robot_id)
+    msg = json.dumps({'event': 'Join', 'player': current_user.username, 'robot': robot_name})
     await active_matches[match_id].broadcast(msg)
     return JoinMatchOut(
             operation_result="Successfully joined."
@@ -534,14 +535,14 @@ async def leave_match(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Creator of the match is not allowed to leave."
         )
+    robot_name = get_robot_name_in_match(db, match_id, current_user.id)
+    msg = json.dumps({'event': 'Leave', 'player': current_user.username, 'robot': robot_name})
     remove_user_with_robots_from_match(
         db,
         match_id=match_id,
         user_id=current_user.id
     )
     await active_matches[match_id].disconnect(current_user.id)
-    msg = {}
-    msg["event"] = f"Player {current_user.username} left the match"
     await active_matches[match_id].broadcast(msg)
     return LeaveMatchOut(
             operation_result="Successfully abandoned."
@@ -551,7 +552,6 @@ async def leave_match(
 """
     WebSocket
 """
-
 class MatchRoom:
     def __init__(self):
         self.active_connections: Dict[int, WebSocket] = {}
@@ -582,9 +582,9 @@ async def websocket_endpoint(
         while True:
             pass
     except WebSocketDisconnect:
+        robot_name = get_robot_name_in_match(db, match_id, current_user.id)
+        msg = json.dumps({'event': 'Leave', 'player': current_user.username, 'robot': robot_name})
         await manager.disconnect(current_user.id)
-        msg = {}
-        msg["event"] = f"Player {current_user.username} left the match"
         await manager.broadcast(msg)
 
 
