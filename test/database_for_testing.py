@@ -168,8 +168,6 @@ def define_database_for_testing():
                 ],
                 is_finished=False
             )
-        
-        
     return db
 
 def get_db_override():

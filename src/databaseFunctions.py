@@ -274,6 +274,20 @@ def is_valid_password(
     ):
     return pwd_context.verify(password, db.Match[match_id].password)
 
+def get_robot_name_in_match(
+        db: Database,
+        match_id: int,
+        user_id: int
+    ):
+    return select(r.name for r in db.Match[match_id].robots if r.user==db.User[user_id])[:][0]
+
+@db_session
+def get_robot_name_by_id(
+        db: Database,
+        robot_id: int
+    ):
+    return db.Robot[robot_id].name
+
 @db_session
 def generate_robots_for_game(
         db: Database,
