@@ -397,7 +397,10 @@ async def list_matches_to_start(current_user: User = Depends(get_current_user),
     List robots.
 """
 @app.get("/robots")
-async def list_user_robots(current_user: User = Depends(get_current_user), db: Database = Depends(get_db)):
+async def list_user_robots(
+        current_user: User = Depends(get_current_user),
+        db: Database = Depends(get_db)
+    ):
     return get_all_user_robots(db, current_user.username)
 
 

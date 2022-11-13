@@ -11,9 +11,30 @@ app.dependency_overrides[get_db] = get_db_override
 client = TestClient(app)
 
 fk_list_robots = {
-    "1": "R2D2",
-    "2": "MEGATRON",
-    "3": "Robot3000"
+    "1": {
+        'name':"R2D2",
+        'avatar':"image1.64base_coded_img",
+        'matches_played':0,
+        'matches_won':0,
+        'matches_lost':0,
+        'matches_drawed':0
+    },
+    "2": {
+        'name':"MEGATRON",
+        'avatar':"image2.64base_coded_img",
+        'matches_played':0,
+        'matches_won':0,
+        'matches_lost':0,
+        'matches_drawed':0
+    },
+    "3": {
+        'name':"Robot3000",
+        'avatar':"image3.64base_coded_img",
+        'matches_played':0,
+        'matches_won':0,
+        'matches_lost':0,
+        'matches_drawed':0
+    }
 }
 
 access_token = ""

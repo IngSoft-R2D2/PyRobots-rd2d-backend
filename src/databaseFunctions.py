@@ -1,5 +1,7 @@
 from pony.orm import *
-from typing import Optional
+from typing import (
+    Deque, Dict, FrozenSet, List, Optional, Sequence, Set, Tuple, Union
+)
 from passlib.context import CryptContext
 from robot import Robot
 
@@ -168,14 +170,21 @@ def match_add(
                         users = [db.User[creator_id_in]])
 
 @db_session
-def get_all_user_robots(db, username):
+def get_all_user_robots(db, username) -> Dict:
     user = get_user_by_username(db, username)
     robots_list = select(r for r in user.robots)[:]
-    json = {}
+    robots_json = {}
     for r in robots_list:
         key = str(r.id)
-        json[key]=r.name
-    return json
+        robot_info = {}
+        robot_info['name'] = r.name
+        robot_info['avatar'] = r.avatar
+        robot_info['matches_played'] = r.matches_played
+        robot_info['matches_won'] = r.matches_won
+        robot_info['matches_lost'] = r.matches_lost
+        robot_info['matches_drawed'] = r.matches_drawed
+        robots_json[key] = robot_info
+    return robots_json
 
 @db_session
 def confirm_user(db: Database, id: int):
