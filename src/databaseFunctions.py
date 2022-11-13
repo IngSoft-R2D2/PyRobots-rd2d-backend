@@ -252,7 +252,7 @@ def get_robot_name_in_match(
         match_id: int,
         user_id: int
     ):
-    return select(r.name for r in db.Match[match_id].robots if r.user==db.User[user_id])[:][1]
+    return select(r.name for r in db.Match[match_id].robots if r.user==db.User[user_id])[:][0]
 
 @db_session
 def get_robot_name_by_id(
