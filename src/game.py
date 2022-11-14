@@ -123,8 +123,5 @@ def run_match(db, robots_id: List[int], number_of_games: int, number_of_rounds: 
 
     match_results_descending = OrderedDict(sorted(match_results.items(), 
                                   key=lambda kv: kv[1]['won_games'], reverse=True))
-    # result = []
-    # for bot_id in match_results_descending:
-    #     result.append(match_results_descending[bot_id])
-    # return result
+
     return match_results_descending

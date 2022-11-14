@@ -320,12 +320,12 @@ def update_robots_statistics(
     # find the winners id's and the games it/they won.
     for robot_id in match_results:
         # new potential winner found.
-        if match_results[robot_id].won_games > games_won_highest:
+        if match_results[robot_id]['won_games'] > games_won_highest:
             winners_id.clear()
             winners_id.append(robot_id)
-            games_won_highest = match_results[robot_id].won_games
+            games_won_highest = match_results[robot_id]['won_games']
         # another robot has the same games won.
-        elif match_results[robot_id].won_games == games_won_highest:
+        elif match_results[robot_id]['won_games'] == games_won_highest:
             winners_id.append(robot_id)
     
     winner_exists = len(winners_id) == 1

@@ -680,11 +680,10 @@ async def start_match(
         number_of_games,
         number_of_rounds
     )
-    # acá calcular stats
     update_robots_statistics(db, match_result)
     match_result_list = []
     for robot_id in match_result:
-        match_result_list.appent(match_result[robot_id])
+        match_result_list.append(match_result[robot_id])
     msg = json.dumps({'event': 'Results', 'participants': match_result_list})
     await active_matches[match_id].broadcast(msg)
     end_match_db(db, match_id)
