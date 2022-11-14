@@ -352,6 +352,15 @@ def end_match_db(
     ):
     db.Match[match_id].is_finished = True
 
+@db_session
+def is_match_started(db, match_id):
+    return db.Match[match_id].is_started
+
+@db_session
+def valid_number_of_players(db, match_id):
+    users_list = select(u for u in db.Match[match_id].users)[:]
+    return db.Match[match_id].min_players <= len(users_list) <= db.Match[match_id].max_players
+
 # Returns (z,x,y) where z robots_id's, x number of games and y number of rounds.
 @db_session
 def get_match_parameters(

@@ -666,6 +666,16 @@ async def start_match(
         status_code=status.HTTP_404_NOT_FOUND,
         detail="This user is not the creator of the match."
     )
+    if is_match_started(db, match_id):
+        raise HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail="Match already started."
+    )
+    if not valid_number_of_players(db, match_id):
+        raise HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail="Invalid number of players."
+    )
     robot_name = get_robot_name_in_match(db, match_id, current_user.id)
     msg = json.dumps({'event': 'Start', 'player': current_user.username, 'robot': robot_name})
     await active_matches[match_id].broadcast(msg)
