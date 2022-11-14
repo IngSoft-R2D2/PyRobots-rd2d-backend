@@ -37,7 +37,7 @@ def define_entities(db):
         matches_played = Required (int,default=0)
         matches_won = Required(int, default=0)
         matches_lost = Required(int, default=0)
-        matches_drawed = Required(int, default=0)
+        matches_tied = Required(int, default=0)
         matches = Set('Match', reverse='robots')
         composite_key(user, name)
 

@@ -1,3 +1,4 @@
+import math
 from pony.orm import *
 from typing import (
     Dict, List, Optional, Tuple
@@ -306,6 +307,44 @@ def start_match_db(
         match_id: int
     ):
     db.Match[match_id].is_started = True
+
+@db_session
+def update_robots_statistics(
+        db: Database,
+        match_id: int,
+        match_results: dict
+    ):
+    winner_exists: bool = False
+    games_won_highest = -math.inf
+    winners_id: List[int] = []
+
+    # find the winners id's and the games it/they won.
+    for robot_id in match_results:
+        # new potential winner found.
+        if match_results[robot_id].won_games > games_won_highest:
+            winners_id.clear()
+            winners_id.append(robot_id)
+            games_won_highest = match_results[robot_id].won_games
+        # another robot has the same games won.
+        elif match_results[robot_id].won_games == games_won_highest:
+            winners_id.append(robot_id)
+    
+    winner_exists = len(winners_id) == 1
+    # update statistics.
+    for robot_id in match_results:
+        db.Robot[robot_id].matches_played += 1
+        # is the winner robot.
+        if winner_exists and robot_id in winners_id:
+            db.Robot[robot_id].matches_won += 1
+        # is a loser robot.
+        elif winner_exists and not (robot_id in winners_id):
+            db.Robot[robot_id].matches_lost += 1
+        # not a winner nor a loser.
+        elif not winner_exists and robot_id in winners_id:
+            db.Robot[robot_id].matches_tied += 1
+        # is a loser robot.
+        elif not winner_exists and not (robot_id in winners_id):
+            db.Robot[robot_id].matches_lost += 1
 
 @db_session
 def end_match_db(
