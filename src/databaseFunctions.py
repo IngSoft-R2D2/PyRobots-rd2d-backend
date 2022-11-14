@@ -187,7 +187,7 @@ def get_all_user_robots(db, username) -> Dict:
         robot_info['matches_played'] = r.matches_played
         robot_info['matches_won'] = r.matches_won
         robot_info['matches_lost'] = r.matches_lost
-        robot_info['matches_drawed'] = r.matches_drawed
+        robot_info['matches_tied'] = r.matches_tied
         robots_json[key] = robot_info
     return robots_json
 
