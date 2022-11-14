@@ -311,7 +311,6 @@ def start_match_db(
 @db_session
 def update_robots_statistics(
         db: Database,
-        match_id: int,
         match_results: dict
     ):
     winner_exists: bool = False

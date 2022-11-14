@@ -681,7 +681,7 @@ async def start_match(
         number_of_rounds
     )
     # acá calcular stats
-    update_robots_statistics(db, match_id, match_result)
+    update_robots_statistics(db, match_result)
     match_result_list = []
     for robot_id in match_result:
         match_result_list.appent(match_result[robot_id])
