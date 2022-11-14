@@ -20,8 +20,9 @@ class Robot:
     __scann_result: float
     __missile: tuple[float, float]
 
-    def __init__(self, name: str):
+    def __init__(self, name: str, id: int):
         self.__name = name
+        self.__id = id
         self.__direction = random.randint(0,359)
         self.__velocity = random.randint(1,VELOCITY)
         self.__position = (random.randint(FIRST_COORD,LAST_COORD), random.randint(FIRST_COORD,LAST_COORD))
@@ -71,6 +72,9 @@ class Robot:
 
     def __get_name(self):
         return self.__name
+
+    def __get_id(self):
+        return self.__id
 
     def __move(self):
         if (self.get_direction() >= 0 and self.get_direction() <=90):

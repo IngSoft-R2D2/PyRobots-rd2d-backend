@@ -1,7 +1,12 @@
 from pony.orm import *
 from robot import *
+from databaseFunctions import *
+from collections import OrderedDict
+from typing import (
+    List, Dict
+)
 
-def round(robots: "list[Robot]") -> dict:
+def round(robots: List[Robot]) -> dict:
     round_json = {}
 
     not_dead_robots = robots[:]
@@ -44,12 +49,37 @@ def round(robots: "list[Robot]") -> dict:
 
     return round_json
 
-def game(number_of_rounds: int, robots: "list[Robot]") -> dict:
+def competitive_round(robots: List[Robot]):
+    for bot in robots:
+        bot.respond()
+
+    for bot in robots:
+        robots_to_scann = robots[:]
+        robots_to_scann.remove(bot)
+        bot._Robot__scann(robots_to_scann)
+
+    for bot in robots:
+        bot._Robot__attack(robots)
+
+    for bot in robots:
+        bot._Robot__move()
+
+    for bot in robots:
+        robots_collision = robots[:]
+        robots_collision.remove(bot)
+        bot._Robot__check_collision(robots_collision)
+
+    for bot in robots:
+        if bot.get_damage() == 100:
+            robots.remove(bot)
+
+
+def game(number_of_rounds: int, robots: List[Robot]) -> dict:
     game_json = {}
     for bot in robots:
         bot.initialize()
         bot._Robot__set_damage(0)
-    for round_index in range(number_of_rounds):
+    for round_index in range(1,number_of_rounds+1):
         key = "round_" + str(round_index)
         game_json[key] = round(robots)
         robots_amount = len(robots)
@@ -60,3 +90,38 @@ def game(number_of_rounds: int, robots: "list[Robot]") -> dict:
         if  dead_robots >= robots_amount-1:
             break
     return game_json
+
+def competitive_game(number_of_rounds: int, robots: List[Robot]):
+    winners = []
+    for bot in robots:
+        bot.initialize()
+    for _ in range(number_of_rounds):
+        competitive_round(robots)
+        if len(robots) < 2:
+            break
+    if len(robots) > 0 :
+        for bot in robots:
+            winners.append(bot._Robot__get_id())
+    return winners
+
+def run_match(db, robots_id: List[int], number_of_games: int, number_of_rounds: int):
+    match_results = dict()
+    for bot_id in robots_id:
+        match_results[bot_id] = {}
+        match_results[bot_id]['user_name'] = get_user_creator_by_robot_id(db, bot_id)
+        match_results[bot_id]['robot_name'] = get_robot_name_by_id(db, bot_id)
+        match_results[bot_id]['won_games'] = 0
+    for _ in range(number_of_games):
+        robots = generate_robots_for_game(db, robots_id)
+        result = competitive_game(number_of_rounds,robots)
+        if result != []:
+            for robot_id in result:
+                match_results[robot_id]['won_games'] += 1
+
+    for bot_id in robots_id:
+        match_results[bot_id]['lost_games'] = number_of_games - match_results[bot_id]['won_games']
+
+    match_results_descending = OrderedDict(sorted(match_results.items(), 
+                                  key=lambda kv: kv[1]['won_games'], reverse=True))
+
+    return match_results_descending

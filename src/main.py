@@ -8,7 +8,7 @@ from email_validator import validate_email
 from jose import JWTError, jwt
 from pydantic import BaseModel, EmailStr
 from typing import (
-    Dict, List, Optional
+    Dict, List, Optional, Tuple
 )
 
 from databaseFunctions import *
@@ -19,7 +19,7 @@ from jinja2 import Environment, select_autoescape, PackageLoader
 from fastapi.responses import RedirectResponse
 
 from entities import define_database
-from game import game
+from game import game, run_match
 
 import json
 import shutil
@@ -36,7 +36,6 @@ ACCESS_TOKEN_EXPIRE_DAYS = 30
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
-
 origins = {
     "http://localhost",
     "http://localhost:3000",
@@ -49,7 +48,6 @@ app.add_middleware(
     allow_methods = ["*"],
     allow_headers= ["*"],
 )
-
 
 class RobotRegOut(BaseModel):
     id: int
@@ -103,6 +101,44 @@ class TokenData(BaseModel):
 
 class JoinMatch(BaseModel):
     password: Optional[str]
+
+"""
+    WebSocket
+"""
+class MatchRoom:
+    def __init__(self):
+        self.active_connections: Dict[int, WebSocket] = {}
+
+    async def connect(self, user_id: int, websocket: WebSocket):
+        await websocket.accept()
+        self.active_connections[user_id] = websocket
+
+    def disconnect(self, user_id: int):
+        if user_id in self.active_connections:
+            self.active_connections.pop(user_id)
+
+    async def broadcast(self, message):
+        for user_id in self.active_connections:
+            await self.active_connections[user_id].send_json(message)
+
+active_matches: Dict[int, MatchRoom] = {}
+
+@app.websocket("/ws/{match_id}")
+async def websocket_endpoint(
+        websocket: WebSocket, match_id: int,
+        current_user: UserDb = Depends(get_current_user),
+        db: Database = Depends(get_db)
+    ):
+    manager = active_matches[match_id]
+    await manager.connect(current_user.id, websocket)
+    try:
+        while True:
+            pass
+    except WebSocketDisconnect:
+        robot_name = get_robot_name_in_match(db, match_id, current_user.id)
+        msg = json.dumps({'event': 'Leave', 'player': current_user.username, 'robot': robot_name})
+        await manager.disconnect(current_user.id)
+        await manager.broadcast(msg)
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
@@ -572,46 +608,7 @@ async def leave_match(
 
 
 """
-    WebSocket
-"""
-class MatchRoom:
-    def __init__(self):
-        self.active_connections: Dict[int, WebSocket] = {}
-
-    async def connect(self, user_id: int, websocket: WebSocket):
-        await websocket.accept()
-        self.active_connections[user_id] = websocket
-
-    def disconnect(self, user_id: int):
-        if user_id in self.active_connections:
-            self.active_connections.pop(user_id)
-
-    async def broadcast(self, message):
-        for user_id in self.active_connections:
-            await self.active_connections[user_id].send_json(message)
-
-active_matches: Dict[int, MatchRoom] = dict()
-
-@app.websocket("/ws/{match_id}")
-async def websocket_endpoint(
-        websocket: WebSocket, match_id: int,
-        current_user: UserDb = Depends(get_current_user),
-        db: Database = Depends(get_db)
-    ):
-    manager = active_matches[match_id]
-    await manager.connect(current_user.id, websocket)
-    try:
-        while True:
-            pass
-    except WebSocketDisconnect:
-        robot_name = get_robot_name_in_match(db, match_id, current_user.id)
-        msg = json.dumps({'event': 'Leave', 'player': current_user.username, 'robot': robot_name})
-        await manager.disconnect(current_user.id)
-        await manager.broadcast(msg)
-
-
-"""
-    Get simulation.
+    Start simulation.
 """
 @app.post(
     "/simulation",
@@ -635,7 +632,6 @@ async def start_simulation(
         )
     robots_for_game = generate_robots_for_game(
         db,
-        current_user.id,
         simulation.robots_id
     )
     simulation_json: dict = game(
@@ -646,3 +642,59 @@ async def start_simulation(
         simulation_json=simulation_json,
         operation_result="Simulation successfully runned."
     )
+
+
+"""
+    Start match.
+"""
+@app.put(
+    "/matches/start/{match_id}",
+    status_code = status.HTTP_201_CREATED
+)
+async def start_match(
+        match_id: int,
+        current_user: UserDb = Depends(get_current_user),
+        db: Database = Depends(get_db)
+    ):
+    if not match_exists(db, match_id):
+        raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="Match not found."
+    )
+    if not user_is_creator_of_match(db, match_id, current_user.id):
+        raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="This user is not the creator of the match."
+    )
+    if is_match_started(db, match_id):
+        raise HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail="Match already started."
+    )
+    if not valid_number_of_players(db, match_id):
+        raise HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail="Invalid number of players."
+    )
+    robot_name = get_robot_name_in_match(db, match_id, current_user.id)
+    msg = json.dumps({'event': 'Start', 'player': current_user.username, 'robot': robot_name})
+    await active_matches[match_id].broadcast(msg)
+    start_match_db(db, match_id)
+    params: Tuple[List[int], int, int] = get_match_parameters(db, match_id)
+    list_robots = params[0]
+    number_of_games = params[1]
+    number_of_rounds = params[2]
+    match_result = run_match(
+        db,
+        list_robots,
+        number_of_games,
+        number_of_rounds
+    )
+    update_robots_statistics(db, match_result)
+    match_result_list = []
+    for robot_id in match_result:
+        match_result_list.append(match_result[robot_id])
+    msg = json.dumps({'event': 'Results', 'participants': match_result_list})
+    await active_matches[match_id].broadcast(msg)
+    end_match_db(db, match_id)
+    return { "operation_result" : "Match successfully runned." }
