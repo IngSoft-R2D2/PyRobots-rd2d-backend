@@ -29,7 +29,7 @@ class Robot:
         self.__damage = 0
         self.__cannon_degree = random.randint(0,359)
         self.__cannon_distance = round(random.uniform(0,CANNON_RANGE), 2)
-        self.__reload_time_counter = RELOAD_TIME
+        self.__reload_time_counter = time.perf_counter()
         self.__wall_collision = False
         self.__scanner_direction = random.randint(0,359)
         self.__resolution = 0
@@ -177,7 +177,7 @@ class Robot:
 
     def __attack(self, robots: list[Robot]):
         if (self.is_cannon_ready()):
-            explosion_position = get_explosion_position(
+            explosion_position: tuple[int, int] = get_explosion_position(
                 self.get_position(),
                 self.__cannon_degree,
                 self.__cannon_distance
@@ -226,7 +226,7 @@ def get_explosion_position(
         robot_position: tuple[int, int],
         shooting_degree: int, 
         shooting_distance: int
-    ) -> int:
+    ) -> tuple[int, int]:
     if (shooting_degree >= 0 and shooting_degree <=90):
         alpha = shooting_degree
     elif (shooting_degree > 90 and shooting_degree <= 180):
