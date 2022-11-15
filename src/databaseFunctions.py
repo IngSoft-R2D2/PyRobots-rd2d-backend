@@ -98,7 +98,7 @@ def get_all_matches(db: Database, user_id: int):
     matches = select(m for m in db.Match)[:]
     for match in matches:
         match_dict = match.to_dict()
-
+        match_dict['user_id'] = user_id
         match_not_full = match.max_players < len(match.users)
         user_is_creator = db.User[user_id] == match.creator
         user_in_match = db.User[user_id] in match.users
