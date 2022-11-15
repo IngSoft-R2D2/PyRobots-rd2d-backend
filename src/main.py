@@ -413,22 +413,12 @@ def valid_match_config(match: NewMatchIn):
         )
 
 
-"""
-    List matches to join.
-"""
-@app.get("/matches/join")
-async def list_matches_to_join(current_user: User = Depends(get_current_user),
-                                  db: Database = Depends(get_db)):
-    return get_matches_to_join(db, current_user.id)
-
-
-"""
-    List matches to start.
-"""
-@app.get("/matches/start")
-async def list_matches_to_start(current_user: User = Depends(get_current_user),
-                                  db: Database = Depends(get_db)):
-    return get_matches_to_start(db, current_user.id)
+@app.get("/matches")
+async def list_matches(
+        current_user: UserDb = Depends(get_current_user),
+        db: Database = Depends(get_db)
+    ):
+    return get_all_matches(db=db, user_id=current_user.id)
 
 
 """

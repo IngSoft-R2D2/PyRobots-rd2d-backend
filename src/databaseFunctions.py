@@ -91,51 +91,43 @@ def upload_robot(
                 avatar=avatar_in,
                 behaviour_file=behaviour_file_path)
 
-# Lists unfinished matches not created by the current user 
-# that aren't full, where the user isn't already joined.
+# List all matches adding information relatively to the user.
 @db_session
-def get_matches_to_join (db: Database, current_user_id: int):
-    matches = []
-    matches_list = (select(m for m in db.Match if m.is_finished == False and
-                            m.is_started == False and
-                           (m.creator).id != current_user_id and
-                            count(m.users)<m.max_players and
-                            current_user_id not in m.users.id)[:])
-    for m in matches_list:
-        match_dict = m.to_dict()
-        del match_dict['password']
-        users_robots_json = {}
-        for ur in select((r.user.username, r.name) for r in m.robots)[:]:
-            users_robots_json[str(ur[0])] = str(ur[1])
-        match_dict['users_robots'] = users_robots_json
-        matches.append(match_dict)
-    jsons = {}
-    for p in matches:
-        key = 'match_'+str(p['id'])
-        jsons[key]=p
-    return jsons
+def get_all_matches(db: Database, user_id: int):
+    matches_list = []
+    matches = select(m for m in db.Match)[:]
+    for match in matches:
+        match_dict = match.to_dict()
 
-# Lists unfinished matches created by the current user 
-# that have at least the minimum ammmount of players
-@db_session
-def get_matches_to_start(db: Database, current_user_id: int):
-    matches = []
-    matches_list = (select(m for m in db.Match if m.is_finished == False and
-                            m.is_started == False and
-                           (m.creator).id == current_user_id and
-                            count(m.users)>=m.min_players)[:])
-    for m in matches_list:
-        match_dict = m.to_dict()
-        users_robots_json = {}
-        for ur in select((r.user.username, r.name) for r in m.robots)[:]:
-            users_robots_json[str(ur[0])] = str(ur[1])
-        match_dict['users_robots'] = users_robots_json
-        matches.append(match_dict)
-    jsons = {}
-    for p in matches:
-        key = 'match_'+str(p['id'])
-        jsons[key]=p
-    return jsons
+        match_not_full = match.max_players < len(match.users)
+        user_is_creator = db.User[user_id] == match.creator
+        user_in_match = db.User[user_id] in match.users
+        match_players_quantity_satisfied = (len(match.users) >= match.min_players and
+                                             len(match.users) < match.max_players)
+
+        # add usernames with robot names.
+        robots_in_match = {}
+        for r_user_r_name in select((r.user.username, r.name) for r in match.robots)[:]:
+            robots_in_match[str(r_user_r_name[0])] = r_user_r_name[1]
+        match_dict['robots'] = robots_in_match
+        
+        # add control attributes.
+        match_dict['user_is_creator'] = db.User[user_id] == match.creator
+        match_dict['is_available_to_join'] = (not match.is_started and not match.is_finished 
+                                                and match_not_full and not user_is_creator)
+        match_dict['is_available_to_leave'] = (not match.is_started and not match.is_finished
+                                                and user_in_match and not user_is_creator)
+        match_dict['is_ready_to_start'] = (not match.is_started and not match.is_finished
+                                            and match_players_quantity_satisfied)
+        match_dict['user_is_already_joined'] = user_in_match
+        
+        matches_list.append(match_dict)
+
+    matches_to_json = {}
+    for match in matches_list:
+        key = 'match_'+str(match['id'])
+        matches_to_json[key] = match
+    return matches_to_json
 
 # Creates a new Match.
 # creator_id_in must be a valid Id in Users.
