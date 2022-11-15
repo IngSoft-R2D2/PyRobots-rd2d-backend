@@ -107,9 +107,15 @@ def get_all_matches(db: Database, user_id: int):
 
         # add usernames with robot names.
         robots_in_match = {}
-        for r_user_r_name in select((r.user.username, r.name) for r in match.robots)[:]:
-            robots_in_match[str(r_user_r_name[0])] = r_user_r_name[1]
-        match_dict['robots'] = robots_in_match
+        for r_data in select((r.id, r.name, r.user.username) for r in match.robots)[:]:
+            robot_data_dict = {}
+            robot_id = str(r_data[0])
+            robot_name = str(r_data[1])
+            robot_user_name = str(r_data[2])
+            robot_data_dict['robot_id'] = robot_id
+            robot_data_dict['robot_name'] = robot_name
+            robots_in_match[robot_user_name] = robot_data_dict
+        match_dict['players'] = robots_in_match
         
         # add control attributes.
         match_dict['user_is_creator'] = db.User[user_id] == match.creator
