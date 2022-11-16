@@ -148,7 +148,7 @@ def match_add(
         number_of_rounds_in: int,
         password_in: Optional[str]
     ):
-    if password_in is None:
+    if password_in is None or password_in == "":
         db.Match(creator=db.User[creator_id_in],
             name=name_in,
             max_players=max_players_in,
