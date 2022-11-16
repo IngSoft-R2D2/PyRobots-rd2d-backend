@@ -99,7 +99,7 @@ def get_all_matches(db: Database, user_id: int):
     for match in matches:
         match_dict = match.to_dict()
         match_dict['user_id'] = user_id
-        match_not_full = match.max_players < len(match.users)
+        match_not_full =  len(match.users) < match.max_players
         user_is_creator = db.User[user_id] == match.creator
         user_in_match = db.User[user_id] in match.users
         match_players_quantity_satisfied = (len(match.users) >= match.min_players and
@@ -126,7 +126,7 @@ def get_all_matches(db: Database, user_id: int):
         match_dict['is_ready_to_start'] = (not match.is_started and not match.is_finished
                                             and match_players_quantity_satisfied)
         match_dict['user_is_already_joined'] = user_in_match
-        
+        match_dict['matchnotfull'] = match_not_full
         matches_list.append(match_dict)
 
     matches_to_json = {}
