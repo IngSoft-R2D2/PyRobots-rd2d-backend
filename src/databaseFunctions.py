@@ -15,6 +15,10 @@ from robot import Robot
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 @db_session
+def get_username_by_id(db: Database, id: int):
+    return db.User[id].username
+
+@db_session
 def get_id_by_username(db: Database, username: str):
     return get_user_by_username(db,username).id
 
