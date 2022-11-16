@@ -15,6 +15,10 @@ from robot import Robot
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 @db_session
+def get_username_by_id(db: Database, id: int):
+    return db.User[id].username
+
+@db_session
 def get_id_by_username(db: Database, username: str):
     return get_user_by_username(db,username).id
 
@@ -148,7 +152,7 @@ def match_add(
         number_of_rounds_in: int,
         password_in: Optional[str]
     ):
-    if password_in is None:
+    if password_in is None or password_in == "":
         db.Match(creator=db.User[creator_id_in],
             name=name_in,
             max_players=max_players_in,

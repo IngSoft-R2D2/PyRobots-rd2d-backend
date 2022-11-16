@@ -123,21 +123,20 @@ class MatchRoom:
 
 active_matches: Dict[int, MatchRoom] = {}
 
-@app.websocket("/ws/{match_id}")
+@app.websocket("/match/{match_id}/user/{user_id}")
 async def websocket_endpoint(
-        websocket: WebSocket, match_id: int,
-        current_user: UserDb = Depends(get_current_user),
+        websocket: WebSocket, match_id: int, user_id: int,
         db: Database = Depends(get_db)
     ):
     manager = active_matches[match_id]
-    await manager.connect(current_user.id, websocket)
+    await manager.connect(user_id, websocket)
     try:
         while True:
             pass
     except WebSocketDisconnect:
-        robot_name = get_robot_name_in_match(db, match_id, current_user.id)
-        msg = json.dumps({'event': 'Leave', 'player': current_user.username, 'robot': robot_name})
-        await manager.disconnect(current_user.id)
+        robot_name = get_robot_name_in_match(db, match_id, user_id)
+        msg = json.dumps({'event': 'Leave', 'player': get_username_by_id(db, user_id), 'robot': robot_name})
+        await manager.disconnect(user_id)
         await manager.broadcast(msg)
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
