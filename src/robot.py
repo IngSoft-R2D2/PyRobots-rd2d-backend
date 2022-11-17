@@ -29,12 +29,37 @@ class Missile:
                 self.__actual_position = self.__explosion_position
                 self.__distance_traveled = self.__total_distance
                 self.__hit_ground = True
-    
-    def hit_ground(self):
-        return self.__hit_ground
-    
-    def inflict_damage(self, robots: List[Robot]):
-        
+
+    def __inflict_damage(self, damage: int, robot: Robot):
+        if (0 <= damage <= 100):
+            if ((robot.get_damage() + damage) <= 100):
+                robot._Robot__set_damage(robot.get_damage() + damage)
+            else:
+                robot._Robot__set_damage(100)
+
+    def inflict_missile_damage(self, robots: List[Robot]):
+        if self.__hit_ground:
+            robots_damage_5_meters: List[Robot] = get_robots_in_range(
+                robots,
+                self.__explosion_position,
+                (0,5)
+            )
+            robots_damage_20_meters: List[Robot] = get_robots_in_range(
+                robots,
+                self.__explosion_position,
+                (5,20)
+            )
+            robots_damage_40_meters: List[Robot] = get_robots_in_range(
+                robots,
+                self.__explosion_position,
+                (20,40)
+            )
+            for robot in robots_damage_5_meters:
+                self.__inflict_damage(MISSILE_DAMAGE_5_METERS, robot)
+            for robot in robots_damage_20_meters:
+                self.__inflict_damage(MISSILE_DAMAGE_20_METERS, robot)
+            for robot in robots_damage_40_meters:
+                self.__inflict_damage(MISSILE_DAMAGE_40_METERS, robot)
 
 class Robot:
     __direction: int
@@ -145,7 +170,7 @@ class Robot:
             self.__wall_collision = True
         self.__position = (x_axis,y_axis)
 
-    def __scann(self, list_of_robots: list[Robot]):
+    def __scann(self, list_of_robots: List[Robot]):
         (x1,y1) = self.get_position()
         dist = float('inf')
         for robot in list_of_robots:
@@ -193,13 +218,6 @@ class Robot:
                     dist = d
         self.__scann_result = dist
 
-    def __inflict_damage(self, damage: int):
-        if (0 <= damage <= 100):
-            if ((self.get_damage() + damage) <= 100):
-                self.__damage = self.get_damage() + damage
-            else:
-                self.__damage = 100
-
     def __inflict_collision_damage(self):
         if ((self.get_damage() + COLLISION_DAMAGE) <= 100):
             self.__damage = self.get_damage() + COLLISION_DAMAGE
@@ -213,40 +231,16 @@ class Robot:
                 self.__cannon_degree,
                 self.__cannon_distance
             )
+            # for m in missiles:
+            #     m.move_missile()
             # Generate missile
-            for m in missiles:
-                m.move_missile()
             new_missile = Missile(self.__cannon_distance, self.get_position(), explosion_position)
             missiles.append(new_missile)
-            
-            for m in missiles: 
-                if 
-            self.__missile = explosion_position
-            robots_damage_5_meters: list[Robot] = get_robots_in_range(
-                robots,
-                explosion_position,
-                (0,5)
-            )
-            robots_damage_20_meters: list[Robot] = get_robots_in_range(
-                robots,
-                explosion_position,
-                (5,20)
-            )
-            robots_damage_40_meters: list[Robot] = get_robots_in_range(
-                robots,
-                explosion_position,
-                (20,40)
-            )
-            for robot in robots_damage_5_meters:
-                robot.__inflict_damage(MISSILE_DAMAGE_5_METERS)
-            for robot in robots_damage_20_meters:
-                robot.__inflict_damage(MISSILE_DAMAGE_20_METERS)
-            for robot in robots_damage_40_meters:
-                robot.__inflict_damage(MISSILE_DAMAGE_40_METERS)
+
             # start reload time
             self.__reload_time_counter = time.perf_counter()
 
-    def __check_collision(self, robots: list[Robot]):
+    def __check_collision(self, robots: List[Robot]):
         robots_collision = get_robots_in_range(robots, self.get_position(), (0,5))
         for _ in range(len(robots_collision)):
             self.__inflict_collision_damage()
@@ -300,12 +294,12 @@ def get_explosion_position(
 
 
 def get_robots_in_range(
-        robots: list[Robot],
+        robots: List[Robot],
         position: tuple[int, int],
         circle_area: tuple[int, int]
-    ) -> list[Robot]:
+    ) -> List[Robot]:
     (x1,y1) = position
-    robots_result: list[Robot] = []
+    robots_result: List[Robot] = []
     for robot in robots:
         (x2,y2) = robot.get_position()
         d = math.sqrt((x2-x1)**2+(y2-y1)**2)
