@@ -3,7 +3,38 @@ from constants import *
 import random
 import math
 import time
+from typing import List
 
+class Missile:
+    # __initial_position: tuple[float,float]
+    # __explosion_position: tuple[float,float]
+    
+    def __init__(self, total_distance, initial_position, explosion_position):
+        self.__total_distance = total_distance
+        self.__initial_position = initial_position
+        self.__explosion_position = explosion_position
+        self.__actual_position = initial_position
+        self.__distance_traveled = 0
+        self.__hit_ground = False
+        v = (explosion_position[0]-initial_position[0], explosion_position[1]-initial_position[1])
+        v_long = math.sqrt(v[0]**2+v[1]**2)
+        self.__u = v / v_long
+
+    def move_missile(self):
+        if self.__distance_traveled < self.__total_distance:
+            if self.__distance_traveled + MISSILE_VELOCITY < self.__total_distance:
+                self.__actual_position = self.__actual_position + MISSILE_VELOCITY*self.__u
+                self.__distance_traveled += MISSILE_VELOCITY
+            else:
+                self.__actual_position = self.__explosion_position
+                self.__distance_traveled = self.__total_distance
+                self.__hit_ground = True
+    
+    def hit_ground(self):
+        return self.__hit_ground
+    
+    def inflict_damage(self, robots: List[Robot]):
+        
 
 class Robot:
     __direction: int
@@ -175,7 +206,7 @@ class Robot:
         else:
             self.__damage = 100
 
-    def __attack(self, robots: list[Robot]):
+    def __attack(self, robots: List[Robot], missiles: List[Missile]):
         if (self.is_cannon_ready()):
             explosion_position: tuple[int, int] = get_explosion_position(
                 self.get_position(),
@@ -183,6 +214,13 @@ class Robot:
                 self.__cannon_distance
             )
             # Generate missile
+            for m in missiles:
+                m.move_missile()
+            new_missile = Missile(self.__cannon_distance, self.get_position(), explosion_position)
+            missiles.append(new_missile)
+            
+            for m in missiles: 
+                if 
             self.__missile = explosion_position
             robots_damage_5_meters: list[Robot] = get_robots_in_range(
                 robots,
