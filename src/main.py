@@ -208,7 +208,8 @@ env = Environment(
 
 template = env.get_template(f'email.html')
 
-async def send_email_async(email_to: EmailStr, username: str, code: str):
+def send_email_background(background_tasks: BackgroundTasks,
+                          email_to: EmailStr, username: str, code: str):
     message = MessageSchema(
         subject = 'PyRobots: Validation Code',
         recipients = [email_to],
@@ -216,7 +217,7 @@ async def send_email_async(email_to: EmailStr, username: str, code: str):
         subtype = 'html',
     )
     fm = FastMail(conf)
-    await fm.send_message(message, template_name='email.html')
+    background_tasks.add_task(fm.send_message, message, template_name='email.html')
 
 
 """
@@ -226,7 +227,8 @@ async def send_email_async(email_to: EmailStr, username: str, code: str):
     "/users",
     status_code=status.HTTP_201_CREATED
 )
-async def create_user(new_user: UserIn, db: Database = Depends(get_db)):
+async def create_user(background_tasks: BackgroundTasks,
+                      new_user: UserIn, db: Database = Depends(get_db)):
     if new_user.username in get_all_usernames(db):
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, 
@@ -253,7 +255,7 @@ async def create_user(new_user: UserIn, db: Database = Depends(get_db)):
                 new_user.email, new_user.avatar)
     id = get_id_by_username(db, new_user.username)
     code = create_access_token({'sub': new_user.username, 'id': id})
-    await send_email_async(new_user.email, new_user.username, code)
+    send_email_background(background_tasks, new_user.email, new_user.username, code)
     return {'operation_result':
                 'Verification code successfully sent to your email'}
 
