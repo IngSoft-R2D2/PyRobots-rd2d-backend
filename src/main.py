@@ -141,9 +141,8 @@ async def websocket_endpoint(
                 data = await websocket.receive_text()
         except WebSocketDisconnect:
             robot_name = get_robot_name_in_match(db, match_id, user_id)
-            msg = json.dumps({'event': 'Leave', 'player': get_username_by_id(db, user_id), 'robot': robot_name})
             manager.disconnect(user_id)
-            await manager.broadcast(msg)
+            await manager.broadcast({'event': 'Leave', 'player': get_username_by_id(db, user_id), 'robot': robot_name})
     except:
         raise Exception
 
@@ -547,8 +546,7 @@ async def join_match(
         robot_id=robot_id
     )
     robot_name = get_robot_name_by_id(db, robot_id)
-    msg = json.dumps({'event': 'Join', 'player': current_user.username, 'robot': robot_name})
-    await active_matches[match_id].broadcast(msg)
+    await active_matches[match_id].broadcast({'event': 'Join', 'player': current_user.username, 'robot': robot_name})
     return JoinMatchOut(
             operation_result="Successfully joined."
         )
@@ -591,7 +589,6 @@ async def leave_match(
             detail="Creator of the match is not allowed to leave."
         )
     robot_name = get_robot_name_in_match(db, match_id, current_user.id)
-    msg = json.dumps({'event': 'Leave', 'player': current_user.username, 'robot': robot_name})
     remove_user_with_robots_from_match(
         db,
         match_id=match_id,
@@ -599,7 +596,7 @@ async def leave_match(
     )
     # await active_matches[match_id].close(current_user.id)
     active_matches[match_id].disconnect(current_user.id)
-    await active_matches[match_id].broadcast(msg)
+    await active_matches[match_id].broadcast({'event': 'Leave', 'player': current_user.username, 'robot': robot_name})
     return LeaveMatchOut(
             operation_result="Successfully abandoned."
         )
@@ -675,8 +672,7 @@ async def start_match(
         detail="Invalid number of players."
     )
     robot_name = get_robot_name_in_match(db, match_id, current_user.id)
-    msg = json.dumps({'event': 'Start', 'player': current_user.username, 'robot': robot_name})
-    await active_matches[match_id].broadcast(msg)
+    await active_matches[match_id].broadcast({'event': 'Start', 'player': current_user.username, 'robot': robot_name})
     start_match_db(db, match_id)
     params: Tuple[List[int], int, int] = get_match_parameters(db, match_id)
     list_robots = params[0]
@@ -692,8 +688,7 @@ async def start_match(
     match_result_list = []
     for robot_id in match_result:
         match_result_list.append(match_result[robot_id])
-    msg = json.dumps({'event': 'Results', 'participants': match_result_list})
-    await active_matches[match_id].broadcast(msg)
+    await active_matches[match_id].broadcast({'event': 'Results', 'participants': match_result_list})
     end_match_db(db, match_id)
     for user_id in get_all_user_id_in_match(db, match_id):
         # await active_matches[match_id].close(current_user.id)
