@@ -113,6 +113,9 @@ class MatchRoom:
         await websocket.accept()
         self.active_connections[user_id] = websocket
 
+    async def close(self, user_id: int):
+        await self.active_connections[user_id].close()
+
     def disconnect(self, user_id: int):
         if user_id in self.active_connections:
             self.active_connections.pop(user_id)
@@ -122,6 +125,8 @@ class MatchRoom:
             await self.active_connections[user_id].send_json(message)
 
 active_matches: Dict[int, MatchRoom] = {}
+for match_id in load_old_active_matches(get_db()):
+    active_matches[match_id] = MatchRoom()
 
 @app.websocket("/match/{match_id}/user/{user_id}")
 async def websocket_endpoint(
@@ -131,13 +136,16 @@ async def websocket_endpoint(
     manager = active_matches[match_id]
     await manager.connect(user_id, websocket)
     try:
-        while True:
-            pass
-    except WebSocketDisconnect:
-        robot_name = get_robot_name_in_match(db, match_id, user_id)
-        msg = json.dumps({'event': 'Leave', 'player': get_username_by_id(db, user_id), 'robot': robot_name})
-        await manager.disconnect(user_id)
-        await manager.broadcast(msg)
+        try:
+            while True:
+                data = await websocket.receive_text()
+        except WebSocketDisconnect:
+            robot_name = get_robot_name_in_match(db, match_id, user_id)
+            msg = json.dumps({'event': 'Leave', 'player': get_username_by_id(db, user_id), 'robot': robot_name})
+            manager.disconnect(user_id)
+            await manager.broadcast(msg)
+    except:
+        raise Exception
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
@@ -589,7 +597,8 @@ async def leave_match(
         match_id=match_id,
         user_id=current_user.id
     )
-    await active_matches[match_id].disconnect(current_user.id)
+    # await active_matches[match_id].close(current_user.id)
+    active_matches[match_id].disconnect(current_user.id)
     await active_matches[match_id].broadcast(msg)
     return LeaveMatchOut(
             operation_result="Successfully abandoned."
@@ -686,4 +695,9 @@ async def start_match(
     msg = json.dumps({'event': 'Results', 'participants': match_result_list})
     await active_matches[match_id].broadcast(msg)
     end_match_db(db, match_id)
+    for user_id in get_all_user_id_in_match(db, match_id):
+        # await active_matches[match_id].close(current_user.id)
+        active_matches[match_id].disconnect(user_id)
+    if match_id in active_matches:
+        active_matches.pop(match_id)
     return { "operation_result" : "Match successfully runned." }

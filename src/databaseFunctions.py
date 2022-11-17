@@ -74,6 +74,10 @@ def get_match_by_creator_and_name(db: Database, creator_id: int, match_name: str
                 if m.creator.id==creator_id and m.name==match_name)[:1][0]
     return match_id
 
+@db_session
+def load_old_active_matches(db: Database):
+    return select(m.id for m in db.Match if m.is_finished == False)[:]
+
 # Creates a new Robot and returns it's id
 # user_id_in must be a valid Id in Users.
 @db_session
@@ -208,6 +212,13 @@ def user_in_match(
         match_id: int
     ):
     return db.User[user_id] in db.Match[match_id].users
+
+@db_session
+def get_all_user_id_in_match(
+        db:Database,
+        match_id: int
+    )-> List[int]:
+    return select (u.id for u in db.Match[match_id].users)[:]
 
 @db_session
 def is_valid_robot_id(
@@ -383,7 +394,7 @@ def get_match_parameters(
 @db_session
 def generate_robots_for_game(
         db: Database,
-        robots_id: "list[int]"
+        robots_id: List[int]
     ) -> List[Robot]:
     robots: List[Robot] = []
     index = 1
