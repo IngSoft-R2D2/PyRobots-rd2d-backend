@@ -363,11 +363,15 @@ async def create_robot(
 )
 async def create_match(
     match_to_cr: NewMatchIn,
-    current_user: User = Depends(get_current_user), db: Database = Depends(get_db)):
-    user_id = get_id_by_username(db, current_user.username)
+    current_user: UserDb = Depends(get_current_user), db: Database = Depends(get_db)):
     valid_match_config(match_to_cr)
+    if match_name_exists(db, match_to_cr.name, current_user.id):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="This user has a match with this name already."
+    )
     match_add(db,
-        user_id,
+        current_user.id,
         match_to_cr.name,
         match_to_cr.robot_id,
         match_to_cr.max_players,
@@ -377,7 +381,7 @@ async def create_match(
         match_to_cr.password
     )
     new_match_id = get_match_by_creator_and_name(db,
-        user_id,
+        current_user.id,
         match_to_cr.name
     )
     global active_matches

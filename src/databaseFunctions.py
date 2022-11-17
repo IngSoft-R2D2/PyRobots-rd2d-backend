@@ -206,6 +206,10 @@ def match_exists(db:Database, match_id: int):
     return db.Match.exists(id=match_id)
 
 @db_session
+def match_name_exists(db:Database, match_name: int, user_id: int):
+    return match_name in select(m.name for m in db.User[user_id].matches)[:]
+
+@db_session
 def user_in_match(
         db:Database,
         user_id:int,
