@@ -1,6 +1,6 @@
 # Max velocity per round (meters)
 VELOCITY = 50
-MISSILE_VELOCITY = 5
+MISSILE_VELOCITY = 100
 
 # Board dimensions (meters)
 FIRST_COORD = 0
