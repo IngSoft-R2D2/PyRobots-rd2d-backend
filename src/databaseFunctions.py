@@ -108,6 +108,7 @@ def get_all_matches(db: Database, user_id: int):
         match_dict = match.to_dict()
         match_dict.pop('password')
         match_dict['user_id'] = user_id
+        match_dict['user_name'] = get_username_by_id(db, user_id)
         match_not_full =  len(match.users) < match.max_players
         user_is_creator = db.User[user_id] == match.creator
         user_in_match = db.User[user_id] in match.users
