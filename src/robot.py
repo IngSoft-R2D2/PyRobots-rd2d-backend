@@ -7,7 +7,7 @@ from typing import List
 
 class Missile:
 
-    def __init__(self, total_distance, degree, initial_position, owner):
+    def __init__(self, total_distance, degree, initial_position, owner, id):
         self.__total_distance = total_distance
         self.__degree = degree
         self.__actual_position = initial_position
@@ -16,6 +16,10 @@ class Missile:
         self.__stopped = False
         self.__wall_collision = False
         self.__owner = owner
+        self.__id = id
+
+    def get_id(self):
+        return self.__id
 
     def get_position(self):
         return self.__actual_position
@@ -141,6 +145,7 @@ class Robot:
         self.__scanner_direction = random.randint(0,359)
         self.__resolution = 0
         self.__scann_result = float('inf')
+        self.__number_of_missiles = 0
 
     def get_direction(self):
         return self.__direction
@@ -278,7 +283,9 @@ class Robot:
     def __attack(self, robots: List[Robot], missiles: List[Missile]):
         if (self.is_cannon_ready()):
             # Generate missile
-            new_missile = Missile(self.__cannon_distance, self.__cannon_degree, self.get_position(), self.__get_name())
+            self.__number_of_missiles += 1
+            missile_id = "missile_" + str(self.__number_of_missiles) + "_" + self.__get_name()
+            new_missile = Missile(self.__cannon_distance, self.__cannon_degree, self.get_position(), self.__get_name(), missile_id)
             missiles.append(new_missile)
             # start reload time
             self.__reload_time_counter = time.perf_counter()

@@ -30,14 +30,17 @@ def round(robots: List[Robot], missiles: List[Missile]) -> dict:
     for m in missiles:
         m.inflict_missile_damage(not_dead_robots)
 
-    i = 1
     for m in missiles:
-        missile_key = "missile_"+str(i)
+        missile_key = m.get_id()
         round_json['Missiles'][missile_key] = {}
         round_json['Missiles'][missile_key]['missile_position'] = m.get_position()
         round_json['Missiles'][missile_key]['missile_status'] = m.is_stopped()
         round_json['Missiles'][missile_key]['owner'] = m.get_owner()
-        i += 1
+
+    check_explotion = missiles[:]
+    for m in check_explotion:
+        if m.is_stopped():
+            missiles.remove(m)
 
     for m in missiles:
         m.move_missile()
