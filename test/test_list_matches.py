@@ -40,6 +40,7 @@ matches_list = {
     "is_finished": False,
     "creator": 1,
     "user_id": 1,
+    "user_name": "mati",
     "players": {
       "mati": {
         "robot_id": "1",
@@ -68,6 +69,7 @@ matches_list = {
     "is_finished": False,
     "creator": 2,
     "user_id": 1,
+    "user_name": "mati",
     "players": {
       "juan": {
         "robot_id": "2",
