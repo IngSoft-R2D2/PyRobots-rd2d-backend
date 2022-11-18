@@ -6,26 +6,22 @@ import time
 from typing import List
 
 class Missile:
-    # __initial_position: tuple[float,float]
-    # __explosion_position: tuple[float,float]
 
-    def __init__(self, total_distance, degree, initial_position):
+    def __init__(self, total_distance, degree, initial_position, owner):
         self.__total_distance = total_distance
-        # self.__initial_position = initial_position
-        # self.__explosion_position = self.__calculate_missile_position(initial_position, total_distance)
         self.__degree = degree
         self.__actual_position = initial_position
         self.__distance_traveled = 0
         self.__hit_ground = total_distance == 0
         self.__stopped = False
         self.__wall_collision = False
-
-        # v = (explosion_position[0]-initial_position[0], explosion_position[1]-initial_position[1])
-        # v_long = math.sqrt(v[0]**2+v[1]**2)
-        # self.__u = (v[0]/v_long, v[1]/v_long)
+        self.__owner = owner
 
     def get_position(self):
         return self.__actual_position
+
+    def get_owner(self):
+        return self.__owner
 
     def is_stopped(self):
         return self.__stopped
@@ -41,16 +37,6 @@ class Missile:
                                                                            remaining_distance_before_explotion)
                 self.__distance_traveled += remaining_distance_before_explotion
                 self.__hit_ground = True
-
-    # def move_missile(self):
-    #     if not self.__stopped and self.__distance_traveled < self.__total_distance:
-    #         if self.__distance_traveled + MISSILE_VELOCITY < self.__total_distance:
-    #             self.__actual_position = self.__actual_position + MISSILE_VELOCITY*self.__u
-    #             self.__distance_traveled += MISSILE_VELOCITY
-    #         else:
-    #             self.__actual_position = self.__explosion_position
-    #             self.__distance_traveled = self.__total_distance
-    #             self.__hit_ground = True
 
     def __inflict_damage(self, damage: int, robot: Robot):
         if (0 <= damage <= 100):
@@ -112,8 +98,6 @@ class Missile:
         else:
             x_axis = initial_position[0] + x
             y_axis = initial_position[1] - y
-        print("antes")
-        print((x_axis,y_axis))
         if x_axis < 0:
             x_axis = 0
             self.__wall_collision = True
@@ -126,8 +110,6 @@ class Missile:
         if x_axis > 999:
             x_axis = 999
             self.__wall_collision = True
-        print("despues")
-        print((x_axis,y_axis))
         return (x_axis,y_axis)
 
 class Robot:
@@ -296,9 +278,8 @@ class Robot:
     def __attack(self, robots: List[Robot], missiles: List[Missile]):
         if (self.is_cannon_ready()):
             # Generate missile
-            new_missile = Missile(self.__cannon_distance, self.__cannon_degree, self.get_position())
+            new_missile = Missile(self.__cannon_distance, self.__cannon_degree, self.get_position(), self.__get_name())
             missiles.append(new_missile)
-
             # start reload time
             self.__reload_time_counter = time.perf_counter()
 
@@ -308,9 +289,6 @@ class Robot:
             self.__inflict_collision_damage()
         if self.__wall_collision:
             self.__inflict_collision_damage()
-
-    def __get_missile(self):
-        return self.__missile
 
     def __set_damage(self, damage):
         self.__damage = damage

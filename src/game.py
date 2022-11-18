@@ -8,6 +8,8 @@ from typing import (
 
 def round(robots: List[Robot], missiles: List[Missile]) -> dict:
     round_json = {}
+    round_json['Robots'] = {}
+    round_json['Missiles'] = {}
 
     not_dead_robots = robots[:]
     for bot in robots:
@@ -30,10 +32,11 @@ def round(robots: List[Robot], missiles: List[Missile]) -> dict:
 
     i = 1
     for m in missiles:
-        key = "m"+str(i)
-        round_json[key] = {}
-        round_json[key]['missile_position'] = m.get_position()
-        round_json[key]['missile_status'] = m.is_stopped()
+        missile_key = "missile_"+str(i)
+        round_json['Missiles'][missile_key] = {}
+        round_json['Missiles'][missile_key]['missile_position'] = m.get_position()
+        round_json['Missiles'][missile_key]['missile_status'] = m.is_stopped()
+        round_json['Missiles'][missile_key]['owner'] = m.get_owner()
         i += 1
 
     for m in missiles:
@@ -41,8 +44,8 @@ def round(robots: List[Robot], missiles: List[Missile]) -> dict:
 
     for bot in robots:
         bot_name = bot._Robot__get_name()
-        round_json[bot_name] = {}
-        round_json[bot_name]['position'] = bot.get_position()
+        round_json['Robots'][bot_name] = {}
+        round_json['Robots'][bot_name]['position'] = bot.get_position()
 
     for bot in not_dead_robots:
         robots_collision = not_dead_robots[:]
@@ -54,7 +57,7 @@ def round(robots: List[Robot], missiles: List[Missile]) -> dict:
 
     for bot in robots:
         bot_name = bot._Robot__get_name()
-        round_json[bot_name]['damage'] = bot.get_damage()
+        round_json['Robots'][bot_name]['damage'] = bot.get_damage()
 
     return round_json
 
