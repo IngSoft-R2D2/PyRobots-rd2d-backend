@@ -1,5 +1,5 @@
 import sys
-from database_for_testing_list_robots import get_db_override
+from database_for_testing import get_db_override
 sys.path.append('../src/')
 from main import app, get_db
 
@@ -11,7 +11,7 @@ app.dependency_overrides[get_db] = get_db_override
 client = TestClient(app)
 
 robots_list = {
-    "1": {
+    "5": {
         'name':"optimus",
         'avatar':"image1.64base_coded_img",
         'matches_played':0,
@@ -19,7 +19,7 @@ robots_list = {
         'matches_lost':0,
         'matches_tied':0
     },
-    "2": {
+    "7": {
         'name':"ratchet",
         'avatar':"image2.64base_coded_img",
         'matches_played':0,

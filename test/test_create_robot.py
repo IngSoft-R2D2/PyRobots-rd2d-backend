@@ -5,6 +5,7 @@ from main import app, get_db
 
 from fastapi.testclient import TestClient
 from fastapi import status
+from subprocess import run
 
 app.dependency_overrides[get_db] = get_db_override
 
@@ -38,7 +39,7 @@ def test_register_robot():
     assert response.json()["operation_result"] == "Successfully created."
 
 def test_register_robot_no_avatar():
-    with open("files_for_testing/rir.py", "rb") as f1:
+    with open("files_for_testing/roboto.py", "rb") as f1:
         files = {"behaviour_file": f1}
         response = client.post(
             "/robots/?name=OPTIMUS_PRIME",
@@ -58,3 +59,5 @@ def test_register_robot_with_robot_name_in_user_robots():
         )
     assert response.status_code == status.HTTP_409_CONFLICT
     assert response.json()["detail"] == "This user has a robot with this name already."
+    run(["rm", "robots/user_id_1/robotito.py"])
+    run(["rm", "robots/user_id_1/roboto.py"])

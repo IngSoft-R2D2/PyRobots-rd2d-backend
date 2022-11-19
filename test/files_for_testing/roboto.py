@@ -2,7 +2,7 @@ import sys
 sys.path.append('../../')
 from robot import Robot
 
-class Rob(Robot):
+class Roboto(Robot):
     def initialize(self):
         pass
 
