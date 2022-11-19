@@ -2,7 +2,6 @@ src/__pycache__/
 test/__pycache__/
 src/env/
 src/robots/
-test/robots
 test/.env
 src/.env
 src/database.sqlite
