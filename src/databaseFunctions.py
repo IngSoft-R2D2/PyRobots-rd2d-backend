@@ -113,7 +113,7 @@ def get_all_matches(db: Database, user_id: int):
         user_is_creator = db.User[user_id] == match.creator
         user_in_match = db.User[user_id] in match.users
         match_players_quantity_satisfied = (len(match.users) >= match.min_players and
-                                             len(match.users) < match.max_players)
+                                             len(match.users) <= match.max_players)
 
         # add usernames with robot names.
         robots_in_match = {}
