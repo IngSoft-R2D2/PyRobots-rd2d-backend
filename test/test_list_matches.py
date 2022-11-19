@@ -1,9 +1,8 @@
 import sys
-from database_for_testing_list_matches import get_db_override
+from database_for_testing import get_db_override
 sys.path.append('../src/')
 from main import app, get_db
 
-import json
 from fastapi.testclient import TestClient
 from fastapi import status
 
@@ -32,34 +31,38 @@ matches_list = {
     "id": 1,
     "name": "partida1",
     "min_players": 2,
-    "max_players": 2,
+    "max_players": 4,
     "number_of_games": 123,
     "number_of_rounds": 123,
     "is_secured": False,
     "is_started": False,
     "is_finished": False,
-    "creator": 1,
-    "user_id": 1,
+    "creator": 4,
+    "user_id": 4,
     "user_name": "mati",
     "players": {
       "mati": {
-        "robot_id": "1",
+        "robot_id": "5",
         "robot_name": "optimus"
       },
       "juan": {
-        "robot_id": "2",
+        "robot_id": "6",
         "robot_name": "megatron"
+      },
+      "angelescch": {
+        "robot_id": "1",
+        "robot_name": "R2D2"
       }
     },
     "user_is_creator": True,
     "is_available_to_join": False,
     "is_available_to_leave": False,
-    "is_ready_to_start": False,
+    "is_ready_to_start": True,
     "user_is_already_joined": True
   },
   "match_2": {
     "id": 2,
-    "name": "partida_de_juan",
+    "name": "partida2",
     "min_players": 2,
     "max_players": 2,
     "number_of_games": 113,
@@ -67,13 +70,38 @@ matches_list = {
     "is_secured": False,
     "is_started": False,
     "is_finished": False,
-    "creator": 2,
-    "user_id": 1,
+    "creator": 5,
+    "user_id": 4,
     "user_name": "mati",
     "players": {
       "juan": {
-        "robot_id": "2",
+        "robot_id": "6",
         "robot_name": "megatron"
+      }
+    },
+    "user_is_creator": False,
+    "is_available_to_join": True,
+    "is_available_to_leave": False,
+    "is_ready_to_start": False,
+    "user_is_already_joined": False
+  },
+    "match_3": {
+    "id": 3,
+    "name": "partida3",
+    "min_players": 2,
+    "max_players": 3,
+    "number_of_games": 20,
+    "number_of_rounds": 10000,
+    "is_secured": False,
+    "is_started": False,
+    "is_finished": False,
+    "creator": 1,
+    "user_id": 4,
+    "user_name": "mati",
+    "players": {
+      "angelescch": {
+        "robot_id": "2",
+        "robot_name": "MEGATRON"
       }
     },
     "user_is_creator": False,

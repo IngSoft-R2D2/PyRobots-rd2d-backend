@@ -19,155 +19,56 @@ def define_database_for_testing():
         db.User(username="fake",email="fake@gmail.com",
                 password=pwd_context.hash("8924F35bi"),avatar="avatar.img",
                 is_confirmed=False)
+        db.User(username="mati",email="matimail@gmail.com",
+                password=pwd_context.hash("ssssSSSS1"),avatar="avatar.img",
+                is_confirmed=True)
+        db.User(username="juan",email="juanmail@gmail.com",
+                password=pwd_context.hash("ssssSSSS1"),avatar="avatar.img",
+                is_confirmed=True)
         db.Robot(user = db.User.get(username="angelescch"), name="R2D2",
-                 avatar="image1.64base_coded_img", behaviour_file="RSD2.py")
+                 avatar="image1.64base_coded_img", behaviour_file="rir.py")
         db.Robot(user = db.User.get(username="angelescch"), name="MEGATRON",
                  avatar="image2.64base_coded_img", behaviour_file="MegaRobot.py")
         db.Robot(user = db.User.get(username="angelescch"), name="Robot3000",
                  avatar="image3.64base_coded_img", behaviour_file="Robot3000.py")
         db.Robot(user=db.User.get(username="keyword"), name="MEGATRON",
                  avatar="64base_coded_img", behaviour_file="rob.py")
-        db.Match(creator=db.User.get(username="angelescch"),
-                name="epic",
-                max_players=4,
-                min_players=2,
-                number_of_games=100,
-                number_of_rounds=10000,
-                password="secret",
-                robots = [db.Robot[1]],
-                users = [db.User.get(username="angelescch")])
-        db.Match(creator=db.User.get(username="keyword"),
-                name="pool",
-                max_players=10,
-                min_players=8,
-                number_of_games=125,
-                number_of_rounds=1010,
-                robots = [db.Robot[4]],
-                users = [db.User.get(username="keyword")])
-        db.Match(creator=db.User.get(username="keyword"),
-                name="NGBI",
-                max_players=5,
-                min_players=3,
-                number_of_games=5,
-                number_of_rounds=10,
-                password="AGSV87NG4",
-                robots = [db.Robot[4]],
-                users = [db.User.get(username="keyword")])
-        db.Match(creator=db.User.get(username="angelescch"),
-                name="KGN",
-                max_players=5,
-                min_players=3,
-                number_of_games=5,
-                number_of_rounds=10,
-                robots = [db.Robot[3]],
-                users = [db.User.get(username="angelescch")])
-        db.Match(creator=db.User.get(username="keyword"),
-                name="pool2",
-                max_players=10,
-                min_players=8,
-                number_of_games=125,
-                number_of_rounds=1010,
-                robots = [db.Robot[4],db.Robot[1]],
-                users = [
-                    db.User.get(username="keyword"),
-                    db.User.get(username="angelescch")
-                ]
-            )
-        db.Match(creator=db.User.get(username="keyword"),
-                name="pool3",
-                max_players=10,
-                min_players=8,
-                number_of_games=125,
-                number_of_rounds=1010,
-                robots = [db.Robot[4]],
-                users = [db.User.get(username="keyword")])
-        db.Match(creator=db.User.get(username="angelescch"),
-                name="epic2",
-                max_players=4,
-                min_players=2,
-                number_of_games=100,
-                number_of_rounds=10000,
-                password="secret",
-                robots = [db.Robot[1]],
-                users = [db.User.get(username="angelescch")])
-        db.Match(creator=db.User.get(username="keyword"),
-                name="pool4",
-                max_players=10,
-                min_players=8,
-                number_of_games=125,
-                number_of_rounds=1010,
-                robots = [db.Robot[4],db.Robot[1]],
-                users = [
-                    db.User.get(username="keyword"),
-                    db.User.get(username="angelescch")
-                ]
-            )
-        db.Match(creator=db.User.get(username="keyword"),
-                name="fake_match_for_join_1",
-                max_players=10,
-                min_players=8,
-                number_of_games=125,
-                number_of_rounds=1010,
-                robots = [db.Robot[4],db.Robot[1]],
-                users = [
-                    db.User.get(username="keyword"),
-                    db.User.get(username="angelescch")
-                ]
-            )
-        db.Match(creator=db.User.get(username="keyword"),
-                name="fake_match_for_join_2",
-                max_players=10,
-                min_players=8,
-                number_of_games=125,
-                number_of_rounds=1010,
-                robots = [db.Robot[4]],
-                users = [db.User.get(username="keyword")])
-        db.Match(creator=db.User.get(username="keyword"),
-                name="fake_match_for_join_3",
-                max_players=10,
-                min_players=8,
-                number_of_games=125,
-                number_of_rounds=1010,
-                robots = [db.Robot[4]],
-                users = [db.User.get(username="keyword")])
-        db.Match(creator=db.User.get(username="keyword"),
-                name="full_match",
-                max_players=2,
-                min_players=2,
-                number_of_games=125,
-                number_of_rounds=1010,
-                robots = [db.Robot[4],db.Robot[1]],
-                users = [
-                    db.User.get(username="keyword"),
-                    db.User.get(username="angelescch")
-                ]
-            )
-        db.Match(creator=db.User.get(username="keyword"),
-                name="finished_match",
-                max_players=10,
-                min_players=8,
-                number_of_games=125,
-                number_of_rounds=1010,
-                robots = [db.Robot[4],db.Robot[1]],
-                users = [
-                    db.User.get(username="keyword"),
-                    db.User.get(username="angelescch")
-                ],
-                is_finished=True
-            )
-        db.Match(creator=db.User.get(username="angelescch"),
-                name="match_that_can_begin",
-                max_players=10,
-                min_players=2,
-                number_of_games=125,
-                number_of_rounds=1010,
-                robots = [db.Robot[4],db.Robot[1]],
-                users = [
-                    db.User.get(username="keyword"),
-                    db.User.get(username="angelescch")
-                ],
-                is_finished=False
-            )
+        db.Robot(user = db.User.get(username="mati"), name="optimus",
+                 avatar="image1.64base_coded_img", behaviour_file="optimus.py")
+        db.Robot(user = db.User.get(username="juan"), name="megatron",
+                 avatar="image2.64base_coded_img", behaviour_file="megatron.py")
+        db.Robot(user = db.User.get(username="mati"), name="ratchet",
+                 avatar="image2.64base_coded_img", behaviour_file="ratchet.py")
+        db.Match(
+                    creator=db.User.get(username="mati"),
+                    name="partida1",
+                    max_players=4,
+                    min_players=2,
+                    number_of_games=123,
+                    number_of_rounds=123,
+                    robots = [db.Robot[5],db.Robot[1],db.Robot[6]],
+                    users = [db.User.get(username="mati"),db.User.get(username="angelescch"),db.User.get(username="juan")]
+                )
+        db.Match(
+                    creator=db.User.get(username="juan"),
+                    name="partida2",
+                    max_players=2,
+                    min_players=2,
+                    number_of_games=113,
+                    number_of_rounds=13,
+                    robots = [db.Robot[6]],
+                    users = [db.User.get(username="juan")]
+                )
+        db.Match(
+                    creator=db.User.get(username="angelescch"),
+                    name="partida3",
+                    max_players=3,
+                    min_players=2,
+                    number_of_games=20,
+                    number_of_rounds=10000,
+                    robots = [db.Robot[2]],
+                    users = [db.User.get(username="angelescch")]
+                )
     return db
 
 def get_db_override():

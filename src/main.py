@@ -21,7 +21,6 @@ from fastapi.responses import RedirectResponse
 from entities import define_database
 from game import game, run_match
 
-import json
 import shutil
 import os.path
 
@@ -177,12 +176,6 @@ async def get_current_user(
     if user is None:
         raise credentials_exception
     return user
-
-
-# TODO: implementation
-@app.get("/")
-async def root():
-    pass
 
 
 """
