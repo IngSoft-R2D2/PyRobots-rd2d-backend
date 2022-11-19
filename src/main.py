@@ -109,6 +109,8 @@ class MatchRoom:
         self.active_connections: Dict[int, WebSocket] = {}
 
     async def connect(self, user_id: int, websocket: WebSocket):
+        print("connect")
+        print("types user_id", type(user_id))
         await websocket.accept()
         self.active_connections[user_id] = websocket
 
@@ -593,7 +595,7 @@ async def leave_match(
         match_id=match_id,
         user_id=current_user.id
     )
-    # await active_matches[match_id].close(current_user.id)
+    await active_matches[match_id].close(current_user.id)
     active_matches[match_id].disconnect(current_user.id)
     await active_matches[match_id].broadcast({'event': 'Leave', 'player': current_user.username, 'robot': robot_name})
     return LeaveMatchOut(
@@ -690,7 +692,7 @@ async def start_match(
     await active_matches[match_id].broadcast({'event': 'Results', 'participants': match_result_list})
     end_match_db(db, match_id)
     for user_id in get_all_user_id_in_match(db, match_id):
-        # await active_matches[match_id].close(current_user.id)
+        await active_matches[match_id].close(user_id)
         active_matches[match_id].disconnect(user_id)
     if match_id in active_matches:
         active_matches.pop(match_id)
