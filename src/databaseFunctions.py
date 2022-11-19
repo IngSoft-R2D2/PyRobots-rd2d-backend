@@ -130,7 +130,7 @@ def get_all_matches(db: Database, user_id: int):
         # add control attributes.
         match_dict['user_is_creator'] = db.User[user_id] == match.creator
         match_dict['is_available_to_join'] = (not match.is_started and not match.is_finished 
-                                                and match_not_full and not user_is_creator)
+                                                and match_not_full and not user_is_creator and not user_in_match)
         match_dict['is_available_to_leave'] = (not match.is_started and not match.is_finished
                                                 and user_in_match and not user_is_creator)
         match_dict['is_ready_to_start'] = (not match.is_started and not match.is_finished
