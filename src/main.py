@@ -109,8 +109,6 @@ class MatchRoom:
         self.active_connections: Dict[int, WebSocket] = {}
 
     async def connect(self, user_id: int, websocket: WebSocket):
-        print("connect")
-        print("types user_id", type(user_id))
         await websocket.accept()
         self.active_connections[user_id] = websocket
 
