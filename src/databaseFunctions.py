@@ -408,7 +408,8 @@ def generate_robots_for_game(
         user_id = db.Robot[r_id].user.id
         filename_path = f"robots/user_id_{user_id}/"+r.behaviour_file
         exec(open(filename_path).read(), globals())
-        without_suffix = r.behaviour_file.removesuffix('.py')
+        if r.behaviour_file.endswith('.py'):
+            without_suffix = r.behaviour_file[:-3]
         words_list_lowercase = without_suffix.split('_')
         words_list_capitalize = [word.capitalize() for word in words_list_lowercase]
         class_name = ''.join(words_list_capitalize)
