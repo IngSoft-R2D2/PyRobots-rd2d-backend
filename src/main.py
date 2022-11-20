@@ -108,6 +108,9 @@ class MatchRoom:
     def __init__(self):
         self.active_connections: Dict[int, WebSocket] = {}
 
+    def connected_users(self):
+        return list(self.active_connections.keys())
+
     async def connect(self, user_id: int, websocket: WebSocket):
         await websocket.accept()
         self.active_connections[user_id] = websocket
@@ -139,9 +142,7 @@ async def websocket_endpoint(
             while True:
                 data = await websocket.receive_text()
         except WebSocketDisconnect:
-            robot_name = get_robot_name_in_match(db, match_id, user_id)
-            manager.disconnect(user_id)
-            await manager.broadcast({'event': 'Leave', 'player': get_username_by_id(db, user_id), 'robot': robot_name})
+                manager.disconnect(user_id)
     except:
         raise Exception
 
@@ -593,9 +594,11 @@ async def leave_match(
         match_id=match_id,
         user_id=current_user.id
     )
-    await active_matches[match_id].close(current_user.id)
-    active_matches[match_id].disconnect(current_user.id)
-    await active_matches[match_id].broadcast({'event': 'Leave', 'player': current_user.username, 'robot': robot_name})
+    connected_users = active_matches[match_id].connected_users()
+    if current_user.id in connected_users:
+        await active_matches[match_id].close(current_user.id)
+        active_matches[match_id].disconnect(current_user.id)
+        await active_matches[match_id].broadcast({'event': 'Leave', 'player': current_user.username, 'robot': robot_name})
     return LeaveMatchOut(
             operation_result="Successfully abandoned."
         )
@@ -689,7 +692,8 @@ async def start_match(
         match_result_list.append(match_result[robot_id])
     await active_matches[match_id].broadcast({'event': 'Results', 'participants': match_result_list})
     end_match_db(db, match_id)
-    for user_id in get_all_user_id_in_match(db, match_id):
+    users_to_disconnect = active_matches[match_id].connected_users()
+    for user_id in users_to_disconnect:
         await active_matches[match_id].close(user_id)
         active_matches[match_id].disconnect(user_id)
     if match_id in active_matches:
