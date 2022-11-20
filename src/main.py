@@ -21,7 +21,6 @@ from fastapi.responses import RedirectResponse
 from entities import define_database
 from game import game, run_match
 
-import json
 import shutil
 import os.path
 
@@ -109,6 +108,9 @@ class MatchRoom:
     def __init__(self):
         self.active_connections: Dict[int, WebSocket] = {}
 
+    def connected_users(self):
+        return list(self.active_connections.keys())
+
     async def connect(self, user_id: int, websocket: WebSocket):
         await websocket.accept()
         self.active_connections[user_id] = websocket
@@ -140,9 +142,7 @@ async def websocket_endpoint(
             while True:
                 data = await websocket.receive_text()
         except WebSocketDisconnect:
-            robot_name = get_robot_name_in_match(db, match_id, user_id)
-            manager.disconnect(user_id)
-            await manager.broadcast({'event': 'Leave', 'player': get_username_by_id(db, user_id), 'robot': robot_name})
+                manager.disconnect(user_id)
     except:
         raise Exception
 
@@ -179,12 +179,6 @@ async def get_current_user(
     return user
 
 
-# TODO: implementation
-@app.get("/")
-async def root():
-    pass
-
-
 """
 send email
 """
@@ -208,7 +202,8 @@ env = Environment(
 
 template = env.get_template(f'email.html')
 
-async def send_email_async(email_to: EmailStr, username: str, code: str):
+def send_email_background(background_tasks: BackgroundTasks,
+                          email_to: EmailStr, username: str, code: str):
     message = MessageSchema(
         subject = 'PyRobots: Validation Code',
         recipients = [email_to],
@@ -216,7 +211,7 @@ async def send_email_async(email_to: EmailStr, username: str, code: str):
         subtype = 'html',
     )
     fm = FastMail(conf)
-    await fm.send_message(message, template_name='email.html')
+    background_tasks.add_task(fm.send_message, message, template_name='email.html')
 
 
 """
@@ -226,7 +221,8 @@ async def send_email_async(email_to: EmailStr, username: str, code: str):
     "/users",
     status_code=status.HTTP_201_CREATED
 )
-async def create_user(new_user: UserIn, db: Database = Depends(get_db)):
+async def create_user(background_tasks: BackgroundTasks,
+                      new_user: UserIn, db: Database = Depends(get_db)):
     if new_user.username in get_all_usernames(db):
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, 
@@ -253,7 +249,7 @@ async def create_user(new_user: UserIn, db: Database = Depends(get_db)):
                 new_user.email, new_user.avatar)
     id = get_id_by_username(db, new_user.username)
     code = create_access_token({'sub': new_user.username, 'id': id})
-    await send_email_async(new_user.email, new_user.username, code)
+    send_email_background(background_tasks, new_user.email, new_user.username, code)
     return {'operation_result':
                 'Verification code successfully sent to your email'}
 
@@ -598,9 +594,11 @@ async def leave_match(
         match_id=match_id,
         user_id=current_user.id
     )
-    # await active_matches[match_id].close(current_user.id)
-    active_matches[match_id].disconnect(current_user.id)
-    await active_matches[match_id].broadcast({'event': 'Leave', 'player': current_user.username, 'robot': robot_name})
+    connected_users = active_matches[match_id].connected_users()
+    if current_user.id in connected_users:
+        await active_matches[match_id].close(current_user.id)
+        active_matches[match_id].disconnect(current_user.id)
+        await active_matches[match_id].broadcast({'event': 'Leave', 'player': current_user.username, 'robot': robot_name})
     return LeaveMatchOut(
             operation_result="Successfully abandoned."
         )
@@ -694,8 +692,9 @@ async def start_match(
         match_result_list.append(match_result[robot_id])
     await active_matches[match_id].broadcast({'event': 'Results', 'participants': match_result_list})
     end_match_db(db, match_id)
-    for user_id in get_all_user_id_in_match(db, match_id):
-        # await active_matches[match_id].close(current_user.id)
+    users_to_disconnect = active_matches[match_id].connected_users()
+    for user_id in users_to_disconnect:
+        await active_matches[match_id].close(user_id)
         active_matches[match_id].disconnect(user_id)
     if match_id in active_matches:
         active_matches.pop(match_id)

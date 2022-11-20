@@ -10,40 +10,33 @@ app.dependency_overrides[get_db] = get_db_override
 
 client = TestClient(app)
 
-fk_list_robots = {
-    "1": {
-        'name':"R2D2",
+robots_list = {
+    "5": {
+        'name':"optimus",
         'avatar':"image1.64base_coded_img",
         'matches_played':0,
         'matches_won':0,
         'matches_lost':0,
-        'matches_drawed':0
+        'matches_tied':0
     },
-    "2": {
-        'name':"MEGATRON",
+    "7": {
+        'name':"ratchet",
         'avatar':"image2.64base_coded_img",
         'matches_played':0,
         'matches_won':0,
         'matches_lost':0,
-        'matches_drawed':0
-    },
-    "3": {
-        'name':"Robot3000",
-        'avatar':"image3.64base_coded_img",
-        'matches_played':0,
-        'matches_won':0,
-        'matches_lost':0,
-        'matches_drawed':0
+        'matches_tied':0
     }
 }
 
 access_token = ""
 token_type = ""
+wrong_token = "eyJGOiJIUzIiIsInR5cCIkpXVCJyJzdisdWNhcyIsImV46MTY2ODDc2OH6ksb20clr.sg05kd.y-1k4Ul9hYApOgRTRnkgXpSTsm7PuuEvVx8UbBTJfbp7E4SEXQU"
 
 def test_login_to_get_token():
     response = client.post(
         "/login",
-        data={"username": "angelescch","password": "ssssSSS1"}
+        data={"username": "mati","password": "ssssSSSS1"}
     )
     assert response.status_code == status.HTTP_200_OK
     global access_token
@@ -57,5 +50,13 @@ def test_list_user_robots():
         "/robots",
         headers={"Authorization": token_type+" "+access_token}
         )
-    assert response.status_code == status.HTTP_200_OK
-    assert response.json() == fk_list_robots
+    assert response.status_code==status.HTTP_200_OK
+    assert response.json()==robots_list
+
+def test_get_matches_not_autheticated_user():
+    response = client.get(
+        "/matches",
+        headers={"Authorization": token_type + " " + wrong_token}   
+    )
+    assert response.status_code==status.HTTP_401_UNAUTHORIZED
+    assert response.json()=={"detail":"Could not validate credentials"}
