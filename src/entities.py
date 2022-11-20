@@ -24,6 +24,7 @@ def define_entities(db):
         password = Optional(str)
         is_started = Required(bool, default=False, sql_default='0')
         is_finished = Required(bool, default=False, sql_default='0')
+        results = Required(Json, default={})
         robots = Set('Robot', reverse='matches')
         users = Set('User', reverse='matches')
         creator = Required(User, reverse='created_matches')
