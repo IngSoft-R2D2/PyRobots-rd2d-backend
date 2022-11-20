@@ -64,7 +64,7 @@ def round(robots: List[Robot], missiles: List[Missile]) -> dict:
 
     return round_json
 
-def competitive_round(robots: List[Robot]):
+def competitive_round(robots: List[Robot], missiles: List[Missile]):
     for bot in robots:
         bot.respond()
 
@@ -73,16 +73,22 @@ def competitive_round(robots: List[Robot]):
         robots_to_scann.remove(bot)
         bot._Robot__scann(robots_to_scann)
 
-    # for bot in robots:
-        # bot._Robot__attack(robots)
-
     for bot in robots:
-        bot._Robot__move()
+        bot._Robot__attack(robots, missiles)
+
+    for m in missiles:
+        m.inflict_missile_damage(robots)
+
+    for m in missiles:
+        m.move_missile()
 
     for bot in robots:
         robots_collision = robots[:]
         robots_collision.remove(bot)
         bot._Robot__check_collision(robots_collision)
+
+    for bot in robots:
+        bot._Robot__move()
 
     for bot in robots:
         if bot.get_damage() == 100:
@@ -94,7 +100,6 @@ def game(number_of_rounds: int, robots: List[Robot]) -> dict:
     game_json = {}
     for bot in robots:
         bot.initialize()
-        bot._Robot__set_damage(0)
     for round_index in range(1,number_of_rounds+1):
         key = "round_" + str(round_index)
         game_json[key] = round(robots,missiles)
@@ -108,11 +113,12 @@ def game(number_of_rounds: int, robots: List[Robot]) -> dict:
     return game_json
 
 def competitive_game(number_of_rounds: int, robots: List[Robot]):
+    missiles: List[Missile] = []
     winners = []
     for bot in robots:
         bot.initialize()
     for _ in range(number_of_rounds):
-        competitive_round(robots)
+        competitive_round(robots,missiles)
         if len(robots) < 2:
             break
     if len(robots) > 0 :
