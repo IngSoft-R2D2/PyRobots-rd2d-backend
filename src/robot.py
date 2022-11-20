@@ -105,14 +105,14 @@ class Missile:
         if x_axis < 0:
             x_axis = 0
             self.__wall_collision = True
+        elif x_axis > 999:
+            x_axis = 999
+            self.__wall_collision = True
         if y_axis < 0:
             y_axis = 0
             self.__wall_collision = True
-        if y_axis > 999:
+        elif y_axis > 999:
             y_axis = 999
-            self.__wall_collision = True
-        if x_axis > 999:
-            x_axis = 999
             self.__wall_collision = True
         return (x_axis,y_axis)
 
@@ -285,7 +285,8 @@ class Robot:
             # Generate missile
             self.__number_of_missiles += 1
             missile_id = "missile_" + str(self.__number_of_missiles) + "_" + self.__get_name()
-            new_missile = Missile(self.__cannon_distance, self.__cannon_degree, self.get_position(), self.__get_name(), missile_id)
+            new_missile = Missile(self.__cannon_distance, self.__cannon_degree,
+                                  self.get_position(), self.__get_name(), missile_id)
             missiles.append(new_missile)
             # start reload time
             self.__reload_time_counter = time.perf_counter()
@@ -296,6 +297,7 @@ class Robot:
             self.__inflict_collision_damage()
         if self.__wall_collision:
             self.__inflict_collision_damage()
+            self.__wall_collision = False
 
     def __set_damage(self, damage):
         self.__damage = damage
