@@ -5,116 +5,6 @@ import math
 import time
 from typing import List
 
-class Missile:
-
-    def __init__(self, total_distance, degree, initial_position, owner, id):
-        self.__total_distance = total_distance
-        self.__degree = degree
-        self.__actual_position = initial_position
-        self.__distance_traveled = 0
-        self.__hit_ground = total_distance == 0
-        self.__stopped = False
-        self.__wall_collision = False
-        self.__owner = owner
-        self.__id = id
-
-    def get_id(self):
-        return self.__id
-
-    def get_position(self):
-        return self.__actual_position
-
-    def get_owner(self):
-        return self.__owner
-
-    def is_stopped(self):
-        return self.__stopped
-
-    def move_missile(self):
-        if not self.__stopped and self.__distance_traveled < self.__total_distance:
-            if self.__distance_traveled + MISSILE_VELOCITY < self.__total_distance:
-                self.__actual_position = self.__calculate_missile_position(self.__actual_position, MISSILE_VELOCITY)
-                self.__distance_traveled += MISSILE_VELOCITY
-            else:
-                remaining_distance_before_explotion = self.__total_distance - self.__distance_traveled
-                self.__actual_position = self.__calculate_missile_position(self.__actual_position,
-                                                                           remaining_distance_before_explotion)
-                self.__distance_traveled += remaining_distance_before_explotion
-                self.__hit_ground = True
-
-    def __inflict_damage(self, damage: int, robot: Robot):
-        if (0 <= damage <= 100):
-            if ((robot.get_damage() + damage) <= 100):
-                robot._Robot__set_damage(robot.get_damage() + damage)
-            else:
-                robot._Robot__set_damage(100)
-
-    def inflict_missile_damage(self, robots: List[Robot]):
-        if (self.__hit_ground or self.__wall_collision) and not self.__stopped:
-            robots_damage_5_meters: List[Robot] = get_robots_in_range(
-                robots,
-                self.__actual_position,
-                (0,5)
-            )
-            robots_damage_20_meters: List[Robot] = get_robots_in_range(
-                robots,
-                self.__actual_position,
-                (5,20)
-            )
-            robots_damage_40_meters: List[Robot] = get_robots_in_range(
-                robots,
-                self.__actual_position,
-                (20,40)
-            )
-            for robot in robots_damage_5_meters:
-                self.__inflict_damage(MISSILE_DAMAGE_5_METERS, robot)
-            for robot in robots_damage_20_meters:
-                self.__inflict_damage(MISSILE_DAMAGE_20_METERS, robot)
-            for robot in robots_damage_40_meters:
-                self.__inflict_damage(MISSILE_DAMAGE_40_METERS, robot)
-            self.__stopped = True
-
-    def __calculate_missile_position(
-        self,
-        initial_position: tuple[int, int],
-        shooting_distance: int
-    ) -> tuple[int, int]:
-        if (self.__degree >= 0 and self.__degree <=90):
-            alpha = self.__degree
-        elif (self.__degree > 90 and self.__degree <= 180):
-            alpha = 180 - self.__degree
-        elif (self.__degree > 180 and self.__degree <= 270):
-            alpha = self.__degree - 180
-        else:
-            alpha = 360 - self.__degree
-        sen = math.sin(math.radians(alpha))
-        y = sen * shooting_distance
-        x = math.sqrt(shooting_distance**2-y**2)
-        if (self.__degree >= 0 and self.__degree <= 90):
-            x_axis = initial_position[0] + x
-            y_axis = initial_position[1] + y
-        elif (self.__degree > 90 and self.__degree <= 180):
-            x_axis = initial_position[0] - x
-            y_axis = initial_position[1] + y
-        elif (self.__degree > 180 and self.__degree <= 270):
-            x_axis = initial_position[0] - x
-            y_axis = initial_position[1] - y
-        else:
-            x_axis = initial_position[0] + x
-            y_axis = initial_position[1] - y
-        if x_axis < 0:
-            x_axis = 0
-            self.__wall_collision = True
-        elif x_axis > 999:
-            x_axis = 999
-            self.__wall_collision = True
-        if y_axis < 0:
-            y_axis = 0
-            self.__wall_collision = True
-        elif y_axis > 999:
-            y_axis = 999
-            self.__wall_collision = True
-        return (x_axis,y_axis)
 
 class Robot:
     __direction: int
@@ -129,7 +19,8 @@ class Robot:
     __scanner_direction: int
     __resolution: int
     __scann_result: float
-    __missile: tuple[float, float]
+    __id : int
+    __number_of_missiles: int
 
     def __init__(self, name: str, id: int):
         self.__name = name
@@ -301,6 +192,118 @@ class Robot:
 
     def __set_damage(self, damage):
         self.__damage = damage
+
+
+class Missile:
+
+    def __init__(self, total_distance, degree, initial_position, owner, id):
+        self.__total_distance = total_distance
+        self.__degree = degree
+        self.__actual_position = initial_position
+        self.__distance_traveled = 0
+        self.__hit_ground = total_distance == 0
+        self.__stopped = False
+        self.__wall_collision = False
+        self.__owner = owner
+        self.__id = id
+
+    def get_id(self):
+        return self.__id
+
+    def get_position(self):
+        return self.__actual_position
+
+    def get_owner(self):
+        return self.__owner
+
+    def is_stopped(self):
+        return self.__stopped
+
+    def move_missile(self):
+        if not self.__stopped and self.__distance_traveled < self.__total_distance:
+            if self.__distance_traveled + MISSILE_VELOCITY < self.__total_distance:
+                self.__actual_position = self.__calculate_missile_position(self.__actual_position, MISSILE_VELOCITY)
+                self.__distance_traveled += MISSILE_VELOCITY
+            else:
+                remaining_distance_before_explotion = self.__total_distance - self.__distance_traveled
+                self.__actual_position = self.__calculate_missile_position(self.__actual_position,
+                                                                           remaining_distance_before_explotion)
+                self.__distance_traveled += remaining_distance_before_explotion
+                self.__hit_ground = True
+
+    def __inflict_damage(self, damage: int, robot: Robot):
+        if (0 <= damage <= 100):
+            if ((robot.get_damage() + damage) <= 100):
+                robot._Robot__set_damage(robot.get_damage() + damage)
+            else:
+                robot._Robot__set_damage(100)
+
+    def inflict_missile_damage(self, robots: List[Robot]):
+        if (self.__hit_ground or self.__wall_collision) and not self.__stopped:
+            robots_damage_5_meters: List[Robot] = get_robots_in_range(
+                robots,
+                self.__actual_position,
+                (0,5)
+            )
+            robots_damage_20_meters: List[Robot] = get_robots_in_range(
+                robots,
+                self.__actual_position,
+                (5,20)
+            )
+            robots_damage_40_meters: List[Robot] = get_robots_in_range(
+                robots,
+                self.__actual_position,
+                (20,40)
+            )
+            for robot in robots_damage_5_meters:
+                self.__inflict_damage(MISSILE_DAMAGE_5_METERS, robot)
+            for robot in robots_damage_20_meters:
+                self.__inflict_damage(MISSILE_DAMAGE_20_METERS, robot)
+            for robot in robots_damage_40_meters:
+                self.__inflict_damage(MISSILE_DAMAGE_40_METERS, robot)
+            self.__stopped = True
+
+    def __calculate_missile_position(
+        self,
+        initial_position: tuple[int, int],
+        shooting_distance: int
+    ) -> tuple[int, int]:
+        if (self.__degree >= 0 and self.__degree <=90):
+            alpha = self.__degree
+        elif (self.__degree > 90 and self.__degree <= 180):
+            alpha = 180 - self.__degree
+        elif (self.__degree > 180 and self.__degree <= 270):
+            alpha = self.__degree - 180
+        else:
+            alpha = 360 - self.__degree
+        sen = math.sin(math.radians(alpha))
+        y = sen * shooting_distance
+        x = math.sqrt(shooting_distance**2-y**2)
+        if (self.__degree >= 0 and self.__degree <= 90):
+            x_axis = initial_position[0] + x
+            y_axis = initial_position[1] + y
+        elif (self.__degree > 90 and self.__degree <= 180):
+            x_axis = initial_position[0] - x
+            y_axis = initial_position[1] + y
+        elif (self.__degree > 180 and self.__degree <= 270):
+            x_axis = initial_position[0] - x
+            y_axis = initial_position[1] - y
+        else:
+            x_axis = initial_position[0] + x
+            y_axis = initial_position[1] - y
+        if x_axis < 0:
+            x_axis = 0
+            self.__wall_collision = True
+        elif x_axis > 999:
+            x_axis = 999
+            self.__wall_collision = True
+        if y_axis < 0:
+            y_axis = 0
+            self.__wall_collision = True
+        elif y_axis > 999:
+            y_axis = 999
+            self.__wall_collision = True
+        return (x_axis,y_axis)
 
 
 def get_robots_in_range(
