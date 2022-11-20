@@ -79,6 +79,11 @@ def competitive_round(robots: List[Robot], missiles: List[Missile]):
     for m in missiles:
         m.inflict_missile_damage(robots)
 
+    check_explotion = missiles[:]
+    for m in check_explotion:
+        if m.is_stopped():
+            missiles.remove(m)
+
     for m in missiles:
         m.move_missile()
 
@@ -88,11 +93,11 @@ def competitive_round(robots: List[Robot], missiles: List[Missile]):
         bot._Robot__check_collision(robots_collision)
 
     for bot in robots:
-        bot._Robot__move()
-
-    for bot in robots:
         if bot.get_damage() == 100:
             robots.remove(bot)
+
+    for bot in robots:
+        bot._Robot__move()
 
 
 def game(number_of_rounds: int, robots: List[Robot]) -> dict:
