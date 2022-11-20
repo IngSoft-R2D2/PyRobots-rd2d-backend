@@ -73,8 +73,8 @@ def competitive_round(robots: List[Robot]):
         robots_to_scann.remove(bot)
         bot._Robot__scann(robots_to_scann)
 
-    for bot in robots:
-        bot._Robot__attack(robots)
+    # for bot in robots:
+        # bot._Robot__attack(robots)
 
     for bot in robots:
         bot._Robot__move()

@@ -351,6 +351,14 @@ def end_match_db(
     db.Match[match_id].is_finished = True
 
 @db_session
+def add_results_to_match_in_db(
+        db: Database,
+        match_id: int,
+        data: dict
+    ):
+    db.Match[match_id].results = data
+
+@db_session
 def is_match_started(db, match_id):
     return db.Match[match_id].is_started
 

@@ -728,6 +728,7 @@ async def start_match(
     match_result_list = []
     for robot_id in match_result:
         match_result_list.append(complete_results[robot_id])
+    add_results_to_match_in_db(db, match_id, {'participants': match_result_list})
     await active_matches[match_id].broadcast({'event': 'Results', 'participants': match_result_list})
     end_match_db(db, match_id)
     users_to_disconnect = active_matches[match_id].connected_users()
