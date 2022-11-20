@@ -724,7 +724,7 @@ async def start_match(
     update_robots_statistics(db, complete_results)
     match_result_list = []
     for robot_id in match_result:
-        match_result_list.append(match_result[robot_id])
+        match_result_list.append(complete_results[robot_id])
     await active_matches[match_id].broadcast({'event': 'Results', 'participants': match_result_list})
     end_match_db(db, match_id)
     for user_id in get_all_user_id_in_match(db, match_id):
