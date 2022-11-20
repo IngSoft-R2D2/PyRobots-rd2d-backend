@@ -392,20 +392,24 @@ def generate_robots_for_game(
     robots: List[Robot] = []
     index = 1
     for r_id in robots_id:
-        r = db.Robot[r_id]
-        user_id = db.Robot[r_id].user.id
-        filename_path = f"robots/user_id_{user_id}/"+r.behaviour_file
-        exec(open(filename_path).read(), globals())
-        if r.behaviour_file.endswith('.py'):
-            without_suffix = r.behaviour_file[:-3]
-        words_list_lowercase = without_suffix.split('_')
-        words_list_capitalize = [word.capitalize() for word in words_list_lowercase]
-        class_name = ''.join(words_list_capitalize)
-        robot_name = f"R{index}_{r.name}"
-        to_execute = "bot = " + class_name + "(\"" + robot_name  + "\"" + ", " + str(r_id) + ")"
-        ldict = {}
-        exec(to_execute, globals(),ldict)
-        bot = ldict['bot']
-        robots.append(bot)
-        index += 1
+        try:
+            r = db.Robot[r_id]
+            user_id = db.Robot[r_id].user.id
+            filename_path = f"robots/user_id_{user_id}/"+r.behaviour_file
+            exec(open(filename_path).read(), globals())
+            if r.behaviour_file.endswith('.py'):
+                without_suffix = r.behaviour_file[:-3]
+            words_list_lowercase = without_suffix.split('_')
+            words_list_capitalize = [word.capitalize() for word in words_list_lowercase]
+            class_name = ''.join(words_list_capitalize)
+            robot_name = f"R{index}_{r.name}"
+            to_execute = "bot = " + class_name + "(\"" + robot_name  + "\"" + ", " + str(r_id) + ")"
+            ldict = {}
+            exec(to_execute, globals(),ldict)
+            bot = ldict['bot']
+            robots.append(bot)
+            index += 1
+        except Exception as e:
+            print(f"Invalid robot: id f{r_id}")
+            print(e)
     return robots

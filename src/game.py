@@ -17,7 +17,12 @@ def round(robots: List[Robot], missiles: List[Missile]) -> dict:
             not_dead_robots.remove(bot)
 
     for bot in not_dead_robots:
-        bot.respond()
+        try:
+            bot.respond()
+        except Exception as e:
+            bot._Robot__set_damage(100)
+            print(f"Invalid robot: id {bot._Robot__get_id()}")
+            print(e)
 
     for bot in not_dead_robots:
         robots_to_scann = not_dead_robots[:]
@@ -25,7 +30,7 @@ def round(robots: List[Robot], missiles: List[Missile]) -> dict:
         bot._Robot__scann(robots_to_scann)
 
     for bot in not_dead_robots:
-        bot._Robot__attack(not_dead_robots, missiles)
+            bot._Robot__attack(not_dead_robots, missiles)
 
     for m in missiles:
         m.inflict_missile_damage(not_dead_robots)
@@ -66,7 +71,12 @@ def round(robots: List[Robot], missiles: List[Missile]) -> dict:
 
 def competitive_round(robots: List[Robot], missiles: List[Missile]):
     for bot in robots:
-        bot.respond()
+        try:
+            bot.respond()
+        except Exception as e:
+            bot._Robot__set_damage(100)
+            print(f"Invalid robot: id {bot._Robot__get_id()}")
+            print(e)
 
     for bot in robots:
         robots_to_scann = robots[:]
@@ -104,7 +114,12 @@ def game(number_of_rounds: int, robots: List[Robot]) -> dict:
     missiles: List[Missile] = []
     game_json = {}
     for bot in robots:
-        bot.initialize()
+        try:
+            bot.initialize()
+        except Exception as e:
+            bot._Robot__set_damage(100)
+            print(f"Invalid robot: id {bot._Robot__get_id()}")
+            print(e)
     for round_index in range(1,number_of_rounds+1):
         key = "round_" + str(round_index)
         game_json[key] = round(robots,missiles)
@@ -121,7 +136,12 @@ def competitive_game(number_of_rounds: int, robots: List[Robot]):
     missiles: List[Missile] = []
     winners = []
     for bot in robots:
-        bot.initialize()
+        try:
+            bot.initialize()
+        except Exception as e:
+            bot._Robot__set_damage(100)
+            print(f"Invalid robot: id {bot._Robot__get_id()}")
+            print(e)
     for _ in range(number_of_rounds):
         competitive_round(robots,missiles)
         if len(robots) < 2:
