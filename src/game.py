@@ -6,8 +6,10 @@ from typing import (
     List, Dict
 )
 
-def round(robots: List[Robot]) -> dict:
+def round(robots: List[Robot], missiles: List[Missile]) -> dict:
     round_json = {}
+    round_json['Robots'] = {}
+    round_json['Missiles'] = {}
 
     not_dead_robots = robots[:]
     for bot in robots:
@@ -23,29 +25,42 @@ def round(robots: List[Robot]) -> dict:
         bot._Robot__scann(robots_to_scann)
 
     for bot in not_dead_robots:
-        bot._Robot__attack(not_dead_robots)
+        bot._Robot__attack(not_dead_robots, missiles)
+
+    for m in missiles:
+        m.inflict_missile_damage(not_dead_robots)
+
+    for m in missiles:
+        missile_key = m.get_id()
+        round_json['Missiles'][missile_key] = {}
+        round_json['Missiles'][missile_key]['missile_position'] = m.get_position()
+        round_json['Missiles'][missile_key]['missile_status'] = m.is_stopped()
+        round_json['Missiles'][missile_key]['owner'] = m.get_owner()
+
+    check_explotion = missiles[:]
+    for m in check_explotion:
+        if m.is_stopped():
+            missiles.remove(m)
+
+    for m in missiles:
+        m.move_missile()
 
     for bot in robots:
         bot_name = bot._Robot__get_name()
-        round_json[bot_name] = {}
-        round_json[bot_name]['position'] = bot.get_position()
-
-    for bot in robots:
-        missile = bot._Robot__get_missile()
-        bot_name = bot._Robot__get_name()
-        round_json[bot_name]['missile'] = missile
-
-    for bot in not_dead_robots:
-        bot._Robot__move()
+        round_json['Robots'][bot_name] = {}
+        round_json['Robots'][bot_name]['position'] = bot.get_position()
 
     for bot in not_dead_robots:
         robots_collision = not_dead_robots[:]
         robots_collision.remove(bot)
         bot._Robot__check_collision(robots_collision)
 
+    for bot in not_dead_robots:
+        bot._Robot__move()
+
     for bot in robots:
         bot_name = bot._Robot__get_name()
-        round_json[bot_name]['damage'] = bot.get_damage()
+        round_json['Robots'][bot_name]['damage'] = bot.get_damage()
 
     return round_json
 
@@ -75,13 +90,14 @@ def competitive_round(robots: List[Robot]):
 
 
 def game(number_of_rounds: int, robots: List[Robot]) -> dict:
+    missiles: List[Missile] = []
     game_json = {}
     for bot in robots:
         bot.initialize()
         bot._Robot__set_damage(0)
     for round_index in range(1,number_of_rounds+1):
         key = "round_" + str(round_index)
-        game_json[key] = round(robots)
+        game_json[key] = round(robots,missiles)
         robots_amount = len(robots)
         dead_robots = 0
         for bot in robots:
