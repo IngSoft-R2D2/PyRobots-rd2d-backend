@@ -640,6 +640,43 @@ async def start_simulation(
         operation_result="Simulation successfully runned."
     )
 
+def get_match_results_with_achivements(single_results: dict):
+    winner_exists: bool = False
+    games_won_highest = -math.inf
+    winners_id: List[int] = []
+    complete_results = single_results.copy()
+    for robot_id in complete_results:
+        complete_results[robot_id]['is_winner'] = False
+        complete_results[robot_id]['is_loser'] = False
+        complete_results[robot_id]['tied'] = False
+
+    # find the winners id's and the games it/they won.
+    for robot_id in single_results:
+        # new potential winner found.
+        if single_results[robot_id]['won_games'] > games_won_highest:
+            winners_id.clear()
+            winners_id.append(robot_id)
+            games_won_highest = single_results[robot_id]['won_games']
+        # another robot has the same games won.
+        elif single_results[robot_id]['won_games'] == games_won_highest:
+            winners_id.append(robot_id)
+    
+    winner_exists = len(winners_id) == 1
+    # complete results.
+    for robot_id in single_results:
+        # is the winner robot.
+        if winner_exists and robot_id in winners_id:
+            complete_results[robot_id]['is_winner'] = True
+        # is a loser robot.
+        elif winner_exists and not (robot_id in winners_id):
+            complete_results[robot_id]['is_loser'] = True
+        # not a winner nor a loser.
+        elif not winner_exists and robot_id in winners_id:
+            complete_results[robot_id]['tied'] = True
+        # is a loser robot.
+        elif not winner_exists and not (robot_id in winners_id):
+            complete_results[robot_id]['is_loser'] = True
+    return complete_results
 
 """
     Start match.
@@ -686,10 +723,11 @@ async def start_match(
         number_of_games,
         number_of_rounds
     )
-    update_robots_statistics(db, match_result)
+    complete_results = get_match_results_with_achivements(match_result)
+    update_robots_statistics(db, complete_results)
     match_result_list = []
     for robot_id in match_result:
-        match_result_list.append(match_result[robot_id])
+        match_result_list.append(complete_results[robot_id])
     await active_matches[match_id].broadcast({'event': 'Results', 'participants': match_result_list})
     end_match_db(db, match_id)
     users_to_disconnect = active_matches[match_id].connected_users()
