@@ -54,6 +54,7 @@ matches_list = {
         "robot_name": "R2D2"
       }
     },
+    'results': {},
     "user_is_creator": True,
     "is_available_to_join": False,
     "is_available_to_leave": False,
@@ -79,6 +80,7 @@ matches_list = {
         "robot_name": "megatron"
       }
     },
+    'results': {},
     "user_is_creator": False,
     "is_available_to_join": True,
     "is_available_to_leave": False,
@@ -104,6 +106,7 @@ matches_list = {
         "robot_name": "MEGATRON"
       }
     },
+    'results': {},
     "user_is_creator": False,
     "is_available_to_join": True,
     "is_available_to_leave": False,
