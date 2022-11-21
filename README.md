@@ -5,7 +5,7 @@
 
 
 ## Installation
-***
+
 You will need a virtual environment and install the requirements
 ```
 $ git clone https://github.com/IngSoft-R2D2/PyRobots-rd2d-backend.git
@@ -16,14 +16,14 @@ $ pip install -r requirements.txt
 ```
 
 ## Running the Server
-***
+
 From ```PyRobots-rd2d-backend/src``` directory, run ```uvicorn```:
 ```
 $ uvicorn main:app --reload
 ```
 
 ## Testing
-***
+
 ### Unit Test
 Testing using database in RAM
 
