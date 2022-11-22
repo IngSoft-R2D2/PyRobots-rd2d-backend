@@ -116,7 +116,8 @@ class MatchRoom:
         self.active_connections[user_id] = websocket
 
     async def close(self, user_id: int):
-        await self.active_connections[user_id].close()
+        if user_id in self.active_connections:
+            await self.active_connections[user_id].close()
 
     def disconnect(self, user_id: int):
         if user_id in self.active_connections:
