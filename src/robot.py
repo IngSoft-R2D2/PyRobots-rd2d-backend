@@ -57,21 +57,47 @@ class Robot:
     def cannon(self, degree: int, distance: float):
         if (0 <= degree <= 359):
             self.__cannon_degree = degree
-        if (distance < CANNON_RANGE):
+        elif (degree < 0):
+            self.__cannon_degree = 0
+        else:
+            self.__cannon_degree = 359
+        if (0 <= distance <= CANNON_RANGE):
             self.__cannon_distance = distance
+        elif (distance < 0):
+            self.__cannon_distance = 0
         else:
             self.__cannon_distance = CANNON_RANGE
 
     def point_scanner(self, direction: int, resolution: int):
-        self.__scanner_direction = direction
-        self.__resolution = resolution
+        if (0 <= direction <= 359):
+            self.__scanner_direction = direction
+        elif (direction < 0):
+            self.__scanner_direction = 0
+        else:
+            self.__scanner_direction = 359
+        if (0 <= resolution <= 10):
+            self.__resolution = resolution
+        elif (resolution < 0):
+            self.__resolution = 0
+        else:
+            self.__resolution = 10
 
     def scanned(self):
         return self.__scann_result
 
     def drive(self, direction: int, velocity: int):
-        self.__direction = direction
-        self.__velocity = velocity
+        if (0 <= direction <= 359):
+            self.__direction = direction
+        elif (direction < 0):
+            self.__direction = 0
+        else:
+            self.__direction = 359
+        if (0 <= velocity <= 100):
+            self.__velocity = velocity
+        elif (velocity < 0):
+            self.__velocity = 0
+        else:
+            self.__velocity = 100
 
     def __get_name(self):
         return self.__name
