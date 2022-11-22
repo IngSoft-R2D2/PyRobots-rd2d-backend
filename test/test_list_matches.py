@@ -38,6 +38,7 @@ matches_list = {
     "is_started": False,
     "is_finished": False,
     "creator": 4,
+    'creator_name': 'mati',
     "user_id": 4,
     "user_name": "mati",
     "players": {
@@ -72,6 +73,7 @@ matches_list = {
     "is_started": False,
     "is_finished": False,
     "creator": 5,
+    'creator_name': 'juan',
     "user_id": 4,
     "user_name": "mati",
     "players": {
@@ -98,6 +100,7 @@ matches_list = {
     "is_started": False,
     "is_finished": False,
     "creator": 1,
+    'creator_name': 'angelescch',
     "user_id": 4,
     "user_name": "mati",
     "players": {
